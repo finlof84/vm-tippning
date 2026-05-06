@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { db } from "./firebase";
 import { doc, onSnapshot, setDoc, getDoc } from "firebase/firestore";
 
-// ── Data ───────────────────────────────────────────────────────────────────────
+// -- Data -----------------------------------------------------------------------
 const GROUPS = {
   A: ["USA", "Mexiko", "Kanada", "Panama"],
   B: ["Spanien", "Uruguay", "Egypten", "Botswana"],
@@ -10,30 +10,30 @@ const GROUPS = {
   D: ["Frankrike", "Belgien", "Senegal", "Elfenbenskusten"],
   E: ["Brasilien", "Colombia", "Ecuador", "Kamerun"],
   F: ["England", "Portugal", "Tunisien", "Irak"],
-  G: ["Tyskland", "Nederländerna", "Sydkorea", "Saudiarabien"],
+  G: ["Tyskland", "Nederlnderna", "Sydkorea", "Saudiarabien"],
   H: ["Japan", "Australien", "Marocko", "Algeriet"],
   I: ["Italien", "Kroatien", "Mexiko", "Honduras"],
   J: ["Serbien", "Ungern", "Ghana", "Kongo"],
   K: ["Iran", "Uzbekistan", "Tanzania", "Nya Zeeland"],
-  L: ["Turkiet", "Ukraina", "Rumänien", "Zambia"],
+  L: ["Turkiet", "Ukraina", "Rumnien", "Zambia"],
 };
 
 const FLAG_EMOJIS = {
-  "USA":"🇺🇸","Mexiko":"🇲🇽","Kanada":"🇨🇦","Panama":"🇵🇦",
-  "Spanien":"🇪🇸","Uruguay":"🇺🇾","Egypten":"🇪🇬","Botswana":"🇧🇼",
-  "Argentina":"🇦🇷","Chile":"🇨🇱","Peru":"🇵🇪","Albanien":"🇦🇱",
-  "Frankrike":"🇫🇷","Belgien":"🇧🇪","Senegal":"🇸🇳","Elfenbenskusten":"🇨🇮",
-  "Brasilien":"🇧🇷","Colombia":"🇨🇴","Ecuador":"🇪🇨","Kamerun":"🇨🇲",
-  "England":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","Portugal":"🇵🇹","Tunisien":"🇹🇳","Irak":"🇮🇶",
-  "Tyskland":"🇩🇪","Nederländerna":"🇳🇱","Sydkorea":"🇰🇷","Saudiarabien":"🇸🇦",
-  "Japan":"🇯🇵","Australien":"🇦🇺","Marocko":"🇲🇦","Algeriet":"🇩🇿",
-  "Italien":"🇮🇹","Kroatien":"🇭🇷","Honduras":"🇭🇳",
-  "Serbien":"🇷🇸","Ungern":"🇭🇺","Ghana":"🇬🇭","Kongo":"🇨🇩",
-  "Iran":"🇮🇷","Uzbekistan":"🇺🇿","Tanzania":"🇹🇿","Nya Zeeland":"🇳🇿",
-  "Turkiet":"🇹🇷","Ukraina":"🇺🇦","Rumänien":"🇷🇴","Zambia":"🇿🇲",
+  "USA":"US","Mexiko":"MX","Kanada":"CA","Panama":"PA",
+  "Spanien":"ES","Uruguay":"UY","Egypten":"EG","Botswana":"BW",
+  "Argentina":"AR","Chile":"CL","Peru":"PE","Albanien":"AL",
+  "Frankrike":"FR","Belgien":"BE","Senegal":"SN","Elfenbenskusten":"CI",
+  "Brasilien":"BR","Colombia":"CO","Ecuador":"EC","Kamerun":"CM",
+  "England":"EN","Portugal":"PT","Tunisien":"TN","Irak":"IQ",
+  "Tyskland":"DE","Nederlnderna":"NL","Sydkorea":"KR","Saudiarabien":"SA",
+  "Japan":"JP","Australien":"AU","Marocko":"MA","Algeriet":"DZ",
+  "Italien":"IT","Kroatien":"HR","Honduras":"HN",
+  "Serbien":"RS","Ungern":"HU","Ghana":"GH","Kongo":"CD",
+  "Iran":"IR","Uzbekistan":"UZ","Tanzania":"TZ","Nya Zeeland":"NZ",
+  "Turkiet":"TR","Ukraina":"UA","Rumnien":"RO","Zambia":"ZM",
 };
 
-function getFlag(team) { return FLAG_EMOJIS[team] || "🏳️"; }
+function getFlag(team) { return FLAG_EMOJIS[team] || "??"; }
 
 const GROUP_MATCHES = Object.entries(GROUPS).flatMap(([group, teams]) => {
   const ms = [];
@@ -44,18 +44,18 @@ const GROUP_MATCHES = Object.entries(GROUPS).flatMap(([group, teams]) => {
 });
 
 const R16 = [
-  {id:"R16_1",  phase:"Åttondel", homeKey:"A0", awayKey:"B1"},
-  {id:"R16_2",  phase:"Åttondel", homeKey:"B0", awayKey:"A1"},
-  {id:"R16_3",  phase:"Åttondel", homeKey:"C0", awayKey:"D1"},
-  {id:"R16_4",  phase:"Åttondel", homeKey:"D0", awayKey:"C1"},
-  {id:"R16_5",  phase:"Åttondel", homeKey:"E0", awayKey:"F1"},
-  {id:"R16_6",  phase:"Åttondel", homeKey:"F0", awayKey:"E1"},
-  {id:"R16_7",  phase:"Åttondel", homeKey:"G0", awayKey:"H1"},
-  {id:"R16_8",  phase:"Åttondel", homeKey:"H0", awayKey:"G1"},
-  {id:"R16_9",  phase:"Åttondel", homeKey:"I0", awayKey:"J1"},
-  {id:"R16_10", phase:"Åttondel", homeKey:"J0", awayKey:"I1"},
-  {id:"R16_11", phase:"Åttondel", homeKey:"K0", awayKey:"L1"},
-  {id:"R16_12", phase:"Åttondel", homeKey:"L0", awayKey:"K1"},
+  {id:"R16_1",  phase:"ttondel", homeKey:"A0", awayKey:"B1"},
+  {id:"R16_2",  phase:"ttondel", homeKey:"B0", awayKey:"A1"},
+  {id:"R16_3",  phase:"ttondel", homeKey:"C0", awayKey:"D1"},
+  {id:"R16_4",  phase:"ttondel", homeKey:"D0", awayKey:"C1"},
+  {id:"R16_5",  phase:"ttondel", homeKey:"E0", awayKey:"F1"},
+  {id:"R16_6",  phase:"ttondel", homeKey:"F0", awayKey:"E1"},
+  {id:"R16_7",  phase:"ttondel", homeKey:"G0", awayKey:"H1"},
+  {id:"R16_8",  phase:"ttondel", homeKey:"H0", awayKey:"G1"},
+  {id:"R16_9",  phase:"ttondel", homeKey:"I0", awayKey:"J1"},
+  {id:"R16_10", phase:"ttondel", homeKey:"J0", awayKey:"I1"},
+  {id:"R16_11", phase:"ttondel", homeKey:"K0", awayKey:"L1"},
+  {id:"R16_12", phase:"ttondel", homeKey:"L0", awayKey:"K1"},
 ];
 const QF = [
   {id:"QF_1", phase:"Kvartsfinal", homeKey:"R16_1", awayKey:"R16_2"},
@@ -76,9 +76,9 @@ const LATE = [
 ];
 
 const KNOCKOUT_ALL = [...R16, ...QF, ...SF, ...LATE];
-const PHASES = ["Grupp","Åttondel","Kvartsfinal","Semifinal","Bronsmatch","Final"];
+const PHASES = ["Grupp","ttondel","Kvartsfinal","Semifinal","Bronsmatch","Final"];
 
-// ── Logik ──────────────────────────────────────────────────────────────────────
+// -- Logik ----------------------------------------------------------------------
 function calcGroupStandings(group, results) {
   const teams = GROUPS[group];
   const s = {};
@@ -138,8 +138,8 @@ function resolveKOTeams(matchId, placements, results) {
 
 function labelFromKey(key) {
   if (/^[A-L]0$/.test(key)) return `Etta grupp ${key[0]}`;
-  if (/^[A-L]1$/.test(key)) return `Tvåa grupp ${key[0]}`;
-  if (key.endsWith("L"))    return `Förlorare ${key.slice(0,-1)}`;
+  if (/^[A-L]1$/.test(key)) return `Tva grupp ${key[0]}`;
+  if (key.endsWith("L"))    return `Frlorare ${key.slice(0,-1)}`;
   const m = KNOCKOUT_ALL.find(x=>x.id===key);
   if (m) return `Vinnare ${m.id}`;
   return key;
@@ -161,12 +161,12 @@ function calcTotal(tips, results) {
 
 const ADMIN_CODE = "vm2026admin";
 
-// ── Firebase helpers ───────────────────────────────────────────────────────────
+// -- Firebase helpers -----------------------------------------------------------
 async function fbSet(docId, data) {
   await setDoc(doc(db, "vm2026", docId), data, { merge: true });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 export default function App() {
   const [view,         setView]         = useState("start");
   const [participants, setParticipants] = useState({});
@@ -189,7 +189,7 @@ export default function App() {
     return ()=>clearInterval(t);
   }, []);
 
-  // Realtidslyssning på Firebase
+  // Realtidslyssning p Firebase
   useEffect(() => {
     const unsubs = [
       onSnapshot(doc(db,"vm2026","participants"), snap => {
@@ -225,7 +225,7 @@ export default function App() {
     return new Date(dl).toLocaleString("sv-SE",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
   }
 
-  // ── Deltagare ──────────────────────────────────────────────────────────────
+  // -- Deltagare --------------------------------------------------------------
   async function handleJoin() {
     const name = nameInput.trim();
     if (!name) return;
@@ -252,14 +252,14 @@ export default function App() {
   async function handleSave() {
     setSaveStatus("Sparar...");
     await fbSet("participants", participants);
-    setSaveStatus("✓ Sparade!");
+    setSaveStatus(" Sparade!");
     setTimeout(()=>setSaveStatus(""), 2500);
   }
 
-  // ── Admin ──────────────────────────────────────────────────────────────────
+  // -- Admin ------------------------------------------------------------------
   function handleAdminLogin() {
     if (adminCode===ADMIN_CODE) { setIsAdmin(true); setView("admin"); }
-    else alert("Fel lösenord");
+    else alert("Fel lsenord");
   }
 
   async function handleResult(matchId, side, val) {
@@ -281,7 +281,7 @@ export default function App() {
     await fbSet("deadlines", upd);
   }
 
-  // ── Topplista ──────────────────────────────────────────────────────────────
+  // -- Topplista --------------------------------------------------------------
   const leaderboard = Object.entries(participants)
     .map(([name,tips])=>({
       name,
@@ -307,7 +307,7 @@ export default function App() {
   if (loading) return (
     <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",
       background:"#0a1628",color:"#f5c842",fontFamily:"Georgia,serif",fontSize:20}}>
-      Laddar VM-tippning 2026…
+      Laddar VM-tippning 2026
     </div>
   );
 
@@ -369,7 +369,7 @@ export default function App() {
       <header style={{background:"rgba(255,255,255,0.03)",borderBottom:"1px solid rgba(245,200,66,0.15)",padding:"0 16px"}}>
         <div style={{maxWidth:980,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:56}}>
           <div style={{display:"flex",alignItems:"center",gap:9}}>
-            <span style={{fontSize:22}}>⚽</span>
+            <span style={{fontSize:22}}>[S]</span>
             <span className="pf" style={{fontSize:16,color:"#f5c842",fontWeight:900,letterSpacing:.4}}>VM-Tippning 2026</span>
           </div>
           <nav style={{display:"flex",gap:1,flexWrap:"wrap"}}>
@@ -379,25 +379,25 @@ export default function App() {
             <button className={`nav-link${view==="results"?" active":""}`} onClick={()=>setView("results")}>Resultat</button>
             <button className={`nav-link${view==="bracket"?" active":""}`} onClick={()=>setView("bracket")}>Slutspel</button>
             {!isAdmin&&<button className={`nav-link${view==="adminlogin"?" active":""}`} onClick={()=>setView("adminlogin")}>Admin</button>}
-            {isAdmin &&<button className={`nav-link${view==="admin"?" active":""}`} onClick={()=>setView("admin")}>⚙️ Admin</button>}
+            {isAdmin &&<button className={`nav-link${view==="admin"?" active":""}`} onClick={()=>setView("admin")}>[G] Admin</button>}
           </nav>
         </div>
       </header>
 
       <main style={{maxWidth:980,margin:"0 auto",padding:"28px 16px 80px"}}>
 
-        {/* ══ START ══ */}
+        {/* == START == */}
         {view==="start"&&(
           <div style={{textAlign:"center",paddingTop:28}}>
-            <div style={{fontSize:56,marginBottom:14}}>🏆</div>
+            <div style={{fontSize:56,marginBottom:14}}>[T]</div>
             <h1 className="pf" style={{fontSize:42,color:"#f5c842",fontWeight:900,lineHeight:1.1,marginBottom:9}}>FIFA VM 2026</h1>
-            <p className="ss" style={{fontSize:17,color:"#a09070",marginBottom:5}}>USA · Mexiko · Kanada</p>
-            <p className="ss" style={{fontSize:13,color:"#60504a",marginBottom:40}}>11 juni – 19 juli 2026</p>
+            <p className="ss" style={{fontSize:17,color:"#a09070",marginBottom:5}}>USA  Mexiko  Kanada</p>
+            <p className="ss" style={{fontSize:13,color:"#60504a",marginBottom:40}}>11 juni  19 juli 2026</p>
             <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:44}}>
               {[
-                {icon:"⚽",label:"104 matcher",sub:"48 grupp + 56 slutspel"},
-                {icon:"👥",label:`${Object.keys(participants).length} deltagare`,sub:"registrerade tippare"},
-                {icon:"🏅",label:"Poängsystem",sub:"3p rätt, 1p rätt utfall"},
+                {icon:"[S]",label:"104 matcher",sub:"48 grupp + 56 slutspel"},
+                {icon:"",label:`${Object.keys(participants).length} deltagare`,sub:"registrerade tippare"},
+                {icon:"",label:"Pongsystem",sub:"3p rtt, 1p rtt utfall"},
               ].map(c=>(
                 <div key={c.label} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:12,padding:"16px 24px",minWidth:140}}>
                   <div style={{fontSize:28,marginBottom:7}}>{c.icon}</div>
@@ -407,7 +407,7 @@ export default function App() {
               ))}
             </div>
             <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.15)",borderRadius:14,padding:"26px 22px",maxWidth:400,margin:"0 auto 20px"}}>
-              <h2 className="pf" style={{fontSize:19,color:"#f5c842",marginBottom:16,fontWeight:700}}>Gå in och tippa</h2>
+              <h2 className="pf" style={{fontSize:19,color:"#f5c842",marginBottom:16,fontWeight:700}}>G in och tippa</h2>
               <div style={{display:"flex",gap:8}}>
                 <input type="text" placeholder="Ditt namn" value={nameInput}
                   onChange={e=>setNameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleJoin()} style={{flex:1}}/>
@@ -421,22 +421,22 @@ export default function App() {
             </div>
             <div style={{background:"rgba(245,200,66,0.05)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:9,padding:"13px 17px",maxWidth:400,margin:"0 auto",textAlign:"left"}}>
               <p className="ss" style={{fontSize:11,color:"#a09070",lineHeight:1.8}}>
-                <strong style={{color:"#f5c842"}}>Poängsystem:</strong><br/>
-                🥇 3 poäng – Exakt rätt resultat<br/>
-                🥈 1 poäng – Rätt utfall (vinst / oavgjort / förlust)<br/>
-                ❌ 0 poäng – Fel &nbsp;&nbsp; 🔒 Låst = kan ej ändras
+                <strong style={{color:"#f5c842"}}>Pongsystem:</strong><br/>
+                [1] 3 pong  Exakt rtt resultat<br/>
+                [2] 1 pong  Rtt utfall (vinst / oavgjort / frlust)<br/>
+                 0 pong  Fel &nbsp;&nbsp; [X] Lst = kan ej ndras
               </p>
             </div>
           </div>
         )}
 
-        {/* ══ TIPS ══ */}
+        {/* == TIPS == */}
         {view==="tips"&&currentUser&&(
           <div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,flexWrap:"wrap",gap:10}}>
               <div>
                 <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700}}>{currentUser}s tips</h2>
-                <p className="ss" style={{fontSize:12,color:"#60504a",marginTop:3}}>{countTipped()} / {totalMatches} matcher tippade • du kan ändra fritt tills deadline</p>
+                <p className="ss" style={{fontSize:12,color:"#60504a",marginTop:3}}>{countTipped()} / {totalMatches} matcher tippade  du kan ndra fritt tills deadline</p>
               </div>
               <div style={{display:"flex",gap:9,alignItems:"center"}}>
                 {saveStatus&&<span className="ss" style={{fontSize:13,color:"#50c878"}}>{saveStatus}</span>}
@@ -475,12 +475,12 @@ export default function App() {
                       <div style={{display:"flex",alignItems:"center",gap:5}}>
                         <input type="number" min="0" max="20" value={tip.home} disabled={locked}
                           onChange={e=>handleTip(m.id,"home",e.target.value)}/>
-                        <span className="ss" style={{color:"#504040",fontSize:11}}>–</span>
+                        <span className="ss" style={{color:"#504040",fontSize:11}}></span>
                         <input type="number" min="0" max="20" value={tip.away} disabled={locked}
                           onChange={e=>handleTip(m.id,"away",e.target.value)}/>
                       </div>
-                      {locked&&<span className="lock-badge">🔒 Låst</span>}
-                      {!locked&&dl&&<span className="open-badge">Stänger {dl}</span>}
+                      {locked&&<span className="lock-badge">[X] Lst</span>}
+                      {!locked&&dl&&<span className="open-badge">Stnger {dl}</span>}
                     </div>
                     <span className="tn">{aT}</span>
                     <span style={{fontSize:17}}>{getFlag(aT)}</span>
@@ -495,20 +495,20 @@ export default function App() {
           </div>
         )}
 
-        {/* ══ TOPPLISTA ══ */}
+        {/* == TOPPLISTA == */}
         {view==="leaderboard"&&(
           <div>
             <h2 className="pf" style={{fontSize:28,color:"#f5c842",fontWeight:700,marginBottom:5}}>Topplista</h2>
-            <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:26}}>Uppdateras i realtid när resultat registreras</p>
+            <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:26}}>Uppdateras i realtid nr resultat registreras</p>
             {leaderboard.length===0?(
               <div style={{textAlign:"center",padding:"60px 0",color:"#60504a"}}>
-                <div style={{fontSize:44,marginBottom:14}}>🏆</div>
-                <p className="ss" style={{fontSize:15}}>Inga tippare ännu – var först!</p>
+                <div style={{fontSize:44,marginBottom:14}}>[T]</div>
+                <p className="ss" style={{fontSize:15}}>Inga tippare nnu  var frst!</p>
               </div>
             ):(
               <div style={{display:"flex",flexDirection:"column",gap:7}}>
                 {leaderboard.map((e,i)=>{
-                  const medals=["🥇","🥈","🥉"];
+                  const medals=["[1]","[2]","[3]"];
                   return (
                     <div key={e.name} style={{
                       background:i===0?"rgba(245,200,66,0.08)":"rgba(255,255,255,0.04)",
@@ -524,7 +524,7 @@ export default function App() {
                       </div>
                       <div style={{textAlign:"right"}}>
                         <div className="pf" style={{fontSize:24,fontWeight:900,color:i===0?"#f5c842":"#f0e6d3"}}>{e.points}</div>
-                        <div className="ss" style={{fontSize:10,color:"#60504a"}}>poäng</div>
+                        <div className="ss" style={{fontSize:10,color:"#60504a"}}>pong</div>
                       </div>
                     </div>
                   );
@@ -534,38 +534,38 @@ export default function App() {
           </div>
         )}
 
-        {/* ══ RESULTAT ══ */}
+        {/* == RESULTAT == */}
         {view==="results"&&(
           <ResultsView results={results} getTeams={getTeams} getDisplay={getDisplay}/>
         )}
 
-        {/* ══ SLUTSPELSTRÄD ══ */}
+        {/* == SLUTSPELSTRD == */}
         {view==="bracket"&&(
           <BracketView placements={placements} results={results} getTeams={getTeams}/>
         )}
 
-        {/* ══ ADMIN LOGIN ══ */}
+        {/* == ADMIN LOGIN == */}
         {view==="adminlogin"&&(
           <div style={{maxWidth:370,margin:"60px auto",textAlign:"center"}}>
-            <div style={{fontSize:44,marginBottom:16}}>🔐</div>
-            <h2 className="pf" style={{fontSize:22,color:"#f5c842",marginBottom:20,fontWeight:700}}>Adminåtkomst</h2>
+            <div style={{fontSize:44,marginBottom:16}}>[L]</div>
+            <h2 className="pf" style={{fontSize:22,color:"#f5c842",marginBottom:20,fontWeight:700}}>Admintkomst</h2>
             <div style={{display:"flex",gap:8}}>
-              <input type="password" placeholder="Lösenord" value={adminCode}
+              <input type="password" placeholder="Lsenord" value={adminCode}
                 onChange={e=>setAdminCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleAdminLogin()} style={{flex:1}}/>
               <button className="btn" onClick={handleAdminLogin}>Logga in</button>
             </div>
           </div>
         )}
 
-        {/* ══ ADMIN ══ */}
+        {/* == ADMIN == */}
         {view==="admin"&&isAdmin&&(
           <div>
             <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:22}}>
-              <span style={{fontSize:22}}>⚙️</span>
+              <span style={{fontSize:22}}>[G]</span>
               <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700}}>Administrera VM-tippning</h2>
             </div>
             <div style={{display:"flex",gap:0,borderBottom:"1px solid rgba(255,255,255,0.08)",marginBottom:22}}>
-              {[["results","📊 Resultat"],["deadlines","🔒 Deadlines"],["bracket","🌿 Träd"]].map(([k,l])=>(
+              {[["results"," Resultat"],["deadlines","[X] Deadlines"],["bracket","[B] Trd"]].map(([k,l])=>(
                 <button key={k} className={`tab${adminTab===k?" active":""}`} onClick={()=>setAdminTab(k)}>{l}</button>
               ))}
             </div>
@@ -599,12 +599,12 @@ export default function App() {
                         <span className="tn" style={{textAlign:"right"}}>{hT}</span>
                         <div style={{display:"flex",alignItems:"center",gap:5}}>
                           <input type="number" min="0" max="20" value={r.home} onChange={e=>handleResult(m.id,"home",e.target.value)}/>
-                          <span className="ss" style={{color:"#60504a",fontSize:11}}>–</span>
+                          <span className="ss" style={{color:"#60504a",fontSize:11}}></span>
                           <input type="number" min="0" max="20" value={r.away} onChange={e=>handleResult(m.id,"away",e.target.value)}/>
                         </div>
                         <span className="tn">{aT}</span>
                         <span style={{fontSize:17}}>{getFlag(aT)}</span>
-                        {done&&<span style={{fontSize:15}}>✅</span>}
+                        {done&&<span style={{fontSize:15}}>[OK]</span>}
                       </div>
                     );
                   })}
@@ -615,7 +615,7 @@ export default function App() {
             {adminTab==="deadlines"&&(
               <div>
                 <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:18,lineHeight:1.7}}>
-                  Sätt deadline per match. När deadline passerar låses tipsen automatiskt.
+                  Stt deadline per match. Nr deadline passerar lses tipsen automatiskt.
                 </p>
                 <div className="scroll-x" style={{marginBottom:11}}>
                   <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",minWidth:"max-content"}}>
@@ -630,13 +630,13 @@ export default function App() {
                       ))}
                     </div>
                     <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:9,padding:"13px 14px",marginBottom:14,display:"flex",alignItems:"center",gap:9,flexWrap:"wrap"}}>
-                      <span className="ss" style={{fontSize:12,color:"#a09070"}}>Bulk – Grupp {tipGroup}:</span>
+                      <span className="ss" style={{fontSize:12,color:"#a09070"}}>Bulk  Grupp {tipGroup}:</span>
                       <input type="datetime-local" value={dlInput[`bulk_${tipGroup}`]||""}
                         onChange={e=>setDlInput(prev=>({...prev,[`bulk_${tipGroup}`]:e.target.value}))}/>
                       <button className="btn btn-sm" onClick={()=>{
                         const v=dlInput[`bulk_${tipGroup}`];
                         if(v) bulkDeadline(tipGroup, new Date(v).toISOString());
-                      }}>Tillämpa alla Grupp {tipGroup}</button>
+                      }}>Tillmpa alla Grupp {tipGroup}</button>
                     </div>
                   </>
                 )}
@@ -650,9 +650,9 @@ export default function App() {
                       <div key={m.id} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:9,padding:"11px 14px"}}>
                         <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",marginBottom:8}}>
                           <span style={{fontSize:15}}>{getFlag(hT)}</span>
-                          <span className="ss" style={{fontSize:13,fontWeight:600,color:"#f0e6d3",flex:1}}>{hT} – {aT}</span>
-                          {locked&&<span className="lock-badge">🔒 Låst</span>}
-                          {!locked&&dl&&<span className="open-badge">Stänger {fmtDl(m.id)}</span>}
+                          <span className="ss" style={{fontSize:13,fontWeight:600,color:"#f0e6d3",flex:1}}>{hT}  {aT}</span>
+                          {locked&&<span className="lock-badge">[X] Lst</span>}
+                          {!locked&&dl&&<span className="open-badge">Stnger {fmtDl(m.id)}</span>}
                           {!dl&&<span className="ss" style={{fontSize:10,color:"#60504a"}}>Ingen deadline</span>}
                         </div>
                         <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
@@ -674,7 +674,7 @@ export default function App() {
             {adminTab==="bracket"&&(
               <div>
                 <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:18}}>
-                  Lag placeras in automatiskt från gruppresultaten.
+                  Lag placeras in automatiskt frn gruppresultaten.
                 </p>
                 <BracketView placements={placements} results={results} getTeams={getTeams}/>
               </div>
@@ -684,7 +684,7 @@ export default function App() {
 
         {view==="tips"&&!currentUser&&(
           <div style={{textAlign:"center",padding:"60px 0"}}>
-            <p className="ss" style={{color:"#a09070",marginBottom:16}}>Ange ditt namn på startsidan för att börja tippa.</p>
+            <p className="ss" style={{color:"#a09070",marginBottom:16}}>Ange ditt namn p startsidan fr att brja tippa.</p>
             <button className="btn" onClick={()=>setView("start")}>Till startsidan</button>
           </div>
         )}
@@ -693,11 +693,11 @@ export default function App() {
   );
 }
 
-// ═══ RESULTAT & GRUPPER ═══════════════════════════════════════════════════════
+// === RESULTAT & GRUPPER =======================================================
 function ResultsView({ results, getTeams, getDisplay }) {
   const [tab, setTab] = useState("groups");
   const [selGroup, setSelGroup] = useState("A");
-  const [koPhase, setKoPhase] = useState("Åttondel");
+  const [koPhase, setKoPhase] = useState("ttondel");
 
   function GroupSection({ group }) {
     const matches = GROUP_MATCHES.filter(m => m.group === group);
@@ -742,7 +742,7 @@ function ResultsView({ results, getTeams, getDisplay }) {
                 return (
                   <tr key={row.team} style={{borderBottom:"1px solid rgba(255,255,255,0.04)",background:advances?"rgba(245,200,66,0.04)":"transparent"}}>
                     <td style={{padding:"8px 16px",fontFamily:"'Source Sans 3',sans-serif",color:advances?"#f5c842":"#60504a",fontWeight:700,fontSize:12}}>
-                      {i+1}{advances&&<span style={{marginLeft:3,fontSize:9,opacity:.7}}>▶</span>}
+                      {i+1}{advances&&<span style={{marginLeft:3,fontSize:9,opacity:.7}}></span>}
                     </td>
                     <td style={{padding:"8px",whiteSpace:"nowrap"}}>
                       <div style={{display:"flex",alignItems:"center",gap:6}}>
@@ -754,7 +754,7 @@ function ResultsView({ results, getTeams, getDisplay }) {
                     <td style={{padding:"8px",textAlign:"center",fontFamily:"'Source Sans 3',sans-serif",color:"#50c878",fontSize:12,fontWeight:wins>0?700:400}}>{wins}</td>
                     <td style={{padding:"8px",textAlign:"center",fontFamily:"'Source Sans 3',sans-serif",color:"#a09070",fontSize:12}}>{draws}</td>
                     <td style={{padding:"8px",textAlign:"center",fontFamily:"'Source Sans 3',sans-serif",color:"#e07070",fontSize:12,fontWeight:losses>0?700:400}}>{losses}</td>
-                    <td style={{padding:"8px",textAlign:"center",fontFamily:"'Source Sans 3',sans-serif",color:"#a09070",fontSize:12}}>{row.gf}–{row.ga}</td>
+                    <td style={{padding:"8px",textAlign:"center",fontFamily:"'Source Sans 3',sans-serif",color:"#a09070",fontSize:12}}>{row.gf}{row.ga}</td>
                     <td style={{padding:"8px",textAlign:"center",fontFamily:"'Source Sans 3',sans-serif",color:row.gd>0?"#50c878":row.gd<0?"#e07070":"#a09070",fontSize:12,fontWeight:row.gd!==0?700:400}}>{row.gd>0?"+":""}{row.gd}</td>
                     <td style={{padding:"8px 16px 8px 8px",textAlign:"center",fontFamily:"'Source Sans 3',sans-serif",color:advances?"#f5c842":"#f0e6d3",fontWeight:700,fontSize:13}}>{row.pts}</td>
                   </tr>
@@ -773,8 +773,8 @@ function ResultsView({ results, getTeams, getDisplay }) {
                 <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc",textAlign:"right"}}>{m.home}</span>
                 <div style={{minWidth:64,textAlign:"center",background:played?"rgba(255,255,255,0.07)":"rgba(255,255,255,0.03)",border:`1px solid ${played?"rgba(255,255,255,0.12)":"rgba(255,255,255,0.05)"}`,borderRadius:6,padding:"3px 10px"}}>
                   {played
-                    ? <span className="pf" style={{fontSize:14,fontWeight:700,color:"#f0e6d3",letterSpacing:2}}>{r.home} – {r.away}</span>
-                    : <span className="ss" style={{fontSize:11,color:"#50403a"}}>–</span>}
+                    ? <span className="pf" style={{fontSize:14,fontWeight:700,color:"#f0e6d3",letterSpacing:2}}>{r.home}  {r.away}</span>
+                    : <span className="ss" style={{fontSize:11,color:"#50403a"}}></span>}
                 </div>
                 <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc"}}>{m.away}</span>
                 <span style={{fontSize:14}}>{getFlag(m.away)}</span>
@@ -786,13 +786,13 @@ function ResultsView({ results, getTeams, getDisplay }) {
     );
   }
 
-  const koPhases = ["Åttondel","Kvartsfinal","Semifinal","Bronsmatch","Final"];
+  const koPhases = ["ttondel","Kvartsfinal","Semifinal","Bronsmatch","Final"];
   const koMatches = KNOCKOUT_ALL.filter(m => m.phase === koPhase);
 
   return (
     <div>
       <h2 className="pf" style={{fontSize:28,color:"#f5c842",fontWeight:700,marginBottom:6}}>Resultat</h2>
-      <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:22}}>Officiella matchresultat och gruppställningar</p>
+      <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:22}}>Officiella matchresultat och gruppstllningar</p>
       <div style={{display:"flex",gap:0,borderBottom:"1px solid rgba(255,255,255,0.08)",marginBottom:22}}>
         {[["groups","Gruppspel"],["knockout","Slutspel"]].map(([k,l])=>(
           <button key={k} className={`tab${tab===k?" active":""}`} onClick={()=>setTab(k)}>{l}</button>
@@ -806,7 +806,7 @@ function ResultsView({ results, getTeams, getDisplay }) {
             ))}
           </div>
           <GroupSection group={selGroup}/>
-          <p className="ss" style={{fontSize:11,color:"#504840",marginTop:-8}}>▶ markerar lag som kvalificerar till åttondelsfinalen (topp 2)</p>
+          <p className="ss" style={{fontSize:11,color:"#504840",marginTop:-8}}> markerar lag som kvalificerar till ttondelsfinalen (topp 2)</p>
         </div>
       )}
       {tab==="knockout"&&(
@@ -833,7 +833,7 @@ function ResultsView({ results, getTeams, getDisplay }) {
                   <span className="ss" style={{fontSize:13,fontWeight:700,flex:1,textAlign:"right",color:homeWon?"#f5c842":played?"#a09070":"#d0c8bc"}}>{disp.home}</span>
                   <div style={{minWidth:72,textAlign:"center",background:played?"rgba(255,255,255,0.09)":"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 12px"}}>
                     {played
-                      ? <span className="pf" style={{fontSize:18,fontWeight:900,color:"#f0e6d3",letterSpacing:3}}>{gh}–{ga}</span>
+                      ? <span className="pf" style={{fontSize:18,fontWeight:900,color:"#f0e6d3",letterSpacing:3}}>{gh}{ga}</span>
                       : <span className="ss" style={{fontSize:13,color:"#50403a"}}>vs</span>}
                   </div>
                   <span className="ss" style={{fontSize:13,fontWeight:700,flex:1,color:awayWon?"#f5c842":played?"#a09070":"#d0c8bc"}}>{disp.away}</span>
@@ -848,7 +848,7 @@ function ResultsView({ results, getTeams, getDisplay }) {
   );
 }
 
-// ═══ SLUTSPELSTRÄD ════════════════════════════════════════════════════════════
+// === SLUTSPELSTRD ============================================================
 function BracketView({ placements, results, getTeams }) {
   function TeamRow({ matchId, side }) {
     const {home, away} = getTeams(matchId);
@@ -861,7 +861,7 @@ function BracketView({ placements, results, getTeams }) {
     return (
       <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 9px",background:won?"rgba(245,200,66,0.1)":team?"rgba(255,255,255,0.04)":"rgba(255,255,255,0.02)",borderRadius:5,minWidth:155,border:`1px solid ${won?"rgba(245,200,66,0.28)":"rgba(255,255,255,0.06)"}`}}>
         <span style={{fontSize:13}}>{getFlag(team)}</span>
-        <span style={{fontSize:11,fontFamily:"'Source Sans 3',sans-serif",fontWeight:600,color:team?(won?"#f5c842":"#f0e6d3"):"#50403a",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{team||"–"}</span>
+        <span style={{fontSize:11,fontFamily:"'Source Sans 3',sans-serif",fontWeight:600,color:team?(won?"#f5c842":"#f0e6d3"):"#50403a",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{team||""}</span>
         {hasScore&&<span style={{fontSize:11,fontFamily:"'Source Sans 3',sans-serif",fontWeight:700,color:won?"#f5c842":"#70605a",minWidth:12,textAlign:"right"}}>{side==="home"?rh:ra}</span>}
       </div>
     );
@@ -880,10 +880,10 @@ function BracketView({ placements, results, getTeams }) {
   );
   return (
     <div>
-      <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:20}}>Slutspelsträd</h2>
+      <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:20}}>Slutspelstrd</h2>
       <div style={{overflowX:"auto",paddingBottom:16}}>
         <div style={{display:"flex",gap:18,alignItems:"flex-start",minWidth:900,paddingBottom:8}}>
-          <div style={{...col,gap:8}}>{hdr("Åttondel")}
+          <div style={{...col,gap:8}}>{hdr("ttondel")}
             {["R16_1","R16_3","R16_5","R16_7","R16_9","R16_11"].map(id=><div key={id} style={{marginBottom:4}}><MatchBox matchId={id}/></div>)}
           </div>
           <div style={{...col,gap:8,paddingTop:24}}>{hdr("Kvartsfinal")}
@@ -893,12 +893,12 @@ function BracketView({ placements, results, getTeams }) {
             {["SF_1","SF_2","SF_3"].map(id=><div key={id} style={{marginBottom:28}}><MatchBox matchId={id}/></div>)}
           </div>
           <div style={{...col,gap:10,paddingTop:80}}>
-            {hdr("🏆 Final","#f5c842")}<MatchBox matchId="FINAL"/>
+            {hdr("[T] Final","#f5c842")}<MatchBox matchId="FINAL"/>
             <div style={{marginTop:20}}>{hdr("Bronsmatch")}<MatchBox matchId="BRONS"/></div>
           </div>
           <div style={{...col,gap:8,paddingTop:56}}>{hdr("Semifinal")}<MatchBox matchId="SF_3"/></div>
           <div style={{...col,gap:8,paddingTop:24}}>{hdr("Kvartsfinal")}<div style={{marginBottom:10}}><MatchBox matchId="QF_4"/></div></div>
-          <div style={{...col,gap:8}}>{hdr("Åttondel")}
+          <div style={{...col,gap:8}}>{hdr("ttondel")}
             {["R16_2","R16_4","R16_6","R16_8","R16_10","R16_12"].map(id=><div key={id} style={{marginBottom:4}}><MatchBox matchId={id}/></div>)}
           </div>
         </div>
@@ -911,12 +911,12 @@ function BracketView({ placements, results, getTeams }) {
             const done = GROUP_MATCHES.filter(m=>m.group===g).every(m=>{const r=results[m.id];return r&&r.home.length>0&&r.away.length>0;});
             return (
               <div key={g} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:7,padding:"9px 11px"}}>
-                <div className="ss" style={{fontSize:10,color:"#f5c842",fontWeight:700,marginBottom:7,letterSpacing:.5}}>Grupp {g} {done&&"✓"}</div>
+                <div className="ss" style={{fontSize:10,color:"#f5c842",fontWeight:700,marginBottom:7,letterSpacing:.5}}>Grupp {g} {done&&""}</div>
                 {[e1,e2].map((team,i)=>(
                   <div key={i} style={{display:"flex",alignItems:"center",gap:5,marginBottom:3}}>
                     <span className="ss" style={{fontSize:9,color:"#60504a",minWidth:10}}>{i+1}.</span>
                     <span style={{fontSize:11}}>{getFlag(team)}</span>
-                    <span className="ss" style={{fontSize:11,color:team?"#f0e6d3":"#60504a"}}>{team||"–"}</span>
+                    <span className="ss" style={{fontSize:11,color:team?"#f0e6d3":"#60504a"}}>{team||""}</span>
                   </div>
                 ))}
               </div>
