@@ -908,7 +908,7 @@ function BracketView({ placements, results, getTeams }) {
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:8}}>
           {Object.keys(GROUPS).map(g=>{
             const e1=placements[`${g}0`], e2=placements[`${g}1`];
-            const done = GROUP_MATCHES.filter(m=>m.group===g).every(m=>{const r=results[m.id];return r&&r.home!==""&&r.away!==="";});
+            const done = GROUP_MATCHES.filter(m=>m.group===g).every(m=>{const r=results[m.id];return r&&r.home.length>0&&r.away.length>0;});
             return (
               <div key={g} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:7,padding:"9px 11px"}}>
                 <div className="ss" style={{fontSize:10,color:"#f5c842",fontWeight:700,marginBottom:7,letterSpacing:.5}}>Grupp {g} {done&&"✓"}</div>
