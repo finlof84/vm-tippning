@@ -2,51 +2,62 @@ import { useState, useEffect } from "react";
 import { db } from "./firebase";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 
+// Ratta grupper enligt FIFA VM 2026 (efter alla kval klara april 2026)
 const GROUPS = {
-  A: ["USA", "Mexiko", "Kanada", "Panama"],
-  B: ["Spanien", "Uruguay", "Egypten", "Botswana"],
-  C: ["Argentina", "Chile", "Peru", "Albanien"],
-  D: ["Frankrike", "Belgien", "Senegal", "Elfenbenskusten"],
-  E: ["Brasilien", "Colombia", "Ecuador", "Kamerun"],
-  F: ["England", "Portugal", "Tunisien", "Irak"],
-  G: ["Tyskland", "Nederlaenderna", "Sydkorea", "Saudiarabien"],
-  H: ["Japan", "Australien", "Marocko", "Algeriet"],
-  I: ["Italien", "Kroatien", "Paraguay", "Honduras"],
-  J: ["Serbien", "Ungern", "Ghana", "Kongo"],
-  K: ["Iran", "Uzbekistan", "Tanzania", "Nya Zeeland"],
-  L: ["Turkiet", "Ukraina", "Rumanien", "Zambia"],
+  A: ["Mexiko", "Sydafrika", "Sydkorea", "Tjeckien"],
+  B: ["Kanada", "Schweiz", "Qatar", "Bosnien"],
+  C: ["Brasilien", "Marocko", "Skottland", "Haiti"],
+  D: ["USA", "Australien", "Paraguay", "Turkiet"],
+  E: ["Tyskland", "Ecuador", "Elfenbenskusten", "Curacao"],
+  F: ["Nederlanderna", "Japan", "Tunisien", "Sverige"],
+  G: ["Belgien", "Iran", "Egypten", "Nya Zeeland"],
+  H: ["Spanien", "Uruguay", "Saudiarabien", "Kap Verde"],
+  I: ["Frankrike", "Senegal", "Norge", "Irak"],
+  J: ["Argentina", "Osterrike", "Algeriet", "Jordanien"],
+  K: ["Portugal", "Colombia", "Uzbekistan", "DR Kongo"],
+  L: ["England", "Kroatien", "Panama", "Ghana"],
 };
 
-const TEAM_DISPLAY = { "Nederlaenderna": "Nederlanderna", "Rumanien": "Rumanien" };
-function dn(team) { return TEAM_DISPLAY[team] || team; }
-
-const CC = {
-  "USA":"US","Mexiko":"MX","Kanada":"CA","Panama":"PA",
-  "Spanien":"ES","Uruguay":"UY","Egypten":"EG","Botswana":"BW",
-  "Argentina":"AR","Chile":"CL","Peru":"PE","Albanien":"AL",
-  "Frankrike":"FR","Belgien":"BE","Senegal":"SN","Elfenbenskusten":"CI",
-  "Brasilien":"BR","Colombia":"CO","Ecuador":"EC","Kamerun":"CM",
-  "England":"EN","Portugal":"PT","Tunisien":"TN","Irak":"IQ",
-  "Tyskland":"DE","Nederlaenderna":"NL","Sydkorea":"KR","Saudiarabien":"SA",
-  "Japan":"JP","Australien":"AU","Marocko":"MA","Algeriet":"DZ",
-  "Italien":"IT","Kroatien":"HR","Paraguay":"PY","Honduras":"HN",
-  "Serbien":"RS","Ungern":"HU","Ghana":"GH","Kongo":"CD",
-  "Iran":"IR","Uzbekistan":"UZ","Tanzania":"TZ","Nya Zeeland":"NZ",
-  "Turkiet":"TR","Ukraina":"UA","Rumanien":"RO","Zambia":"ZM",
-};
-function gc(team) { return CC[team] || "??"; }
+// Matchpar per omgang inom varje grupp
+// Baserat pa officiellt FIFA VM 2026 schema:
+// Omgang 1: match 1 (lag0 vs lag1) och match 2 (lag2 vs lag3)
+// Omgang 2: match 3 (lag0 vs lag2) och match 4 (lag1 vs lag3)  
+// Omgang 3: match 5 (lag0 vs lag3) och match 6 (lag1 vs lag2) - spelas samtidigt
+const ROUND_MAP = { "01":1, "23":1, "02":2, "13":2, "03":3, "12":3 };
 
 const GROUP_MATCHES = Object.entries(GROUPS).flatMap(([group, teams]) => {
   const ms = [];
   for (let i = 0; i < teams.length; i++)
-    for (let j = i + 1; j < teams.length; j++)
-      ms.push({ id: group+i+j, group, home: teams[i], away: teams[j], phase: "Grupp" });
+    for (let j = i + 1; j < teams.length; j++) {
+      const key = ""+i+j;
+      const round = ROUND_MAP[key] || 1;
+      ms.push({ id: group+i+j, group, home: teams[i], away: teams[j], phase: "Grupp", round });
+    }
   return ms;
 });
 
-// Sextondelsfinal (Round of 32): 16 matcher
-// 12 fasta matchningar (etta vs tvaa) + 4 matcher for treorna (admin fyller i lag)
-// Fasta matchningar enligt FIFA VM 2026 schema:
+function getMatchesForRound(round) {
+  return GROUP_MATCHES.filter(m => m.round === round);
+}
+
+const CC = {
+  "Mexiko":"MX","Sydafrika":"ZA","Sydkorea":"KR","Tjeckien":"CZ",
+  "Kanada":"CA","Schweiz":"CH","Qatar":"QA","Bosnien":"BA",
+  "Brasilien":"BR","Marocko":"MA","Skottland":"GB-SCT","Haiti":"HT",
+  "USA":"US","Australien":"AU","Paraguay":"PY","Turkiet":"TR",
+  "Tyskland":"DE","Ecuador":"EC","Elfenbenskusten":"CI","Curacao":"CW",
+  "Nederlanderna":"NL","Japan":"JP","Tunisien":"TN","Sverige":"SE",
+  "Belgien":"BE","Iran":"IR","Egypten":"EG","Nya Zeeland":"NZ",
+  "Spanien":"ES","Uruguay":"UY","Saudiarabien":"SA","Kap Verde":"CV",
+  "Frankrike":"FR","Senegal":"SN","Norge":"NO","Irak":"IQ",
+  "Argentina":"AR","Osterrike":"AT","Algeriet":"DZ","Jordanien":"JO",
+  "Portugal":"PT","Colombia":"CO","Uzbekistan":"UZ","DR Kongo":"CD",
+  "England":"EN","Kroatien":"HR","Panama":"PA","Ghana":"GH",
+};
+function gc(team) { return CC[team] || "??"; }
+function dn(team) { return team || "--"; }
+
+// Sextondelsfinal: 12 fasta + 4 for treorna
 const R32_FIXED = [
   {id:"R32_1",  phase:"Sextondelsfinal", homeKey:"A0", awayKey:"B1"},
   {id:"R32_2",  phase:"Sextondelsfinal", homeKey:"B0", awayKey:"A1"},
@@ -61,7 +72,6 @@ const R32_FIXED = [
   {id:"R32_11", phase:"Sextondelsfinal", homeKey:"K0", awayKey:"L1"},
   {id:"R32_12", phase:"Sextondelsfinal", homeKey:"L0", awayKey:"K1"},
 ];
-// 4 matcher for de 8 basta treorna - lag fylls i av admin efter gruppspelet
 const R32_THIRDS = [
   {id:"R32_13", phase:"Sextondelsfinal", homeKey:"THIRD_A", awayKey:"THIRD_B"},
   {id:"R32_14", phase:"Sextondelsfinal", homeKey:"THIRD_C", awayKey:"THIRD_D"},
@@ -70,7 +80,6 @@ const R32_THIRDS = [
 ];
 const R32 = [...R32_FIXED, ...R32_THIRDS];
 
-// Attondelsfinaler (Round of 16): 8 matcher - vinnare av R32
 const R16 = [
   {id:"R16_1", phase:"Attondelsfinaler", homeKey:"R32_1",  awayKey:"R32_2"},
   {id:"R16_2", phase:"Attondelsfinaler", homeKey:"R32_3",  awayKey:"R32_4"},
@@ -81,19 +90,16 @@ const R16 = [
   {id:"R16_7", phase:"Attondelsfinaler", homeKey:"R32_13", awayKey:"R32_14"},
   {id:"R16_8", phase:"Attondelsfinaler", homeKey:"R32_15", awayKey:"R32_16"},
 ];
-
 const QF = [
   {id:"QF_1", phase:"Kvartsfinal", homeKey:"R16_1", awayKey:"R16_2"},
   {id:"QF_2", phase:"Kvartsfinal", homeKey:"R16_3", awayKey:"R16_4"},
   {id:"QF_3", phase:"Kvartsfinal", homeKey:"R16_5", awayKey:"R16_6"},
   {id:"QF_4", phase:"Kvartsfinal", homeKey:"R16_7", awayKey:"R16_8"},
 ];
-
 const SF = [
   {id:"SF_1", phase:"Semifinal", homeKey:"QF_1", awayKey:"QF_2"},
   {id:"SF_2", phase:"Semifinal", homeKey:"QF_3", awayKey:"QF_4"},
 ];
-
 const LATE = [
   {id:"BRONS", phase:"Bronsmatch", homeKey:"SF_1L", awayKey:"SF_2L"},
   {id:"FINAL", phase:"Final",      homeKey:"SF_1",  awayKey:"SF_2"},
@@ -124,7 +130,7 @@ function calcGroupStandings(group, results) {
 
 function getBestThirds(results) {
   return Object.keys(GROUPS)
-    .map(g => { const st = calcGroupStandings(g,results); return st[2]?{...st[2],group:g}:null; })
+    .map(g => { const st=calcGroupStandings(g,results); return st[2]?{...st[2],group:g}:null; })
     .filter(Boolean)
     .sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf||a.team.localeCompare(b.team))
     .slice(0,8);
@@ -142,13 +148,10 @@ function resolveGroupPlacements(results) {
   return p;
 }
 
-// thirdOverrides: admin kan manuellt saga vilket lag som ar THIRD_A..H
-// om FIFA:s schema ger en annan matchning an automatisk ranking
 function resolveKOTeams(matchId, placements, results, thirdOverrides) {
   const all = KNOCKOUT_ALL;
   const match = all.find(m => m.id === matchId);
   if (!match) return {home:null,away:null};
-
   function teamFromKey(key) {
     if (/^[A-L][01]$/.test(key)) return placements[key]||null;
     if (/^THIRD_[A-H]$/.test(key)) return (thirdOverrides&&thirdOverrides[key])||placements[key]||null;
@@ -156,39 +159,35 @@ function resolveKOTeams(matchId, placements, results, thirdOverrides) {
     return winner(key);
   }
   function winner(id) {
-    const r = results[id];
-    if (!r||r.home===""||r.away==="") return null;
-    const gh=parseInt(r.home), ga=parseInt(r.away);
-    if (isNaN(gh)||isNaN(ga)) return null;
-    const {home:ht,away:at} = resolveKOTeams(id, placements, results, thirdOverrides);
-    if (gh>ga) return ht; if (ga>gh) return at; return null;
+    const r=results[id]; if(!r||r.home===""||r.away==="") return null;
+    const gh=parseInt(r.home),ga=parseInt(r.away); if(isNaN(gh)||isNaN(ga)) return null;
+    const {home:ht,away:at}=resolveKOTeams(id,placements,results,thirdOverrides);
+    if(gh>ga) return ht; if(ga>gh) return at; return null;
   }
   function loser(id) {
-    const r = results[id];
-    if (!r||r.home===""||r.away==="") return null;
-    const gh=parseInt(r.home), ga=parseInt(r.away);
-    if (isNaN(gh)||isNaN(ga)) return null;
-    const {home:ht,away:at} = resolveKOTeams(id, placements, results, thirdOverrides);
-    if (gh>ga) return at; if (ga>gh) return ht; return null;
+    const r=results[id]; if(!r||r.home===""||r.away==="") return null;
+    const gh=parseInt(r.home),ga=parseInt(r.away); if(isNaN(gh)||isNaN(ga)) return null;
+    const {home:ht,away:at}=resolveKOTeams(id,placements,results,thirdOverrides);
+    if(gh>ga) return at; if(ga>gh) return ht; return null;
   }
-  return {home: teamFromKey(match.homeKey), away: teamFromKey(match.awayKey)};
+  return {home:teamFromKey(match.homeKey),away:teamFromKey(match.awayKey)};
 }
 
 function labelFromKey(key) {
-  if (/^[A-L]0$/.test(key)) return "Etta grupp "+key[0];
-  if (/^[A-L]1$/.test(key)) return "Tvaa grupp "+key[0];
-  if (/^THIRD_[A-H]$/.test(key)) return "Trea #"+(key.charCodeAt(6)-64);
-  if (key.endsWith("L")) return "Forlorare "+key.slice(0,-1);
+  if(/^[A-L]0$/.test(key)) return "Etta grupp "+key[0];
+  if(/^[A-L]1$/.test(key)) return "Tvaa grupp "+key[0];
+  if(/^THIRD_[A-H]$/.test(key)) return "Trea #"+(key.charCodeAt(6)-64);
+  if(key.endsWith("L")) return "Forlorare "+key.slice(0,-1);
   return "Vinnare "+key;
 }
 
 function calcPoints(tip, result) {
-  if (!tip||!result) return 0;
-  const th=parseInt(tip.home), ta=parseInt(tip.away);
-  const rh=parseInt(result.home), ra=parseInt(result.away);
-  if (isNaN(th)||isNaN(ta)||isNaN(rh)||isNaN(ra)) return 0;
-  if (th===rh&&ta===ra) return 3;
-  if (Math.sign(th-ta)===Math.sign(rh-ra)) return 1;
+  if(!tip||!result) return 0;
+  const th=parseInt(tip.home),ta=parseInt(tip.away);
+  const rh=parseInt(result.home),ra=parseInt(result.away);
+  if(isNaN(th)||isNaN(ta)||isNaN(rh)||isNaN(ra)) return 0;
+  if(th===rh&&ta===ra) return 3;
+  if(Math.sign(th-ta)===Math.sign(rh-ra)) return 1;
   return 0;
 }
 function calcTotal(tips, results) {
@@ -202,41 +201,47 @@ async function fbSet(id, data) {
 
 // =============================================================================
 export default function App() {
-  const [view,         setView]         = useState("start");
-  const [participants, setParticipants] = useState({});
-  const [results,      setResults]      = useState({});
-  const [deadlines,    setDeadlines]    = useState({});
+  const [view,           setView]           = useState("start");
+  const [participants,   setParticipants]   = useState({});
+  const [passwords,      setPasswords]      = useState({});
+  const [results,        setResults]        = useState({});
+  const [deadlines,      setDeadlines]      = useState({});
   const [thirdOverrides, setThirdOverrides] = useState({});
-  const [currentUser,  setCurrentUser]  = useState(null);
-  const [nameInput,    setNameInput]    = useState("");
-  const [tipPhase,     setTipPhase]     = useState("Grupp");
-  const [tipGroup,     setTipGroup]     = useState("A");
-  const [adminCode,    setAdminCode]    = useState("");
-  const [isAdmin,      setIsAdmin]      = useState(false);
-  const [saveStatus,   setSaveStatus]   = useState("");
-  const [loading,      setLoading]      = useState(true);
-  const [adminTab,     setAdminTab]     = useState("results");
-  const [dlInput,      setDlInput]      = useState({});
-  const [now,          setNow]          = useState(Date.now());
+  const [currentUser,    setCurrentUser]    = useState(null);
+  const [nameInput,      setNameInput]      = useState("");
+  const [pwInput,        setPwInput]        = useState("");
+  const [newPwInput,     setNewPwInput]     = useState("");
+  const [loginError,     setLoginError]     = useState("");
+  const [tipPhase,       setTipPhase]       = useState("Omgang1");
+  const [tipGroup,       setTipGroup]       = useState("A");
+  const [adminCode,      setAdminCode]      = useState("");
+  const [isAdmin,        setIsAdmin]        = useState(false);
+  const [saveStatus,     setSaveStatus]     = useState("");
+  const [loading,        setLoading]        = useState(true);
+  const [adminTab,       setAdminTab]       = useState("results");
+  const [dlInput,        setDlInput]        = useState({});
+  const [rdlInput,       setRdlInput]       = useState({r1:"",r2:"",r3:""});
+  const [now,            setNow]            = useState(Date.now());
 
-  useEffect(()=>{ const t=setInterval(()=>setNow(Date.now()),30000); return ()=>clearInterval(t); },[]);
+  useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),30000);return()=>clearInterval(t);},[]);
 
   useEffect(()=>{
-    const unsubs = [
-      onSnapshot(doc(db,"vm2026","participants"), s=>{if(s.exists())setParticipants(s.data());setLoading(false);},()=>setLoading(false)),
-      onSnapshot(doc(db,"vm2026","results"),      s=>{if(s.exists())setResults(s.data());}),
-      onSnapshot(doc(db,"vm2026","deadlines"),    s=>{if(s.exists())setDeadlines(s.data());}),
+    const unsubs=[
+      onSnapshot(doc(db,"vm2026","participants"),s=>{if(s.exists())setParticipants(s.data());setLoading(false);},()=>setLoading(false)),
+      onSnapshot(doc(db,"vm2026","passwords"),   s=>{if(s.exists())setPasswords(s.data());}),
+      onSnapshot(doc(db,"vm2026","results"),     s=>{if(s.exists())setResults(s.data());}),
+      onSnapshot(doc(db,"vm2026","deadlines"),   s=>{if(s.exists())setDeadlines(s.data());}),
       onSnapshot(doc(db,"vm2026","thirdOverrides"),s=>{if(s.exists())setThirdOverrides(s.data());}),
     ];
-    return ()=>unsubs.forEach(u=>u());
+    return()=>unsubs.forEach(u=>u());
   },[]);
 
   const placements = resolveGroupPlacements(results);
-  function getTeams(mid) { return resolveKOTeams(mid, placements, results, thirdOverrides); }
+  function getTeams(mid) { return resolveKOTeams(mid,placements,results,thirdOverrides); }
   function getDisplay(m) {
-    if (m.phase==="Grupp") return {home:dn(m.home), away:dn(m.away)};
-    const {home,away} = getTeams(m.id);
-    return {home:home?dn(home):labelFromKey(m.homeKey), away:away?dn(away):labelFromKey(m.awayKey)};
+    if(m.phase==="Grupp") return {home:dn(m.home),away:dn(m.away)};
+    const {home,away}=getTeams(m.id);
+    return {home:home?dn(home):labelFromKey(m.homeKey),away:away?dn(away):labelFromKey(m.awayKey)};
   }
   function isLocked(mid) { const dl=deadlines[mid]; return dl&&now>=new Date(dl).getTime(); }
   function fmtDl(mid) {
@@ -244,11 +249,23 @@ export default function App() {
     return new Date(dl).toLocaleString("sv-SE",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
   }
 
+  // Login/register
   async function handleJoin() {
-    const name=nameInput.trim(); if(!name) return;
-    const upd={...participants}; if(!upd[name]) upd[name]={};
-    await fbSet("participants",upd); setCurrentUser(name); setView("tips"); setNameInput("");
+    const name=nameInput.trim();
+    if(!name||!pwInput) { setLoginError("Ange namn och losenord."); return; }
+    if(participants[name]!==undefined) {
+      // Befintlig deltagare - logga in
+      if(passwords[name]!==pwInput) { setLoginError("Fel losenord."); return; }
+    } else {
+      // Ny deltagare - registrera
+      if(!newPwInput) { setLoginError("Bekrafta ditt losenord."); return; }
+      if(pwInput!==newPwInput) { setLoginError("Losenorden matchar inte."); return; }
+      await fbSet("participants",{...participants,[name]:{}});
+      await fbSet("passwords",{...passwords,[name]:pwInput});
+    }
+    setCurrentUser(name); setView("tips"); setNameInput(""); setPwInput(""); setNewPwInput(""); setLoginError("");
   }
+
   async function handleTip(mid, side, val) {
     if(isLocked(mid)) return;
     await fbSet("participants",{...participants,[currentUser]:{...(participants[currentUser]||{}),[mid]:{...(participants[currentUser]?.[mid]||{}),[side]:val}}});
@@ -261,41 +278,55 @@ export default function App() {
     if(adminCode===ADMIN_CODE){setIsAdmin(true);setView("admin");}
     else alert("Fel losenord");
   }
-  async function handleResult(mid, side, val) {
+  async function handleResult(mid,side,val) {
     await fbSet("results",{...results,[mid]:{...(results[mid]||{}),[side]:val}});
   }
-  async function setDeadline(mid, iso) { await fbSet("deadlines",{...deadlines,[mid]:iso}); }
+  async function setDeadline(mid,iso) { await fbSet("deadlines",{...deadlines,[mid]:iso}); }
   async function rmDeadline(mid) {
     const upd={...deadlines}; delete upd[mid];
     await setDoc(doc(db,"vm2026","deadlines"),upd);
   }
-  async function bulkDeadline(group, iso) {
+  async function bulkDeadline(group,iso) {
     if(!iso) return;
     const upd={...deadlines};
     GROUP_MATCHES.filter(m=>m.group===group).forEach(m=>{upd[m.id]=iso;});
     await fbSet("deadlines",upd);
   }
-  async function handleThirdOverride(key, team) {
-    const upd={...thirdOverrides,[key]:team};
-    await fbSet("thirdOverrides",upd);
+  async function bulkRoundDeadline(round,iso) {
+    if(!iso) return;
+    const upd={...deadlines};
+    getMatchesForRound(round).forEach(m=>{upd[m.id]=iso;});
+    await fbSet("deadlines",upd);
+  }
+  async function handleThirdOverride(key,team) {
+    await fbSet("thirdOverrides",{...thirdOverrides,[key]:team});
+  }
+  async function deleteParticipant(name) {
+    if(!window.confirm("Ta bort "+name+"?")) return;
+    const upd={...participants}; delete upd[name];
+    await setDoc(doc(db,"vm2026","participants"),upd);
+    const pwUpd={...passwords}; delete pwUpd[name];
+    await setDoc(doc(db,"vm2026","passwords"),pwUpd);
+    if(currentUser===name){setCurrentUser(null); setView("start");}
   }
 
-  const leaderboard = Object.entries(participants)
+  const leaderboard=Object.entries(participants)
     .map(([name,tips])=>({name,points:calcTotal(tips,results),
       tipped:[...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{const t=tips[m.id];return t&&t.home!=""&&t.away!="";}).length}))
     .sort((a,b)=>b.points-a.points);
 
-  const userTips = participants[currentUser]||{};
-  const totalMatches = GROUP_MATCHES.length+KNOCKOUT_ALL.length;
-  function countTipped() {
-    return [...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{const t=userTips[m.id];return t&&t.home!=""&&t.away!="";}).length;
+  const userTips=participants[currentUser]||{};
+  const totalMatches=GROUP_MATCHES.length+KNOCKOUT_ALL.length;
+  function countTipped(){
+    return[...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{const t=userTips[m.id];return t&&t.home!=""&&t.away!="";}).length;
   }
+  const filteredMatches=tipPhase==="Grupp"?GROUP_MATCHES.filter(m=>m.group===tipGroup)
+    :tipPhase==="Omgang1"?getMatchesForRound(1)
+    :tipPhase==="Omgang2"?getMatchesForRound(2)
+    :tipPhase==="Omgang3"?getMatchesForRound(3)
+    :KNOCKOUT_ALL.filter(m=>m.phase===tipPhase);
 
-  const filteredMatches = tipPhase==="Grupp"
-    ? GROUP_MATCHES.filter(m=>m.group===tipGroup)
-    : KNOCKOUT_ALL.filter(m=>m.phase===tipPhase);
-
-  const bestThirds = getBestThirds(results);
+  const bestThirds=getBestThirds(results);
 
   if(loading) return(
     <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",
@@ -304,7 +335,7 @@ export default function App() {
     </div>
   );
 
-  const css = `
+  const css=`
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@400;600&display=swap');
     *{box-sizing:border-box;margin:0;padding:0} body{background:#0a1628}
     .pf{font-family:'Playfair Display',Georgia,serif}
@@ -322,6 +353,8 @@ export default function App() {
       font-family:'Source Sans 3',sans-serif;transition:background .15s,transform .1s}
     .btn:hover{background:#ffd96b;transform:translateY(-1px)} .btn:active{transform:scale(.98)}
     .btn-sm{padding:6px 14px;font-size:12px;border-radius:6px}
+    .btn-ghost{background:transparent;border:1px solid rgba(245,200,66,0.35);color:#f5c842;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:14px;}
+    .btn-ghost:hover{background:rgba(245,200,66,0.08);}
     .btn-danger{background:#b83232;color:#fff} .btn-danger:hover{background:#d44}
     .tab{background:transparent;border:none;color:#a09070;padding:8px 14px;cursor:pointer;
       font-size:13px;border-bottom:2px solid transparent;transition:all .15s;
@@ -349,10 +382,11 @@ export default function App() {
     .fc{display:inline-block;background:rgba(255,255,255,0.12);color:#f0e6d3;border-radius:3px;
       font-size:9px;font-weight:700;padding:1px 4px;font-family:'Source Sans 3',sans-serif;
       margin-right:4px;vertical-align:middle}
+    .err{color:#e07070;font-size:12px;font-family:'Source Sans 3',sans-serif;margin-top:8px;}
   `;
 
-  function FC({team}) { return <span className="fc">{gc(team)}</span>; }
-  function TL({team,label}) {
+  function FC({team}){return <span className="fc">{gc(team)}</span>;}
+  function TL({team,label}){
     if(!team) return <span style={{color:"#50403a"}}>{label||"--"}</span>;
     return <><FC team={team}/>{dn(team)}</>;
   }
@@ -370,6 +404,7 @@ export default function App() {
             <button className={"nav-link"+(view==="start"?" active":"")} onClick={()=>setView("start")}>Hem</button>
             {currentUser&&<button className={"nav-link"+(view==="tips"?" active":"")} onClick={()=>setView("tips")}>Mina tips</button>}
             <button className={"nav-link"+(view==="leaderboard"?" active":"")} onClick={()=>setView("leaderboard")}>Topplista</button>
+            <button className={"nav-link"+(view==="participants"?" active":"")} onClick={()=>setView("participants")}>Deltagare</button>
             <button className={"nav-link"+(view==="results"?" active":"")} onClick={()=>setView("results")}>Resultat</button>
             <button className={"nav-link"+(view==="bracket"?" active":"")} onClick={()=>setView("bracket")}>Slutspel</button>
             {!isAdmin&&<button className={"nav-link"+(view==="adminlogin"?" active":"")} onClick={()=>setView("adminlogin")}>Admin</button>}
@@ -380,13 +415,14 @@ export default function App() {
 
       <main style={{maxWidth:1000,margin:"0 auto",padding:"28px 16px 80px"}}>
 
-        {/* START */}
+        {/* START / LOGIN */}
         {view==="start"&&(
           <div style={{textAlign:"center",paddingTop:28}}>
             <div style={{fontSize:56,marginBottom:14}}>&#127942;</div>
             <h1 className="pf" style={{fontSize:42,color:"#f5c842",fontWeight:900,lineHeight:1.1,marginBottom:9}}>BKS VM-tipp 2026</h1>
             <p className="ss" style={{fontSize:17,color:"#a09070",marginBottom:5}}>USA &middot; Mexiko &middot; Kanada</p>
             <p className="ss" style={{fontSize:13,color:"#60504a",marginBottom:40}}>11 juni - 19 juli 2026</p>
+
             <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:44}}>
               {[
                 {label:"104 matcher",sub:"72 grupp + 32 slutspel"},
@@ -399,17 +435,39 @@ export default function App() {
                 </div>
               ))}
             </div>
-            <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.15)",borderRadius:14,padding:"26px 22px",maxWidth:400,margin:"0 auto 20px"}}>
-              <h2 className="pf" style={{fontSize:19,color:"#f5c842",marginBottom:16,fontWeight:700}}>Ga in och tippa</h2>
-              <div style={{display:"flex",gap:8}}>
-                <input type="text" placeholder="Ditt namn" value={nameInput}
-                  onChange={e=>setNameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleJoin()} style={{flex:1}}/>
-                <button className="btn" onClick={handleJoin}>Tippa!</button>
+
+            {currentUser?(
+              <div style={{background:"rgba(80,200,120,0.08)",border:"1px solid rgba(80,200,120,0.25)",borderRadius:14,padding:"20px 24px",maxWidth:400,margin:"0 auto 20px"}}>
+                <p className="pf" style={{fontSize:18,color:"#50c878",fontWeight:700,marginBottom:12}}>Inloggad som {currentUser}</p>
+                <div style={{display:"flex",gap:10,justifyContent:"center"}}>
+                  <button className="btn" onClick={()=>setView("tips")}>Mina tips</button>
+                  <button className="btn-ghost" onClick={()=>setCurrentUser(null)}>Logga ut</button>
+                </div>
               </div>
-              {Object.keys(participants).length>0&&(
-                <p className="ss" style={{fontSize:11,color:"#60504a",marginTop:9}}>Befintliga: {Object.keys(participants).join(", ")}</p>
-              )}
-            </div>
+            ):(
+              <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.15)",borderRadius:14,padding:"26px 22px",maxWidth:400,margin:"0 auto 20px"}}>
+                <h2 className="pf" style={{fontSize:19,color:"#f5c842",marginBottom:6,fontWeight:700}}>Logga in eller registrera dig</h2>
+                <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:16}}>Ny deltagare? Ange namn + losenord (2 ggr). Befintlig? Ange ditt namn och losenord.</p>
+                <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                  <input type="text" placeholder="Ditt namn" value={nameInput}
+                    onChange={e=>{setNameInput(e.target.value);setLoginError("");}} style={{width:"100%"}}/>
+                  <input type="password" placeholder="Losenord" value={pwInput}
+                    onChange={e=>{setPwInput(e.target.value);setLoginError("");}} style={{width:"100%"}}/>
+                  {nameInput&&!participants[nameInput]&&(
+                    <input type="password" placeholder="Bekrafta losenord (ny deltagare)" value={newPwInput}
+                      onChange={e=>{setNewPwInput(e.target.value);setLoginError("");}} style={{width:"100%"}}/>
+                  )}
+                  {nameInput&&participants[nameInput]&&(
+                    <p className="ss" style={{fontSize:11,color:"#a09070"}}>Befintlig deltagare - ange ditt losenord for att logga in och redigera dina tips.</p>
+                  )}
+                  {loginError&&<p className="err">{loginError}</p>}
+                  <button className="btn" onClick={handleJoin} style={{width:"100%"}}>
+                    {nameInput&&participants[nameInput]?"Logga in":"Registrera och tippa!"}
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div style={{background:"rgba(245,200,66,0.05)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:9,padding:"13px 17px",maxWidth:400,margin:"0 auto",textAlign:"left"}}>
               <p className="ss" style={{fontSize:11,color:"#a09070",lineHeight:1.8}}>
                 <strong style={{color:"#f5c842"}}>Pongsystem:</strong><br/>
@@ -432,6 +490,7 @@ export default function App() {
               <div style={{display:"flex",gap:9,alignItems:"center"}}>
                 {saveStatus&&<span className="ss" style={{fontSize:13,color:"#50c878"}}>{saveStatus}</span>}
                 <button className="btn btn-sm" onClick={handleSave}>Spara</button>
+                <button className="btn-ghost" style={{padding:"6px 14px",fontSize:12,borderRadius:6}} onClick={()=>{setCurrentUser(null);setView("start");}}>Logga ut</button>
               </div>
             </div>
             <div style={{background:"rgba(255,255,255,0.05)",borderRadius:4,height:5,marginBottom:22,overflow:"hidden"}}>
@@ -439,7 +498,11 @@ export default function App() {
             </div>
             <div className="scroll-x" style={{marginBottom:12}}>
               <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.07)",minWidth:"max-content"}}>
-                {PHASES.map(p=><button key={p} className={"tab"+(tipPhase===p?" active":"")} onClick={()=>setTipPhase(p)}>{p}</button>)}
+                <button className={"tab"+(tipPhase==="Omgang1"?" active":"")} onClick={()=>setTipPhase("Omgang1")}>Omgang 1</button>
+                <button className={"tab"+(tipPhase==="Omgang2"?" active":"")} onClick={()=>setTipPhase("Omgang2")}>Omgang 2</button>
+                <button className={"tab"+(tipPhase==="Omgang3"?" active":"")} onClick={()=>setTipPhase("Omgang3")}>Omgang 3</button>
+                <button className={"tab"+(tipPhase==="Grupp"?" active":"")} onClick={()=>setTipPhase("Grupp")}>Per grupp</button>
+                {PHASES.filter(p=>p!=="Grupp").map(p=><button key={p} className={"tab"+(tipPhase===p?" active":"")} onClick={()=>setTipPhase(p)}>{p}</button>)}
               </div>
             </div>
             {tipPhase==="Grupp"&&(
@@ -447,6 +510,15 @@ export default function App() {
                 {Object.keys(GROUPS).map(g=>(
                   <button key={g} className={"gbtn"+(tipGroup===g?" active":"")} onClick={()=>setTipGroup(g)}>Grupp {g}</button>
                 ))}
+              </div>
+            )}
+            {(tipPhase==="Omgang1"||tipPhase==="Omgang2"||tipPhase==="Omgang3")&&(
+              <div style={{background:"rgba(245,200,66,0.05)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:8,padding:"8px 14px",marginBottom:14}}>
+                <span className="ss" style={{fontSize:11,color:"#a09070"}}>
+                  {tipPhase==="Omgang1"?"Omgang 1: 11-17 juni - varje grupps forsta 2 matcher":
+                   tipPhase==="Omgang2"?"Omgang 2: 18-24 juni - varje grupps matcher 3 och 4":
+                   "Omgang 3: 25-27 juni - avgrande omgang, bada matcherna i varje grupp spelas samtidigt"}
+                </span>
               </div>
             )}
             <div style={{display:"flex",flexDirection:"column",gap:7}}>
@@ -513,6 +585,11 @@ export default function App() {
           </div>
         )}
 
+        {/* DELTAGARE */}
+        {view==="participants"&&(
+          <ParticipantsView participants={participants} results={results} deadlines={deadlines} now={now}/>
+        )}
+
         {/* RESULTAT */}
         {view==="results"&&(
           <ResultsView results={results} getTeams={getTeams} getDisplay={getDisplay} placements={placements} bestThirds={bestThirds}/>
@@ -541,20 +618,136 @@ export default function App() {
             results={results} deadlines={deadlines} thirdOverrides={thirdOverrides}
             tipPhase={tipPhase} setTipPhase={setTipPhase} tipGroup={tipGroup} setTipGroup={setTipGroup}
             adminTab={adminTab} setAdminTab={setAdminTab} dlInput={dlInput} setDlInput={setDlInput}
+            rdlInput={rdlInput} setRdlInput={setRdlInput}
             filteredMatches={filteredMatches} getDisplay={getDisplay} getTeams={getTeams}
             handleResult={handleResult} setDeadline={setDeadline} rmDeadline={rmDeadline}
-            bulkDeadline={bulkDeadline} isLocked={isLocked} fmtDl={fmtDl}
+            bulkDeadline={bulkDeadline} bulkRoundDeadline={bulkRoundDeadline} isLocked={isLocked} fmtDl={fmtDl}
             placements={placements} bestThirds={bestThirds} handleThirdOverride={handleThirdOverride}
+            participants={participants} deleteParticipant={deleteParticipant}
           />
         )}
 
         {view==="tips"&&!currentUser&&(
           <div style={{textAlign:"center",padding:"60px 0"}}>
-            <p className="ss" style={{color:"#a09070",marginBottom:16}}>Ange ditt namn pa startsidan for att borja tippa.</p>
+            <p className="ss" style={{color:"#a09070",marginBottom:16}}>Logga in pa startsidan for att se och redigera dina tips.</p>
             <button className="btn" onClick={()=>setView("start")}>Till startsidan</button>
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+// DELTAGARE-VY
+function ParticipantsView({participants, results, deadlines, now}) {
+  const [selName, setSelName] = useState(null);
+  const [selPhase, setSelPhase] = useState("Omgang1");
+  const [selGroup, setSelGroup] = useState("A");
+
+  function isVisible(matchId) {
+    const dl=deadlines[matchId];
+    if(!dl) return false;
+    return now>=new Date(dl).getTime();
+  }
+
+  function getVisibleMatches() {
+    if(selPhase==="Omgang1") return getMatchesForRound(1);
+    if(selPhase==="Omgang2") return getMatchesForRound(2);
+    if(selPhase==="Omgang3") return getMatchesForRound(3);
+    if(selPhase==="Grupp") return GROUP_MATCHES.filter(m=>m.group===selGroup);
+    return KNOCKOUT_ALL.filter(m=>m.phase===selPhase);
+  }
+
+  const matches=getVisibleMatches();
+  const names=Object.keys(participants).sort();
+  const tips=selName?(participants[selName]||{}):null;
+
+  return(
+    <div>
+      <h2 className="pf" style={{fontSize:28,color:"#f5c842",fontWeight:700,marginBottom:6}}>Deltagare</h2>
+      <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:22}}>
+        Tips visas forst nar matchens deadline har passerats.
+      </p>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:22}}>
+        {names.map(name=>(
+          <button key={name} onClick={()=>setSelName(selName===name?null:name)}
+            style={{background:selName===name?"#f5c842":"rgba(255,255,255,0.06)",
+              color:selName===name?"#0a1628":"#a09070",border:"none",borderRadius:8,
+              padding:"8px 16px",cursor:"pointer",fontWeight:700,fontSize:13,
+              fontFamily:"'Source Sans 3',sans-serif",transition:"all .15s"}}>
+            {name}
+          </button>
+        ))}
+        {names.length===0&&<p className="ss" style={{color:"#60504a"}}>Inga deltagare an.</p>}
+      </div>
+      {selName&&(
+        <div>
+          <h3 className="pf" style={{fontSize:20,color:"#f5c842",fontWeight:700,marginBottom:14}}>{selName}s tips</h3>
+          <div className="scroll-x" style={{marginBottom:12}}>
+            <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.07)",minWidth:"max-content"}}>
+              <button className={"tab"+(selPhase==="Omgang1"?" active":"")} onClick={()=>setSelPhase("Omgang1")}>Omgang 1</button>
+              <button className={"tab"+(selPhase==="Omgang2"?" active":"")} onClick={()=>setSelPhase("Omgang2")}>Omgang 2</button>
+              <button className={"tab"+(selPhase==="Omgang3"?" active":"")} onClick={()=>setSelPhase("Omgang3")}>Omgang 3</button>
+              <button className={"tab"+(selPhase==="Grupp"?" active":"")} onClick={()=>setSelPhase("Grupp")}>Per grupp</button>
+              {PHASES.filter(p=>p!=="Grupp").map(p=>(
+                <button key={p} className={"tab"+(selPhase===p?" active":"")} onClick={()=>setSelPhase(p)}>{p}</button>
+              ))}
+            </div>
+          </div>
+          {selPhase==="Grupp"&&(
+            <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
+              {Object.keys(GROUPS).map(g=>(
+                <button key={g} className={"gbtn"+(selGroup===g?" active":"")} onClick={()=>setSelGroup(g)}>Grupp {g}</button>
+              ))}
+            </div>
+          )}
+          <div style={{display:"flex",flexDirection:"column",gap:7}}>
+            {matches.map(m=>{
+              const visible=isVisible(m.id);
+              const tip=tips[m.id];
+              const hasTip=tip&&tip.home!=""&&tip.away!="";
+              const hasResult=results[m.id]&&results[m.id].home!=""&&results[m.id].away!="";
+              const pts=visible&&hasTip?calcPoints(tip,results[m.id]):null;
+              const hTeam=m.phase==="Grupp"?m.home:null;
+              const aTeam=m.phase==="Grupp"?m.away:null;
+              return(
+                <div key={m.id} style={{background:"rgba(255,255,255,0.04)",
+                  border:"1px solid "+(visible?"rgba(80,200,120,0.2)":"rgba(255,255,255,0.06)"),
+                  borderRadius:9,padding:"10px 14px",display:"flex",alignItems:"center",gap:8,
+                  opacity:visible?1:0.5}}>
+                  {hTeam&&<span className="fc">{gc(hTeam)}</span>}
+                  <span className="tn" style={{textAlign:"right",color:visible?"#f0e6d3":"#604848"}}>{hTeam?dn(hTeam):"Match "+m.id}</span>
+                  <div style={{minWidth:90,textAlign:"center"}}>
+                    {visible&&hasTip?(
+                      <span className="pf" style={{fontSize:15,fontWeight:700,
+                        color:pts===3?"#50c878":pts===1?"#f5c842":pts===0&&hasResult?"#e07070":"#f0e6d3"}}>
+                        {tip.home} - {tip.away}
+                        {pts!==null&&<span className="ss" style={{fontSize:11,marginLeft:6,opacity:.8}}>({pts}p)</span>}
+                      </span>
+                    ):visible&&!hasTip?(
+                      <span className="ss" style={{fontSize:11,color:"#a05050"}}>Ej tippat</span>
+                    ):(
+                      <span className="ss" style={{fontSize:11,color:"#50403a"}}>Dolda</span>
+                    )}
+                  </div>
+                  {aTeam&&<span className="tn" style={{color:visible?"#f0e6d3":"#604848"}}>{dn(aTeam)}</span>}
+                  {aTeam&&<span className="fc">{gc(aTeam)}</span>}
+                  {hasResult&&visible&&(
+                    <span className="ss" style={{fontSize:10,color:"#60504a",whiteSpace:"nowrap"}}>
+                      Facit: {results[m.id].home}-{results[m.id].away}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      {!selName&&names.length>0&&(
+        <div style={{textAlign:"center",padding:"40px 0",color:"#60504a"}}>
+          <p className="ss" style={{fontSize:14}}>Valj en deltagare ovan for att se deras tips.</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -566,9 +759,9 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
   const [koPhase, setKoPhase] = useState("Sextondelsfinal");
 
   function GroupTable({group}) {
-    const matches = GROUP_MATCHES.filter(m=>m.group===group);
-    const standing = calcGroupStandings(group,results);
-    const played = matches.filter(m=>{const r=results[m.id];return r&&r.home!=""&&r.away!="";}).length;
+    const matches=GROUP_MATCHES.filter(m=>m.group===group);
+    const standing=calcGroupStandings(group,results);
+    const played=matches.filter(m=>{const r=results[m.id];return r&&r.home!=""&&r.away!="";}).length;
     return(
       <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,overflow:"hidden",marginBottom:20}}>
         <div style={{background:"rgba(245,200,66,0.08)",borderBottom:"1px solid rgba(245,200,66,0.12)",padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -602,7 +795,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
                 const losses=pl-wins-draws;
                 return(
                   <tr key={row.team} style={{borderBottom:"1px solid rgba(255,255,255,0.04)",
-                    background:adv?"rgba(245,200,66,0.04)":isThird?"rgba(100,160,255,0.04)":"transparent"}}>
+                    background:adv?"rgba(245,200,66,0.04)":isThird?"rgba(80,120,220,0.04)":"transparent"}}>
                     <td style={{padding:"8px 16px",fontFamily:"'Source Sans 3',sans-serif",
                       color:adv?"#f5c842":isThird?"#80a8f0":"#60504a",fontWeight:700,fontSize:12}}>
                       {i+1}{adv&&" >"}{isThird&&" *"}
@@ -626,7 +819,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
             </tbody>
           </table>
         </div>
-        <div style={{borderTop:"1px solid rgba(255,255,255,0.05)",padding:"10px 14px",display:"flex",flexDirection:"column",gap:6}}>
+        <div style={{borderTop:"1px solid rgba(255,255,255,0.05)",padding:"10px 14px",display:"flex",flexDirection:"column",gap:5}}>
           {matches.map(m=>{
             const r=results[m.id]; const played=r&&r.home!=""&&r.away!="";
             return(
@@ -681,10 +874,8 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             {koMatches.map(m=>{
               const disp=getDisplay(m);
-              const r=results[m.id];
-              const played=r&&r.home!=""&&r.away!="";
-              const gh=played?parseInt(r.home):null;
-              const ga=played?parseInt(r.away):null;
+              const r=results[m.id]; const played=r&&r.home!=""&&r.away!="";
+              const gh=played?parseInt(r.home):null; const ga=played?parseInt(r.away):null;
               const homeWon=played&&gh>ga; const awayWon=played&&ga>gh;
               const ht=getTeams(m.id).home; const at=getTeams(m.id).away;
               return(
@@ -711,7 +902,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
       {tab==="thirds"&&(
         <div>
           <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:18,lineHeight:1.7}}>
-            De 8 basta treorna kvalificerar sig till sextondelsfinalerna. Rankade efter poang, sedan malskillnad, sedan gjorda mal.
+            De 8 basta treorna kvalificerar sig till sextondelsfinalerna.
           </p>
           <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,overflow:"hidden"}}>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
@@ -734,9 +925,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
                     <tr key={g} style={{borderBottom:"1px solid rgba(255,255,255,0.04)",
                       background:advances?"rgba(80,120,220,0.06)":"transparent"}}>
                       <td style={{padding:"8px 12px",fontFamily:"'Source Sans 3',sans-serif",
-                        color:advances?"#80a8f0":"#60504a",fontWeight:700,fontSize:12}}>
-                        {advances?rank+1:"-"}
-                      </td>
+                        color:advances?"#80a8f0":"#60504a",fontWeight:700,fontSize:12}}>{advances?rank+1:"-"}</td>
                       <td style={{padding:"8px 12px",whiteSpace:"nowrap"}}>
                         <span className="fc">{gc(row.team)}</span>
                         <span className="ss" style={{fontSize:12,fontWeight:600,color:advances?"#f0e6d3":"#a09070"}}>{dn(row.team)}</span>
@@ -752,7 +941,6 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
               </tbody>
             </table>
           </div>
-          <p className="ss" style={{fontSize:11,color:"#504840",marginTop:10}}>Blaa = kvalificerad till sextondelsfinalerna</p>
         </div>
       )}
     </div>
@@ -761,17 +949,16 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
 
 // ADMIN-VY
 function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGroup,setTipGroup,
-  adminTab,setAdminTab,dlInput,setDlInput,filteredMatches,getDisplay,getTeams,
-  handleResult,setDeadline,rmDeadline,bulkDeadline,isLocked,fmtDl,
-  placements,bestThirds,handleThirdOverride}) {
-
-  const allTeams = Object.values(GROUPS).flat().sort((a,b)=>dn(a).localeCompare(dn(b)));
+  adminTab,setAdminTab,dlInput,setDlInput,rdlInput,setRdlInput,
+  filteredMatches,getDisplay,getTeams,handleResult,setDeadline,rmDeadline,
+  bulkDeadline,bulkRoundDeadline,isLocked,fmtDl,
+  placements,bestThirds,handleThirdOverride,participants,deleteParticipant}) {
 
   return(
     <div>
       <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:22}}>Admin - BKS VM-tipp 2026</h2>
-      <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.08)",marginBottom:22}}>
-        {[["results","Resultat"],["thirds","Treornas matcher"],["deadlines","Deadlines"]].map(([k,l])=>(
+      <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.08)",marginBottom:22,flexWrap:"wrap"}}>
+        {[["results","Resultat"],["thirds","Treornas matcher"],["deadlines","Deadlines"],["participants","Deltagare"]].map(([k,l])=>(
           <button key={k} className={"tab"+(adminTab===k?" active":"")} onClick={()=>setAdminTab(k)}>{l}</button>
         ))}
       </div>
@@ -792,8 +979,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
           )}
           <div style={{display:"flex",flexDirection:"column",gap:7}}>
             {filteredMatches.map(m=>{
-              const r=results[m.id]||{home:"",away:""};
-              const done=r.home!=""&&r.away!="";
+              const r=results[m.id]||{home:"",away:""}; const done=r.home!=""&&r.away!="";
               const disp=getDisplay(m);
               const ht=m.phase==="Grupp"?m.home:getTeams(m.id).home;
               const at=m.phase==="Grupp"?m.away:getTeams(m.id).away;
@@ -821,32 +1007,27 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
       {adminTab==="thirds"&&(
         <div>
           <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:18,lineHeight:1.7}}>
-            Nar gruppspelet ar klart laser FIFA bracketen och bestammer vilka 8 treor som moter vilka ettorna.
-            Tilldela lagnamnen nedan enligt FIFA:s officiella schema (kands 27 juni).
-            Om du inte andrar nagot anvands automatisk ranking.
+            Nar gruppspelet ar klart laser FIFA bracketen. Tilldela lagnamnen nedan for treornas 4 sextondelsfinalsmatcher.
           </p>
           <div style={{background:"rgba(245,200,66,0.05)",border:"1px solid rgba(245,200,66,0.15)",borderRadius:9,padding:"12px 16px",marginBottom:20}}>
             <p className="ss" style={{fontSize:12,color:"#f5c842",fontWeight:700,marginBottom:8}}>Automatisk ranking (topp 8 treor just nu):</p>
             {bestThirds.length===0
-              ? <p className="ss" style={{fontSize:12,color:"#60504a"}}>Inga gruppresultat registrerade an.</p>
-              : bestThirds.map((t,i)=>(
+              ?<p className="ss" style={{fontSize:12,color:"#60504a"}}>Inga gruppresultat registrerade an.</p>
+              :bestThirds.map((t,i)=>(
                 <div key={t.team} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
                   <span className="fc">{gc(t.team)}</span>
                   <span className="ss" style={{fontSize:12,color:"#f0e6d3",fontWeight:600}}>{i+1}. {dn(t.team)}</span>
-                  <span className="ss" style={{fontSize:11,color:"#60504a"}}>({t.pts}p, {t.gd>0?"+":""}{t.gd} MS) - Grupp {t.group}</span>
+                  <span className="ss" style={{fontSize:11,color:"#60504a"}}>({t.pts}p - Grupp {t.group})</span>
                 </div>
               ))
             }
           </div>
-          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:14,fontWeight:700}}>
-            Tilldela lag till treornas 4 sextondelsfinalsmatcher:
-          </p>
           {R32_THIRDS.map(m=>(
             <div key={m.id} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:9,padding:"12px 16px",marginBottom:10}}>
-              <p className="ss" style={{fontSize:12,color:"#f5c842",fontWeight:700,marginBottom:10}}>{m.id} (enligt FIFA:s schema)</p>
+              <p className="ss" style={{fontSize:12,color:"#f5c842",fontWeight:700,marginBottom:10}}>{m.id}</p>
               <div style={{display:"flex",gap:16,flexWrap:"wrap",alignItems:"center"}}>
                 <div>
-                  <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:4}}>{m.homeKey} (hemmalag / etta):</p>
+                  <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:4}}>{m.homeKey}:</p>
                   <select value={thirdOverrides[m.homeKey]||""} onChange={e=>handleThirdOverride(m.homeKey,e.target.value)}>
                     <option value="">-- Valj lag --</option>
                     {bestThirds.map(t=><option key={t.team} value={t.team}>{dn(t.team)}</option>)}
@@ -854,7 +1035,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
                 </div>
                 <div className="ss" style={{fontSize:14,color:"#60504a",paddingTop:20}}>vs</div>
                 <div>
-                  <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:4}}>{m.awayKey} (bortalag / trea):</p>
+                  <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:4}}>{m.awayKey}:</p>
                   <select value={thirdOverrides[m.awayKey]||""} onChange={e=>handleThirdOverride(m.awayKey,e.target.value)}>
                     <option value="">-- Valj lag --</option>
                     {bestThirds.map(t=><option key={t.team} value={t.team}>{dn(t.team)}</option>)}
@@ -869,29 +1050,34 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
       {adminTab==="deadlines"&&(
         <div>
           <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:18,lineHeight:1.7}}>
-            Satt deadline per match. Nar deadline passerar lases tipsen automatiskt.
+            Satt deadline per match eller per omgang. Nar deadline passerar lases tipsen automatiskt.
           </p>
+          {/* Bulk per omgang */}
+          <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:10,padding:"16px",marginBottom:20}}>
+            <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:12}}>Satt deadline for hel omgang</p>
+            {[1,2,3].map(r=>(
+              <div key={r} style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap",marginBottom:10}}>
+                <span className="ss" style={{fontSize:13,fontWeight:700,color:"#f0e6d3",minWidth:80}}>Omgang {r}:</span>
+                <span className="ss" style={{fontSize:11,color:"#60504a",flex:1}}>{getMatchesForRound(r).length} matcher</span>
+                <input type="datetime-local" value={rdlInput["r"+r]||""}
+                  onChange={e=>setRdlInput(prev=>({...prev,["r"+r]:e.target.value}))}/>
+                <button className="btn btn-sm" onClick={()=>{
+                  const v=rdlInput["r"+r]; if(v) bulkRoundDeadline(r,new Date(v).toISOString());
+                }}>Satt for alla {getMatchesForRound(r).length} matcher</button>
+              </div>
+            ))}
+          </div>
           <div className="scroll-x" style={{marginBottom:11}}>
             <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",minWidth:"max-content"}}>
               {PHASES.map(p=><button key={p} className={"tab"+(tipPhase===p?" active":"")} onClick={()=>setTipPhase(p)}>{p}</button>)}
             </div>
           </div>
           {tipPhase==="Grupp"&&(
-            <>
-              <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
-                {Object.keys(GROUPS).map(g=>(
-                  <button key={g} className={"gbtn"+(tipGroup===g?" active":"")} onClick={()=>setTipGroup(g)}>Grupp {g}</button>
-                ))}
-              </div>
-              <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:9,padding:"13px 14px",marginBottom:14,display:"flex",alignItems:"center",gap:9,flexWrap:"wrap"}}>
-                <span className="ss" style={{fontSize:12,color:"#a09070"}}>Bulk - Grupp {tipGroup}:</span>
-                <input type="datetime-local" value={dlInput["bulk_"+tipGroup]||""}
-                  onChange={e=>setDlInput(prev=>({...prev,["bulk_"+tipGroup]:e.target.value}))}/>
-                <button className="btn btn-sm" onClick={()=>{
-                  const v=dlInput["bulk_"+tipGroup]; if(v) bulkDeadline(tipGroup,new Date(v).toISOString());
-                }}>Tillmpa alla</button>
-              </div>
-            </>
+            <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
+              {Object.keys(GROUPS).map(g=>(
+                <button key={g} className={"gbtn"+(tipGroup===g?" active":"")} onClick={()=>setTipGroup(g)}>Grupp {g}</button>
+              ))}
+            </div>
           )}
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
             {filteredMatches.map(m=>{
@@ -916,6 +1102,34 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
               );
             })}
           </div>
+        </div>
+      )}
+
+      {adminTab==="participants"&&(
+        <div>
+          <h3 className="pf" style={{fontSize:18,color:"#f5c842",fontWeight:700,marginBottom:6}}>Hantera deltagare</h3>
+          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:20}}>
+            {Object.keys(participants).length} registrerade deltagare.
+          </p>
+          {Object.keys(participants).length===0?(
+            <p className="ss" style={{color:"#60504a"}}>Inga deltagare an.</p>
+          ):(
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {Object.keys(participants).sort().map(name=>{
+                const tips=participants[name]||{};
+                const tipped=[...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{const t=tips[m.id];return t&&t.home!=""&&t.away!="";}).length;
+                return(
+                  <div key={name} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:9,padding:"12px 16px",display:"flex",alignItems:"center",gap:12}}>
+                    <div style={{flex:1}}>
+                      <div className="pf" style={{fontSize:15,fontWeight:700,color:"#f0e6d3"}}>{name}</div>
+                      <div className="ss" style={{fontSize:11,color:"#60504a",marginTop:2}}>{tipped} matcher tippade</div>
+                    </div>
+                    <button className="btn btn-sm btn-danger" onClick={()=>deleteParticipant(name)}>Ta bort</button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -944,103 +1158,46 @@ function BracketView({placements, results, getTeams, bestThirds}) {
       </div>
     );
   }
-  function MB({mid}) {
-    return <div style={{display:"flex",flexDirection:"column",gap:2}}><TR mid={mid} side="home"/><TR mid={mid} side="away"/></div>;
-  }
-  function Col({children,pt=0}) {
-    return <div style={{display:"flex",flexDirection:"column",gap:6,paddingTop:pt}}>{children}</div>;
-  }
-  function H({t,gold=false}) {
-    return <div style={{fontSize:8,fontFamily:"'Source Sans 3',sans-serif",color:gold?"#f5c842":"#60504a",
-      textTransform:"uppercase",letterSpacing:.8,marginBottom:3,fontWeight:700}}>{t}</div>;
-  }
+  function MB({mid}){return<div style={{display:"flex",flexDirection:"column",gap:2}}><TR mid={mid} side="home"/><TR mid={mid} side="away"/></div>;}
+  function Col({children,pt=0}){return<div style={{display:"flex",flexDirection:"column",gap:6,paddingTop:pt}}>{children}</div>;}
+  function H({t,gold=false}){return<div style={{fontSize:8,fontFamily:"'Source Sans 3',sans-serif",color:gold?"#f5c842":"#60504a",textTransform:"uppercase",letterSpacing:.8,marginBottom:3,fontWeight:700}}>{t}</div>;}
 
   return(
     <div>
       <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:6}}>Slutspelstrad</h2>
-      <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:20}}>VM 2026: 32 lag, 5 omgangar till final</p>
-
-      {/* Huvud-bracket */}
+      <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:20}}>VM 2026: 32 lag - 5 omgangar till final</p>
       <div style={{overflowX:"auto",paddingBottom:16}}>
         <div style={{display:"flex",gap:12,alignItems:"flex-start",minWidth:1100}}>
-          <Col>
-            <H t="Sextondelsfinal"/>
-            {["R32_1","R32_3","R32_5","R32_7"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}
-          </Col>
-          <Col pt={16}>
-            <H t="Attondel"/>
-            {["R16_1","R16_2"].map(id=><div key={id} style={{marginBottom:8}}><MB mid={id}/></div>)}
-          </Col>
-          <Col pt={44}>
-            <H t="Kvartsfinal"/>
-            <div style={{marginBottom:20}}><MB mid="QF_1"/></div>
-          </Col>
-          <Col pt={76}>
-            <H t="Semifinal"/>
-            <div style={{marginBottom:32}}><MB mid="SF_1"/></div>
-          </Col>
-          <Col pt={100}>
-            <H t="Final" gold={true}/>
-            <MB mid="FINAL"/>
-            <div style={{marginTop:16}}><H t="Bronsmatch"/><MB mid="BRONS"/></div>
-          </Col>
-          <Col pt={76}>
-            <H t="Semifinal"/>
-            <MB mid="SF_2"/>
-          </Col>
-          <Col pt={44}>
-            <H t="Kvartsfinal"/>
-            <MB mid="QF_2"/>
-          </Col>
-          <Col pt={16}>
-            <H t="Attondel"/>
-            {["R16_3","R16_4"].map(id=><div key={id} style={{marginBottom:8}}><MB mid={id}/></div>)}
-          </Col>
-          <Col>
-            <H t="Sextondelsfinal"/>
-            {["R32_9","R32_11","R32_2","R32_4"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}
-          </Col>
+          <Col><H t="Sextondelsfinal"/>{["R32_1","R32_3","R32_5","R32_7"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}</Col>
+          <Col pt={16}><H t="Attondel"/>{["R16_1","R16_2"].map(id=><div key={id} style={{marginBottom:8}}><MB mid={id}/></div>)}</Col>
+          <Col pt={44}><H t="Kvartsfinal"/><div style={{marginBottom:20}}><MB mid="QF_1"/></div></Col>
+          <Col pt={76}><H t="Semifinal"/><div style={{marginBottom:32}}><MB mid="SF_1"/></div></Col>
+          <Col pt={100}><H t="Final" gold={true}/><MB mid="FINAL"/><div style={{marginTop:16}}><H t="Bronsmatch"/><MB mid="BRONS"/></div></Col>
+          <Col pt={76}><H t="Semifinal"/><MB mid="SF_2"/></Col>
+          <Col pt={44}><H t="Kvartsfinal"/><MB mid="QF_2"/></Col>
+          <Col pt={16}><H t="Attondel"/>{["R16_3","R16_4"].map(id=><div key={id} style={{marginBottom:8}}><MB mid={id}/></div>)}</Col>
+          <Col><H t="Sextondelsfinal"/>{["R32_9","R32_11","R32_2","R32_4"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}</Col>
         </div>
       </div>
-
-      {/* Treornas bracket */}
       <div style={{marginTop:28,borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:20}}>
-        <div style={{fontSize:11,fontFamily:"'Source Sans 3',sans-serif",color:"#80a8f0",fontWeight:700,
-          textTransform:"uppercase",letterSpacing:.8,marginBottom:14}}>
+        <div style={{fontSize:11,fontFamily:"'Source Sans 3',sans-serif",color:"#80a8f0",fontWeight:700,textTransform:"uppercase",letterSpacing:.8,marginBottom:14}}>
           De 8 basta treornas del av bracketen
         </div>
         <div style={{overflowX:"auto",paddingBottom:8}}>
           <div style={{display:"flex",gap:12,alignItems:"flex-start",minWidth:900}}>
-            <Col>
-              <H t="Sextondelsfinal"/>
-              {["R32_13","R32_15","R32_6","R32_8"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}
-            </Col>
-            <Col pt={16}>
-              <H t="Attondel"/>
-              {["R16_7","R16_8"].map(id=><div key={id} style={{marginBottom:8}}><MB mid={id}/></div>)}
-            </Col>
-            <Col pt={44}>
-              <H t="Kvartsfinal"/>
-              <MB mid="QF_3"/>
-            </Col>
-            <Col pt={16}>
-              <H t="Attondel"/>
-              {["R16_5","R16_6"].map(id=><div key={id} style={{marginBottom:8}}><MB mid={id}/></div>)}
-            </Col>
-            <Col>
-              <H t="Sextondelsfinal"/>
-              {["R32_14","R32_16","R32_10","R32_12"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}
-            </Col>
+            <Col><H t="Sextondelsfinal"/>{["R32_13","R32_15","R32_6","R32_8"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}</Col>
+            <Col pt={16}><H t="Attondel"/>{["R16_7","R16_8"].map(id=><div key={id} style={{marginBottom:8}}><MB mid={id}/></div>)}</Col>
+            <Col pt={44}><H t="Kvartsfinal"/><MB mid="QF_3"/></Col>
+            <Col pt={16}><H t="Attondel"/>{["R16_5","R16_6"].map(id=><div key={id} style={{marginBottom:8}}><MB mid={id}/></div>)}</Col>
+            <Col><H t="Sextondelsfinal"/>{["R32_14","R32_16","R32_10","R32_12"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}</Col>
           </div>
         </div>
       </div>
-
-      {/* Grupplaceringar */}
       <div style={{marginTop:28,borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:20}}>
         <h3 className="ss" style={{fontSize:11,color:"#60504a",textTransform:"uppercase",letterSpacing:.9,marginBottom:14,fontWeight:700}}>Grupplaceringar</h3>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:8}}>
           {Object.keys(GROUPS).map(g=>{
-            const e1=placements[g+"0"], e2=placements[g+"1"];
+            const e1=placements[g+"0"],e2=placements[g+"1"];
             const done=GROUP_MATCHES.filter(m=>m.group===g).every(m=>{const r=results[m.id];return r&&r.home.length>0&&r.away.length>0;});
             return(
               <div key={g} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:7,padding:"9px 11px"}}>
