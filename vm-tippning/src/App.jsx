@@ -462,9 +462,8 @@ export default function App() {
         {view==="start"&&(
           <div style={{textAlign:"center",paddingTop:28}}>
             <img src="/HIK.png" alt="Hovslatts IK" style={{
-              width:180,height:180,objectFit:"contain",marginBottom:20,
-              mixBlendMode:"screen",
-              filter:"drop-shadow(0 0 24px rgba(245,200,66,0.25))"
+              width:240,height:130,objectFit:"contain",marginBottom:10,
+              filter:"drop-shadow(0 0 16px rgba(245,200,66,0.2))"
             }}/>
             <h1 className="pf" style={{fontSize:38,color:"#f5c842",fontWeight:900,lineHeight:1.1,marginBottom:6}}>P14 HIKs VM-tipp 2026</h1>
             <p className="ss" style={{fontSize:17,color:"#a09070",marginBottom:5}}>USA &middot; Mexiko &middot; Kanada</p>
@@ -541,6 +540,7 @@ export default function App() {
               <div style={{display:"flex",gap:9,alignItems:"center"}}>
                 {saveStatus&&<span className="ss" style={{fontSize:13,color:"#50c878"}}>{saveStatus}</span>}
                 <button className="btn btn-sm" onClick={handleSave}>Spara</button>
+                <button className="btn-ghost" style={{padding:"6px 14px",fontSize:12,borderRadius:6}} onClick={()=>setView("changepw")}>Byt losenord</button>
                 <button className="btn-ghost" style={{padding:"6px 14px",fontSize:12,borderRadius:6}} onClick={()=>{setCurrentUser(null);setView("start");}}>Logga ut</button>
               </div>
             </div>
@@ -662,6 +662,16 @@ export default function App() {
           <BracketView placements={placements} results={results} getTeams={getTeams} bestThirds={bestThirds}/>
         )}
 
+        {/* BYT LOSENORD */}
+        {view==="changepw"&&currentUser&&(
+          <ChangePwView
+            currentUser={currentUser}
+            passwords={passwords}
+            onSaved={()=>setView("tips")}
+            onCancel={()=>setView("tips")}
+          />
+        )}
+
         {/* ADMIN LOGIN */}
         {view==="adminlogin"&&(
           <div style={{maxWidth:370,margin:"60px auto",textAlign:"center"}}>
@@ -699,6 +709,55 @@ export default function App() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+// BYT LOSENORD-VY
+function ChangePwView({currentUser, passwords, onSaved, onCancel}) {
+  const [oldPw,  setOldPw]  = useState("");
+  const [newPw,  setNewPw]  = useState("");
+  const [newPw2, setNewPw2] = useState("");
+  const [err,    setErr]    = useState("");
+  const [ok,     setOk]     = useState("");
+
+  async function handleSave() {
+    setErr(""); setOk("");
+    if(passwords[currentUser] !== oldPw) { setErr("Nuvarande losenord stammer inte."); return; }
+    if(newPw.length < 2) { setErr("Nytt losenord maste vara minst 2 tecken."); return; }
+    if(newPw !== newPw2) { setErr("De nya losenorden matchar inte."); return; }
+    await fbSet("passwords", {...passwords, [currentUser]: newPw});
+    setOk("Losenord uppdat! Omdirigerar..."); 
+    setTimeout(onSaved, 1500);
+  }
+
+  return(
+    <div style={{maxWidth:420,margin:"60px auto"}}>
+      <h2 className="pf" style={{fontSize:26,color:"#f5c842",fontWeight:700,marginBottom:6}}>Byt losenord</h2>
+      <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:24}}>Inloggad som <strong style={{color:"#f0e6d3"}}>{currentUser}</strong></p>
+      <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.15)",borderRadius:12,padding:"24px 20px",display:"flex",flexDirection:"column",gap:12}}>
+        <div>
+          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:6}}>Nuvarande losenord</p>
+          <input type="password" placeholder="Nuvarande losenord" value={oldPw}
+            onChange={e=>{setOldPw(e.target.value);setErr("");}} style={{width:"100%"}}/>
+        </div>
+        <div>
+          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:6}}>Nytt losenord</p>
+          <input type="password" placeholder="Nytt losenord" value={newPw}
+            onChange={e=>{setNewPw(e.target.value);setErr("");}} style={{width:"100%"}}/>
+        </div>
+        <div>
+          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:6}}>Bekrafta nytt losenord</p>
+          <input type="password" placeholder="Upprepa nytt losenord" value={newPw2}
+            onChange={e=>{setNewPw2(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&handleSave()} style={{width:"100%"}}/>
+        </div>
+        {err&&<p className="err">{err}</p>}
+        {ok&&<p className="ss" style={{color:"#50c878",fontSize:13}}>{ok}</p>}
+        <div style={{display:"flex",gap:10,marginTop:4}}>
+          <button className="btn" onClick={handleSave} style={{flex:1}}>Spara nytt losenord</button>
+          <button className="btn-ghost" onClick={onCancel}>Avbryt</button>
+        </div>
+      </div>
     </div>
   );
 }
