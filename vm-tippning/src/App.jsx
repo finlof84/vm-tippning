@@ -195,6 +195,115 @@ function calcTotal(tips, results) {
 }
 
 const ADMIN_CODE = "vm2026admin";
+
+const DEFAULT_DEADLINES = {
+  "A01": "2026-06-11T19:00:00.000Z",
+  "A02": "2026-06-18T17:00:00.000Z",
+  "A03": "2026-06-24T19:00:00.000Z",
+  "A12": "2026-06-24T19:00:00.000Z",
+  "A13": "2026-06-18T17:00:00.000Z",
+  "A23": "2026-06-11T19:00:00.000Z",
+  "B01": "2026-06-11T19:00:00.000Z",
+  "B02": "2026-06-18T17:00:00.000Z",
+  "B03": "2026-06-24T19:00:00.000Z",
+  "B12": "2026-06-24T19:00:00.000Z",
+  "B13": "2026-06-18T17:00:00.000Z",
+  "B23": "2026-06-11T19:00:00.000Z",
+  "BRONS": "2026-07-18T21:00:00.000Z",
+  "C01": "2026-06-11T19:00:00.000Z",
+  "C02": "2026-06-18T17:00:00.000Z",
+  "C03": "2026-06-24T19:00:00.000Z",
+  "C12": "2026-06-24T19:00:00.000Z",
+  "C13": "2026-06-18T17:00:00.000Z",
+  "C23": "2026-06-11T19:00:00.000Z",
+  "D01": "2026-06-11T19:00:00.000Z",
+  "D02": "2026-06-18T17:00:00.000Z",
+  "D03": "2026-06-24T19:00:00.000Z",
+  "D12": "2026-06-24T19:00:00.000Z",
+  "D13": "2026-06-18T17:00:00.000Z",
+  "D23": "2026-06-11T19:00:00.000Z",
+  "E01": "2026-06-11T19:00:00.000Z",
+  "E02": "2026-06-18T17:00:00.000Z",
+  "E03": "2026-06-24T19:00:00.000Z",
+  "E12": "2026-06-24T19:00:00.000Z",
+  "E13": "2026-06-18T17:00:00.000Z",
+  "E23": "2026-06-11T19:00:00.000Z",
+  "F01": "2026-06-11T19:00:00.000Z",
+  "F02": "2026-06-18T17:00:00.000Z",
+  "F03": "2026-06-24T19:00:00.000Z",
+  "F12": "2026-06-24T19:00:00.000Z",
+  "F13": "2026-06-18T17:00:00.000Z",
+  "F23": "2026-06-11T19:00:00.000Z",
+  "FINAL": "2026-07-19T20:00:00.000Z",
+  "G01": "2026-06-11T19:00:00.000Z",
+  "G02": "2026-06-18T17:00:00.000Z",
+  "G03": "2026-06-24T19:00:00.000Z",
+  "G12": "2026-06-24T19:00:00.000Z",
+  "G13": "2026-06-18T17:00:00.000Z",
+  "G23": "2026-06-11T19:00:00.000Z",
+  "H01": "2026-06-11T19:00:00.000Z",
+  "H02": "2026-06-18T17:00:00.000Z",
+  "H03": "2026-06-24T19:00:00.000Z",
+  "H12": "2026-06-24T19:00:00.000Z",
+  "H13": "2026-06-18T17:00:00.000Z",
+  "H23": "2026-06-11T19:00:00.000Z",
+  "I01": "2026-06-11T19:00:00.000Z",
+  "I02": "2026-06-18T17:00:00.000Z",
+  "I03": "2026-06-24T19:00:00.000Z",
+  "I12": "2026-06-24T19:00:00.000Z",
+  "I13": "2026-06-18T17:00:00.000Z",
+  "I23": "2026-06-11T19:00:00.000Z",
+  "J01": "2026-06-11T19:00:00.000Z",
+  "J02": "2026-06-18T17:00:00.000Z",
+  "J03": "2026-06-24T19:00:00.000Z",
+  "J12": "2026-06-24T19:00:00.000Z",
+  "J13": "2026-06-18T17:00:00.000Z",
+  "J23": "2026-06-11T19:00:00.000Z",
+  "K01": "2026-06-11T19:00:00.000Z",
+  "K02": "2026-06-18T17:00:00.000Z",
+  "K03": "2026-06-24T19:00:00.000Z",
+  "K12": "2026-06-24T19:00:00.000Z",
+  "K13": "2026-06-18T17:00:00.000Z",
+  "K23": "2026-06-11T19:00:00.000Z",
+  "L01": "2026-06-11T19:00:00.000Z",
+  "L02": "2026-06-18T17:00:00.000Z",
+  "L03": "2026-06-24T19:00:00.000Z",
+  "L12": "2026-06-24T19:00:00.000Z",
+  "L13": "2026-06-18T17:00:00.000Z",
+  "L23": "2026-06-11T19:00:00.000Z",
+  "QF_1": "2026-07-09T20:00:00.000Z",
+  "QF_2": "2026-07-10T00:00:00.000Z",
+  "QF_3": "2026-07-10T20:00:00.000Z",
+  "QF_4": "2026-07-11T00:00:00.000Z",
+  "R16_1": "2026-07-04T20:00:00.000Z",
+  "R16_2": "2026-07-04T22:00:00.000Z",
+  "R16_3": "2026-07-05T19:00:00.000Z",
+  "R16_4": "2026-07-05T21:00:00.000Z",
+  "R16_5": "2026-07-06T20:00:00.000Z",
+  "R16_6": "2026-07-06T22:00:00.000Z",
+  "R16_7": "2026-07-06T19:00:00.000Z",
+  "R16_8": "2026-07-06T23:00:00.000Z",
+  "R32_1": "2026-06-28T21:00:00.000Z",
+  "R32_10": "2026-07-02T21:00:00.000Z",
+  "R32_11": "2026-07-03T19:00:00.000Z",
+  "R32_12": "2026-07-03T21:00:00.000Z",
+  "R32_13": "2026-06-28T19:00:00.000Z",
+  "R32_14": "2026-06-28T21:00:00.000Z",
+  "R32_15": "2026-06-29T17:00:00.000Z",
+  "R32_16": "2026-06-29T19:00:00.000Z",
+  "R32_2": "2026-06-28T23:00:00.000Z",
+  "R32_3": "2026-06-29T19:00:00.000Z",
+  "R32_4": "2026-06-29T21:00:00.000Z",
+  "R32_5": "2026-06-30T19:00:00.000Z",
+  "R32_6": "2026-06-30T21:00:00.000Z",
+  "R32_7": "2026-07-01T19:00:00.000Z",
+  "R32_8": "2026-07-01T21:00:00.000Z",
+  "R32_9": "2026-07-02T19:00:00.000Z",
+  "SF_1": "2026-07-14T21:00:00.000Z",
+  "SF_2": "2026-07-15T21:00:00.000Z",
+};
+const PODIUM_DEFAULT_DEADLINE = "2026-06-11T19:00:00.000Z";
+
 async function fbSet(id, data) {
   await setDoc(doc(db,"vm2026",id), data, {merge:true});
 }
@@ -233,10 +342,16 @@ export default function App() {
       onSnapshot(doc(db,"vm2026","participants"),s=>{if(s.exists())setParticipants(s.data());setLoading(false);},()=>setLoading(false)),
       onSnapshot(doc(db,"vm2026","passwords"),   s=>{if(s.exists())setPasswords(s.data());}),
       onSnapshot(doc(db,"vm2026","results"),     s=>{if(s.exists())setResults(s.data());}),
-      onSnapshot(doc(db,"vm2026","deadlines"),   s=>{if(s.exists())setDeadlines(s.data());}),
+      onSnapshot(doc(db,"vm2026","deadlines"),   s=>{
+        if(s.exists()&&Object.keys(s.data()).length>0) setDeadlines(s.data());
+        else setDeadlines(DEFAULT_DEADLINES);
+      }),
       onSnapshot(doc(db,"vm2026","thirdOverrides"),s=>{if(s.exists())setThirdOverrides(s.data());}),
       onSnapshot(doc(db,"vm2026","podiumTips"),   s=>{if(s.exists())setPodiumTips(s.data());}),
-      onSnapshot(doc(db,"vm2026","podiumDeadline"),s=>{if(s.exists()&&s.data().dl)setPodiumDeadline(s.data().dl);}),
+      onSnapshot(doc(db,"vm2026","podiumDeadline"),s=>{
+        if(s.exists()&&s.data().dl) setPodiumDeadline(s.data().dl);
+        else setPodiumDeadline(PODIUM_DEFAULT_DEADLINE);
+      }),
       onSnapshot(doc(db,"vm2026","podiumResults"), s=>{if(s.exists())setPodiumResults(s.data());}),
     ];
     return()=>unsubs.forEach(u=>u());
@@ -1285,7 +1400,8 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
           </p>
           {/* Bulk per omgang */}
           <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:10,padding:"16px",marginBottom:20}}>
-            <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:12}}>Satt deadline for hel omgang</p>
+            <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:4}}>Satt deadline for hel omgang</p>
+            <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:12}}>Forinstallda tider = forsta matchen i varje omgang. Andras vid behov.</p>
             {[1,2,3].map(r=>(
               <div key={r} style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap",marginBottom:10}}>
                 <span className="ss" style={{fontSize:13,fontWeight:700,color:"#f0e6d3",minWidth:80}}>Omgang {r}:</span>
