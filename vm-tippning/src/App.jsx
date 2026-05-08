@@ -320,6 +320,7 @@ export default function App() {
   const [results,        setResults]        = useState({});
   const [deadlines,      setDeadlines]      = useState({});
   const [thirdOverrides, setThirdOverrides] = useState({});
+  const [approved,       setApproved]       = useState({}); // { name: true/false }
   const [podiumTips,     setPodiumTips]     = useState({}); // { name: {winner,second,third} }
   const [podiumDeadline, setPodiumDeadline] = useState(null); // ISO string
   const [podiumResults,  setPodiumResults]  = useState({}); // {winner,second,third}
@@ -357,6 +358,7 @@ export default function App() {
         else setPodiumDeadline(PODIUM_DEFAULT_DEADLINE);
       }),
       onSnapshot(doc(db,"vm2026","podiumResults"), s=>{if(s.exists())setPodiumResults(s.data());}),
+      onSnapshot(doc(db,"vm2026","approved"),      s=>{if(s.exists())setApproved(s.data());}),
     ];
     return()=>unsubs.forEach(u=>u());
   },[]);
@@ -441,6 +443,10 @@ export default function App() {
     await fbSet("passwords",{...passwords,[name]:newPw});
     return true;
   }
+  async function toggleApproved(name) {
+    const upd={...approved,[name]:!approved[name]};
+    await fbSet("approved",upd);
+  }
   function loginAs(name, pw) {
     if(passwords[name]===pw) {
       setCurrentUser(name); setView("tips"); return true;
@@ -472,6 +478,7 @@ export default function App() {
   }
 
   const leaderboard=Object.entries(participants)
+    .filter(([name])=>approved[name])
     .map(([name,tips])=>({name,
       points:calcTotal(tips,results)+calcPodiumPoints(name),
       matchPoints:calcTotal(tips,results),
@@ -484,11 +491,20 @@ export default function App() {
   function countTipped(){
     return[...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{const t=userTips[m.id];return t&&t.home!=""&&t.away!="";}).length;
   }
-  const filteredMatches=tipPhase==="Grupp"?GROUP_MATCHES.filter(m=>m.group===tipGroup)
+  function sortByDeadline(matches) {
+    return [...matches].sort((a,b)=>{
+      const da=deadlines[a.id]||DEFAULT_DEADLINES[a.id]||"9999";
+      const db2=deadlines[b.id]||DEFAULT_DEADLINES[b.id]||"9999";
+      return da.localeCompare(db2);
+    });
+  }
+  const filteredMatches=sortByDeadline(
+    tipPhase==="Grupp"?GROUP_MATCHES.filter(m=>m.group===tipGroup)
     :tipPhase==="Omgang1"?getMatchesForRound(1)
     :tipPhase==="Omgang2"?getMatchesForRound(2)
     :tipPhase==="Omgang3"?getMatchesForRound(3)
-    :KNOCKOUT_ALL.filter(m=>m.phase===tipPhase);
+    :KNOCKOUT_ALL.filter(m=>m.phase===tipPhase)
+  );
 
   const bestThirds=getBestThirds(results);
 
@@ -520,10 +536,10 @@ export default function App() {
     .btn-ghost{background:transparent;border:1px solid rgba(245,200,66,0.35);color:#f5c842;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:14px;}
     .btn-ghost:hover{background:rgba(245,200,66,0.08);}
     .btn-danger{background:#b83232;color:#fff} .btn-danger:hover{background:#d44}
-    .tab{background:transparent;border:none;color:#a09070;padding:8px 14px;cursor:pointer;
+    .tab{background:transparent;border:none;color:#c8b89a;padding:8px 14px;cursor:pointer;
       font-size:13px;border-bottom:2px solid transparent;transition:all .15s;
       font-family:'Source Sans 3',sans-serif;font-weight:600}
-    .tab.active{color:#f5c842;border-bottom-color:#f5c842} .tab:hover:not(.active){color:#d4b870}
+    .tab.active{color:#f5c842;border-bottom-color:#f5c842} .tab:hover:not(.active){color:#f0d890}
     .mc{background:rgba(255,255,255,0.04);border:1px solid rgba(255,200,80,0.1);
       border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:8px}
     .mc.tipped{border-color:rgba(80,200,120,0.3);background:rgba(80,200,120,0.04)}
@@ -531,7 +547,7 @@ export default function App() {
     .nav-link{background:none;border:none;color:#a09070;cursor:pointer;font-size:13px;
       font-family:'Source Sans 3',sans-serif;padding:6px 11px;border-radius:6px;font-weight:600;transition:all .15s}
     .nav-link:hover{color:#f5c842;background:rgba(245,200,66,0.06)} .nav-link.active{color:#f5c842}
-    .gbtn{background:rgba(255,255,255,0.06);color:#a09070;border:none;border-radius:5px;
+    .gbtn{background:rgba(255,255,255,0.06);color:#c8b89a;border:none;border-radius:5px;
       padding:5px 11px;cursor:pointer;font-weight:700;font-size:12px;
       font-family:'Source Sans 3',sans-serif;transition:all .15s}
     .gbtn.active{background:#f5c842;color:#0a1628}
@@ -827,6 +843,7 @@ export default function App() {
             bulkDeadline={bulkDeadline} bulkRoundDeadline={bulkRoundDeadline} isLocked={isLocked} fmtDl={fmtDl}
             placements={placements} bestThirds={bestThirds} handleThirdOverride={handleThirdOverride}
             participants={participants} deleteParticipant={deleteParticipant} resetPassword={resetPassword}
+            approved={approved} toggleApproved={toggleApproved}
             podiumDeadline={podiumDeadline} podiumResults={podiumResults} podiumLocked={podiumLocked}
             savePodiumDeadline={savePodiumDeadline} savePodiumResults={savePodiumResults}
             podiumTips={podiumTips}
@@ -1311,6 +1328,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
   filteredMatches,getDisplay,getTeams,handleResult,setDeadline,rmDeadline,
   bulkDeadline,bulkRoundDeadline,isLocked,fmtDl,
   placements,bestThirds,handleThirdOverride,participants,deleteParticipant,resetPassword,
+  approved,toggleApproved,
   podiumDeadline,podiumResults,podiumLocked,savePodiumDeadline,savePodiumResults,podiumTips}) {
 
   const [pdlInput, setPdlInput] = useState(podiumDeadline?new Date(podiumDeadline).toISOString().slice(0,16):"");
@@ -1551,14 +1569,14 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
       )}
 
       {adminTab==="participants"&&(
-        <AdminParticipants participants={participants} deleteParticipant={deleteParticipant} resetPassword={resetPassword}/>
+        <AdminParticipants participants={participants} deleteParticipant={deleteParticipant} resetPassword={resetPassword} approved={approved} toggleApproved={toggleApproved}/>
       )}
     </div>
   );
 }
 
 // ADMIN DELTAGARE
-function AdminParticipants({participants, deleteParticipant, resetPassword}) {
+function AdminParticipants({participants, deleteParticipant, resetPassword, approved, toggleApproved}) {
   const [resetName, setResetName] = useState(null);
   const [newPw, setNewPw] = useState("");
   const [newPw2, setNewPw2] = useState("");
