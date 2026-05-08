@@ -660,7 +660,7 @@ export default function App() {
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>&#127942;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Prispall-tips</strong> - Tippa segrare (20p), två (15p) och trea (10p) innan turneringen börjar. Måste låmpas innan 11 juni kl 21:00.
+                    <strong style={{color:"#f0e6d3"}}>Prispall-tips</strong> - Innan turneringen börjar tippar du vem som vinner VM-guldet (20p), vem som är tvåa i finalen (15p) och vem som vinner bronsmatchen (10p). Måste lämnas innan 11 juni kl 21:00.
                   </p>
                 </div>
               </div>
