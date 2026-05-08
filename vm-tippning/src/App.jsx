@@ -368,9 +368,10 @@ export default function App() {
     const {home,away}=getTeams(m.id);
     return {home:home?dn(home):labelFromKey(m.homeKey),away:away?dn(away):labelFromKey(m.awayKey)};
   }
-  function isLocked(mid) { const dl=deadlines[mid]; return dl&&now>=new Date(dl).getTime(); }
+  function getEffectiveDl(mid) { return deadlines[mid]||DEFAULT_DEADLINES[mid]||null; }
+  function isLocked(mid) { const dl=getEffectiveDl(mid); return dl&&now>=new Date(dl).getTime(); }
   function fmtDl(mid) {
-    const dl=deadlines[mid]; if(!dl) return null;
+    const dl=getEffectiveDl(mid); if(!dl) return null;
     return new Date(dl).toLocaleString("sv-SE",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
   }
 
@@ -382,9 +383,10 @@ export default function App() {
       // Befintlig deltagare - logga in
       if(passwords[name]!==pwInput) { setLoginError("Fel losenord."); return; }
     } else {
-      // Ny deltagare - registrera
-      if(!newPwInput) { setLoginError("Bekrafta ditt losenord."); return; }
-      if(pwInput!==newPwInput) { setLoginError("Losenorden matchar inte."); return; }
+      // Kolla att namnet inte redan finns (case-insensitive)
+      const nameTaken = Object.keys(participants).some(n=>n.toLowerCase()===name.toLowerCase());
+      if(nameTaken) { setLoginError("Namnet ar redan upptaget. Valj ett annat."); return; }
+      // Ny deltagare - registrera (ett losenord racker)
       await fbSet("participants",{...participants,[name]:{}});
       await fbSet("passwords",{...passwords,[name]:pwInput});
     }
@@ -611,24 +613,34 @@ export default function App() {
               </div>
             ):(
               <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.15)",borderRadius:14,padding:"26px 22px",maxWidth:400,margin:"0 auto 20px"}}>
-                <h2 className="pf" style={{fontSize:19,color:"#f5c842",marginBottom:6,fontWeight:700}}>Logga in eller registrera dig</h2>
-                <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:16}}>Ny deltagare? Ange namn + losenord (2 ggr). Befintlig? Ange ditt namn och losenord.</p>
+                <h2 className="pf" style={{fontSize:19,color:"#f5c842",marginBottom:6,fontWeight:700}}>
+                  {nameInput&&participants[nameInput]?"Logga in":"Registrera dig"}
+                </h2>
+                <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:16}}>
+                  {nameInput&&participants[nameInput]
+                    ?"Ange ditt losenord for att logga in och redigera dina tips."
+                    :"Ange ditt namn och valj ett losenord."}
+                </p>
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
                   <input type="text" placeholder="Ditt namn" value={nameInput}
-                    onChange={e=>{setNameInput(e.target.value);setLoginError("");}} style={{width:"100%"}}/>
+                    onChange={e=>{setNameInput(e.target.value);setLoginError("");}}
+                    style={{width:"100%"}}/>
+                  {nameInput&&!participants[nameInput]&&Object.keys(participants).map(n=>n.toLowerCase()).includes(nameInput.trim().toLowerCase())&&nameInput.trim()!==""&&(
+                    <p className="err">Namnet "{nameInput.trim()}" ar redan upptaget. Valj ett annat namn.</p>
+                  )}
                   <input type="password" placeholder="Losenord" value={pwInput}
-                    onChange={e=>{setPwInput(e.target.value);setLoginError("");}} style={{width:"100%"}}/>
-                  {nameInput&&!participants[nameInput]&&(
-                    <input type="password" placeholder="Bekrafta losenord (ny deltagare)" value={newPwInput}
-                      onChange={e=>{setNewPwInput(e.target.value);setLoginError("");}} style={{width:"100%"}}/>
-                  )}
-                  {nameInput&&participants[nameInput]&&(
-                    <p className="ss" style={{fontSize:11,color:"#a09070"}}>Befintlig deltagare - ange ditt losenord for att logga in och redigera dina tips.</p>
-                  )}
+                    onChange={e=>{setPwInput(e.target.value);setLoginError("");}}
+                    onKeyDown={e=>e.key==="Enter"&&handleJoin()}
+                    style={{width:"100%"}}/>
                   {loginError&&<p className="err">{loginError}</p>}
                   <button className="btn" onClick={handleJoin} style={{width:"100%"}}>
                     {nameInput&&participants[nameInput]?"Logga in":"Registrera och tippa!"}
                   </button>
+                  {!nameInput||!participants[nameInput]?(
+                    <p className="ss" style={{fontSize:11,color:"#60504a",textAlign:"center"}}>
+                      Redan registrerad? Ga till <button onClick={()=>setView("participants")} style={{background:"none",border:"none",color:"#f5c842",cursor:"pointer",fontSize:11,fontFamily:"'Source Sans 3',sans-serif",textDecoration:"underline",padding:0}}>Deltagare</button> och klicka Redigera.
+                    </p>
+                  ):null}
                 </div>
               </div>
             )}
