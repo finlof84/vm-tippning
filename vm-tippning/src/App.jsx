@@ -374,7 +374,7 @@ export default function App() {
   if(loading) return(
     <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",
       background:"#0a1628",color:"#f5c842",fontFamily:"Georgia,serif",fontSize:20}}>
-      Laddar BKS VM-tipp 2026...
+      Laddar P14 HIKs VM-tipp 2026...
     </div>
   );
 
@@ -441,7 +441,7 @@ export default function App() {
         <div style={{maxWidth:1000,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:56}}>
           <div style={{display:"flex",alignItems:"center",gap:9}}>
             <span style={{fontSize:22}}>&#9917;</span>
-            <span className="pf" style={{fontSize:16,color:"#f5c842",fontWeight:900}}>BKS VM-tipp 2026</span>
+            <span className="pf" style={{fontSize:16,color:"#f5c842",fontWeight:900}}>P14 HIKs VM-tipp 2026</span>
           </div>
           <nav style={{display:"flex",gap:1,flexWrap:"wrap"}}>
             <button className={"nav-link"+(view==="start"?" active":"")} onClick={()=>setView("start")}>Hem</button>
@@ -461,8 +461,8 @@ export default function App() {
         {/* START / LOGIN */}
         {view==="start"&&(
           <div style={{textAlign:"center",paddingTop:28}}>
-            <div style={{fontSize:56,marginBottom:14}}>&#127942;</div>
-            <h1 className="pf" style={{fontSize:42,color:"#f5c842",fontWeight:900,lineHeight:1.1,marginBottom:9}}>BKS VM-tipp 2026</h1>
+            <img src="/HIK.png" alt="Hovslätts IK" style={{width:140,height:140,objectFit:"contain",marginBottom:16,filter:"drop-shadow(0 0 20px rgba(245,200,66,0.3))"}}/>
+            <h1 className="pf" style={{fontSize:38,color:"#f5c842",fontWeight:900,lineHeight:1.1,marginBottom:6}}>P14 HIKs VM-tipp 2026</h1>
             <p className="ss" style={{fontSize:17,color:"#a09070",marginBottom:5}}>USA &middot; Mexiko &middot; Kanada</p>
             <p className="ss" style={{fontSize:13,color:"#60504a",marginBottom:40}}>11 juni - 19 juli 2026</p>
 
@@ -1124,7 +1124,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
 
   return(
     <div>
-      <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:22}}>Admin - BKS VM-tipp 2026</h2>
+      <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:22}}>Admin - P14 HIKs VM-tipp 2026</h2>
       <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.08)",marginBottom:22,flexWrap:"wrap"}}>
         {[["results","Resultat"],["thirds","Treornas matcher"],["deadlines","Deadlines"],["podium","Prispall"],["participants","Deltagare"]].map(([k,l])=>(
           <button key={k} className={"tab"+(adminTab===k?" active":"")} onClick={()=>setAdminTab(k)}>{l}</button>
