@@ -461,7 +461,11 @@ export default function App() {
         {/* START / LOGIN */}
         {view==="start"&&(
           <div style={{textAlign:"center",paddingTop:28}}>
-            <img src="/HIK.png" alt="Hovslätts IK" style={{width:140,height:140,objectFit:"contain",marginBottom:16,filter:"drop-shadow(0 0 20px rgba(245,200,66,0.3))"}}/>
+            <img src="/HIK.png" alt="Hovslatts IK" style={{
+              width:180,height:180,objectFit:"contain",marginBottom:20,
+              mixBlendMode:"screen",
+              filter:"drop-shadow(0 0 24px rgba(245,200,66,0.25))"
+            }}/>
             <h1 className="pf" style={{fontSize:38,color:"#f5c842",fontWeight:900,lineHeight:1.1,marginBottom:6}}>P14 HIKs VM-tipp 2026</h1>
             <p className="ss" style={{fontSize:17,color:"#a09070",marginBottom:5}}>USA &middot; Mexiko &middot; Kanada</p>
             <p className="ss" style={{fontSize:13,color:"#60504a",marginBottom:40}}>11 juni - 19 juli 2026</p>
