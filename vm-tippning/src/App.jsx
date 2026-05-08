@@ -360,7 +360,7 @@ export default function App() {
       }),
       onSnapshot(doc(db,"vm2026","podiumResults"), s=>{if(s.exists())setPodiumResults(s.data());}),
       onSnapshot(doc(db,"vm2026","approved"),      s=>{if(s.exists())setApproved(s.data());}),
-      onSnapshot(doc(db,"vm2026","siteInfo"),      s=>{if(s.exists())setSiteInfo(s.data());}),
+      onSnapshot(doc(db,"vm2026","siteInfo"),      s=>{setSiteInfo(s.exists()?s.data():{});}),
     ];
     return()=>unsubs.forEach(u=>u());
   },[]);
@@ -613,17 +613,41 @@ export default function App() {
             <p className="ss" style={{fontSize:17,color:"#a09070",marginBottom:5}}>USA &middot; Mexiko &middot; Kanada</p>
             <p className="ss" style={{fontSize:13,color:"#60504a",marginBottom:40}}>11 juni - 19 juli 2026</p>
 
-            <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:44}}>
-              {[
-                {label:"104 matcher",sub:"72 grupp + 32 slutspel"},
-                {label:Object.keys(participants).length+" deltagare",sub:"registrerade tippare"},
-                {label:"3p / 1p / 0p",sub:"ratt / ratt utfall / fel"},
-              ].map(c=>(
-                <div key={c.label} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:12,padding:"16px 24px",minWidth:140}}>
-                  <div className="pf" style={{fontSize:16,color:"#f5c842",fontWeight:700,marginBottom:4}}>{c.label}</div>
-                  <div className="ss" style={{fontSize:11,color:"#60504a"}}>{c.sub}</div>
+            <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:20}}>
+              <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:12,padding:"16px 28px",minWidth:140,textAlign:"center"}}>
+                <div className="pf" style={{fontSize:20,color:"#f5c842",fontWeight:700,marginBottom:2}}>{Object.keys(participants).length}</div>
+                <div className="ss" style={{fontSize:12,color:"#60504a"}}>registrerade tippare</div>
+              </div>
+            </div>
+
+            <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:14,padding:"20px 28px",maxWidth:560,margin:"0 auto 36px",textAlign:"left"}}>
+              <p className="pf" style={{fontSize:15,color:"#f5c842",fontWeight:700,marginBottom:14,textAlign:"center"}}>Hur fungerar tippningen?</p>
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:16,flexShrink:0}}>&#9917;</span>
+                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
+                    <strong style={{color:"#f0e6d3"}}>Tippa alla 104 matcher</strong> - gruppspel och slutspel. Ange hur manga mal du tror varje lag gor.
+                  </p>
                 </div>
-              ))}
+                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:16,flexShrink:0}}>&#128274;</span>
+                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
+                    <strong style={{color:"#f0e6d3"}}>Deadlines</strong> - Omgang 1 lases 11 juni kl 21:00. Omgang 2 lases 18 juni kl 19:00. Omgang 3 lases 24 juni kl 21:00. Slutspelsmatcher lases individuellt vid matchstart.
+                  </p>
+                </div>
+                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:16,flexShrink:0}}>&#127941;</span>
+                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
+                    <strong style={{color:"#f0e6d3"}}>Poang per match</strong> - 3p for exakt ratt resultat &bull; 1p for ratt utfall (vinst/oavgjort/forlust) &bull; 0p om fel.
+                  </p>
+                </div>
+                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:16,flexShrink:0}}>&#127942;</span>
+                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
+                    <strong style={{color:"#f0e6d3"}}>Prispall-tips</strong> - Tippa segrare (20p), tvaa (15p) och trea (10p) innan turneringen borjar. Maste lampas innan 11 juni kl 21:00.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* MEDDELANDE FRAN ADMIN */}
