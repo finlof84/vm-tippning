@@ -613,16 +613,15 @@ export default function App() {
             <p className="ss" style={{fontSize:17,color:"#a09070",marginBottom:5}}>USA &middot; Mexiko &middot; Kanada</p>
             <p className="ss" style={{fontSize:13,color:"#60504a",marginBottom:40}}>11 juni - 19 juli 2026</p>
 
-            <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:20}}>
-              <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:12,padding:"16px 28px",minWidth:140,textAlign:"center"}}>
-                <div className="pf" style={{fontSize:20,color:"#f5c842",fontWeight:700,marginBottom:2}}>{Object.keys(participants).length}</div>
-                <div className="ss" style={{fontSize:12,color:"#60504a"}}>registrerade tippare</div>
-              </div>
-            </div>
-
-            <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:14,padding:"20px 28px",maxWidth:560,margin:"0 auto 36px",textAlign:"left"}}>
+            <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:14,padding:"20px 28px",maxWidth:560,margin:"0 auto 20px",textAlign:"left"}}>
               <p className="pf" style={{fontSize:15,color:"#f5c842",fontWeight:700,marginBottom:14,textAlign:"center"}}>Hur fungerar tippningen?</p>
               <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:16,flexShrink:0}}>&#128100;</span>
+                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
+                    <strong style={{color:"#f0e6d3"}}>Registrera dig och betala</strong> - Skapa din anvandare och swisha xx kr till 0700-000000. Du syns pa topplistan nar admin godkant din betalning.
+                  </p>
+                </div>
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>&#9917;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
@@ -650,18 +649,27 @@ export default function App() {
               </div>
             </div>
 
+            <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:20}}>
+              <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:12,padding:"14px 28px",textAlign:"center"}}>
+                <div className="pf" style={{fontSize:20,color:"#f5c842",fontWeight:700,marginBottom:2}}>{Object.keys(participants).length}</div>
+                <div className="ss" style={{fontSize:12,color:"#60504a"}}>registrerade tippare</div>
+              </div>
+            </div>
+
+            {/* VINSTPOTT - hogst upp */}
+            {siteInfo.prizePot&&(
+              <div style={{background:"rgba(80,200,120,0.08)",border:"1px solid rgba(80,200,120,0.3)",borderRadius:12,padding:"16px 24px",maxWidth:500,margin:"0 auto 16px",textAlign:"center"}}>
+                <p className="ss" style={{fontSize:11,color:"#50c878",fontWeight:700,marginBottom:6,textTransform:"uppercase",letterSpacing:.8}}>Vinstpott</p>
+                <p className="pf" style={{fontSize:32,color:"#50c878",fontWeight:900}}>{siteInfo.prizePot}</p>
+                <p className="ss" style={{fontSize:11,color:"#60504a",marginTop:6}}>60% till ettan &bull; 30% till tvaan &bull; 10% till trean</p>
+              </div>
+            )}
+
             {/* MEDDELANDE FRAN ADMIN */}
             {siteInfo.message&&(
               <div style={{background:"rgba(245,200,66,0.08)",border:"1px solid rgba(245,200,66,0.25)",borderRadius:12,padding:"14px 20px",maxWidth:500,margin:"0 auto 16px",textAlign:"left"}}>
                 <p className="ss" style={{fontSize:11,color:"#f5c842",fontWeight:700,marginBottom:4,textTransform:"uppercase",letterSpacing:.6}}>Meddelande</p>
                 <p className="ss" style={{fontSize:14,color:"#f0e6d3",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{siteInfo.message}</p>
-              </div>
-            )}
-            {/* VINSTPOTT */}
-            {siteInfo.prizePot&&(
-              <div style={{background:"rgba(80,200,120,0.08)",border:"1px solid rgba(80,200,120,0.25)",borderRadius:12,padding:"14px 20px",maxWidth:500,margin:"0 auto 16px",textAlign:"center"}}>
-                <p className="ss" style={{fontSize:11,color:"#50c878",fontWeight:700,marginBottom:4,textTransform:"uppercase",letterSpacing:.6}}>Vinstpott</p>
-                <p className="pf" style={{fontSize:28,color:"#50c878",fontWeight:900}}>{siteInfo.prizePot}</p>
               </div>
             )}
 
