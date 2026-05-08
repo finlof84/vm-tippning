@@ -321,6 +321,7 @@ export default function App() {
   const [deadlines,      setDeadlines]      = useState({});
   const [thirdOverrides, setThirdOverrides] = useState({});
   const [approved,       setApproved]       = useState({}); // { name: true/false }
+  const [siteInfo,       setSiteInfo]       = useState({}); // { message, prizePot }
   const [podiumTips,     setPodiumTips]     = useState({}); // { name: {winner,second,third} }
   const [podiumDeadline, setPodiumDeadline] = useState(null); // ISO string
   const [podiumResults,  setPodiumResults]  = useState({}); // {winner,second,third}
@@ -359,6 +360,7 @@ export default function App() {
       }),
       onSnapshot(doc(db,"vm2026","podiumResults"), s=>{if(s.exists())setPodiumResults(s.data());}),
       onSnapshot(doc(db,"vm2026","approved"),      s=>{if(s.exists())setApproved(s.data());}),
+      onSnapshot(doc(db,"vm2026","siteInfo"),      s=>{if(s.exists())setSiteInfo(s.data());}),
     ];
     return()=>unsubs.forEach(u=>u());
   },[]);
@@ -442,6 +444,11 @@ export default function App() {
     if(!newPw||newPw.length<2) return false;
     await fbSet("passwords",{...passwords,[name]:newPw});
     return true;
+  }
+  async function saveSiteInfo(field, val) {
+    const upd={...siteInfo,[field]:val};
+    await setDoc(doc(db,"vm2026","siteInfo"),upd);
+    setSiteInfo(upd);
   }
   async function toggleApproved(name) {
     const upd={...approved,[name]:!approved[name]};
@@ -618,6 +625,21 @@ export default function App() {
                 </div>
               ))}
             </div>
+
+            {/* MEDDELANDE FRAN ADMIN */}
+            {siteInfo.message&&(
+              <div style={{background:"rgba(245,200,66,0.08)",border:"1px solid rgba(245,200,66,0.25)",borderRadius:12,padding:"14px 20px",maxWidth:500,margin:"0 auto 16px",textAlign:"left"}}>
+                <p className="ss" style={{fontSize:11,color:"#f5c842",fontWeight:700,marginBottom:4,textTransform:"uppercase",letterSpacing:.6}}>Meddelande</p>
+                <p className="ss" style={{fontSize:14,color:"#f0e6d3",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{siteInfo.message}</p>
+              </div>
+            )}
+            {/* VINSTPOTT */}
+            {siteInfo.prizePot&&(
+              <div style={{background:"rgba(80,200,120,0.08)",border:"1px solid rgba(80,200,120,0.25)",borderRadius:12,padding:"14px 20px",maxWidth:500,margin:"0 auto 16px",textAlign:"center"}}>
+                <p className="ss" style={{fontSize:11,color:"#50c878",fontWeight:700,marginBottom:4,textTransform:"uppercase",letterSpacing:.6}}>Vinstpott</p>
+                <p className="pf" style={{fontSize:28,color:"#50c878",fontWeight:900}}>{siteInfo.prizePot}</p>
+              </div>
+            )}
 
             {currentUser?(
               <div style={{background:"rgba(80,200,120,0.08)",border:"1px solid rgba(80,200,120,0.25)",borderRadius:14,padding:"20px 24px",maxWidth:400,margin:"0 auto 20px"}}>
@@ -847,6 +869,7 @@ export default function App() {
             podiumDeadline={podiumDeadline} podiumResults={podiumResults} podiumLocked={podiumLocked}
             savePodiumDeadline={savePodiumDeadline} savePodiumResults={savePodiumResults}
             podiumTips={podiumTips}
+            siteInfo={siteInfo} saveSiteInfo={saveSiteInfo}
           />
         )}
 
@@ -1329,7 +1352,8 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
   bulkDeadline,bulkRoundDeadline,isLocked,fmtDl,
   placements,bestThirds,handleThirdOverride,participants,deleteParticipant,resetPassword,
   approved,toggleApproved,
-  podiumDeadline,podiumResults,podiumLocked,savePodiumDeadline,savePodiumResults,podiumTips}) {
+  podiumDeadline,podiumResults,podiumLocked,savePodiumDeadline,savePodiumResults,podiumTips,
+  siteInfo,saveSiteInfo}) {
 
   const [pdlInput, setPdlInput] = useState(podiumDeadline?new Date(podiumDeadline).toISOString().slice(0,16):"");
   const allTeams = Object.values(GROUPS).flat().sort((a,b)=>a.localeCompare(b));
@@ -1338,7 +1362,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
     <div>
       <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:22}}>Admin - P14 HIKs VM-tipp 2026</h2>
       <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.08)",marginBottom:22,flexWrap:"wrap"}}>
-        {[["results","Resultat"],["thirds","Treornas matcher"],["deadlines","Deadlines"],["podium","Prispall"],["participants","Deltagare"]].map(([k,l])=>(
+        {[["results","Resultat"],["thirds","Treornas matcher"],["deadlines","Deadlines"],["podium","Prispall"],["participants","Deltagare"],["siteinfo","Startsida"]].map(([k,l])=>(
           <button key={k} className={"tab"+(adminTab===k?" active":"")} onClick={()=>setAdminTab(k)}>{l}</button>
         ))}
       </div>
@@ -1571,6 +1595,54 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
       {adminTab==="participants"&&(
         <AdminParticipants participants={participants} deleteParticipant={deleteParticipant} resetPassword={resetPassword} approved={approved} toggleApproved={toggleApproved}/>
       )}
+
+      {adminTab==="siteinfo"&&(
+        <SiteInfoAdmin siteInfo={siteInfo} saveSiteInfo={saveSiteInfo}/>
+      )}
+    </div>
+  );
+}
+
+// STARTSIDA ADMIN
+function SiteInfoAdmin({siteInfo, saveSiteInfo}) {
+  const [msg, setMsg] = useState(siteInfo.message||"");
+  const [pot, setPot] = useState(siteInfo.prizePot||"");
+  const [saved, setSaved] = useState("");
+
+  async function handleSave() {
+    await saveSiteInfo("message", msg);
+    await saveSiteInfo("prizePot", pot);
+    setSaved("Sparat!"); setTimeout(()=>setSaved(""),2000);
+  }
+
+  return(
+    <div>
+      <h3 className="pf" style={{fontSize:18,color:"#f5c842",fontWeight:700,marginBottom:6}}>Startsida - meddelande och vinstpott</h3>
+      <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:24,lineHeight:1.7}}>
+        Meddelandet och vinstpotten visas pa startsidan for alla besokare. Lamma blankt for att doljas.
+      </p>
+      <div style={{display:"flex",flexDirection:"column",gap:16,maxWidth:560}}>
+        <div>
+          <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:8}}>Meddelande</p>
+          <textarea value={msg} onChange={e=>setMsg(e.target.value)}
+            placeholder="Skriv ett meddelande till deltagarna, t.ex. info om regler, deadlines etc."
+            style={{width:"100%",minHeight:100,background:"rgba(255,255,255,0.07)",
+              border:"1px solid rgba(255,200,80,0.25)",borderRadius:6,color:"#f0e6d3",
+              padding:"10px 12px",fontSize:14,fontFamily:"'Source Sans 3',sans-serif",
+              outline:"none",resize:"vertical",lineHeight:1.6}}/>
+          <p className="ss" style={{fontSize:11,color:"#60504a",marginTop:4}}>Visas i en gul ruta pa startsidan. Lamma blankt for att doljas.</p>
+        </div>
+        <div>
+          <p className="ss" style={{fontSize:13,fontWeight:700,color:"#50c878",marginBottom:8}}>Vinstpott</p>
+          <input type="text" placeholder="T.ex. 500 kr eller En runda pa krogen!" value={pot}
+            onChange={e=>setPot(e.target.value)} style={{width:"100%"}}/>
+          <p className="ss" style={{fontSize:11,color:"#60504a",marginTop:4}}>Visas i en gron ruta pa startsidan. Lamma blankt for att doljas.</p>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <button className="btn" onClick={handleSave}>Spara</button>
+          {saved&&<span className="ss" style={{fontSize:13,color:"#50c878"}}>{saved}</span>}
+        </div>
+      </div>
     </div>
   );
 }
@@ -1607,8 +1679,15 @@ function AdminParticipants({participants, deleteParticipant, resetPassword, appr
             const tipped=[...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{const t=tips[m.id];return t&&t.home!=""&&t.away!="";}).length;
             const isResetting=resetName===name;
             return(
-              <div key={name} style={{background:"rgba(255,255,255,0.04)",border:"1px solid "+(isResetting?"rgba(245,200,66,0.3)":"rgba(255,255,255,0.07)"),borderRadius:9,padding:"12px 16px"}}>
-                <div style={{display:"flex",alignItems:"center",gap:12}}>
+              <div key={name} style={{background:"rgba(255,255,255,0.04)",border:"1px solid "+(isResetting?"rgba(245,200,66,0.3)":approved[name]?"rgba(80,200,120,0.25)":"rgba(255,255,255,0.07)"),borderRadius:9,padding:"12px 16px"}}>
+                <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+                  <label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",background:approved[name]?"rgba(80,200,120,0.1)":"rgba(255,255,255,0.05)",border:"1px solid "+(approved[name]?"rgba(80,200,120,0.3)":"rgba(255,255,255,0.1)"),borderRadius:6,padding:"6px 12px"}}>
+                    <input type="checkbox" checked={!!approved[name]} onChange={()=>toggleApproved(name)}
+                      style={{width:16,height:16,accentColor:"#50c878",cursor:"pointer"}}/>
+                    <span className="ss" style={{fontSize:12,color:approved[name]?"#50c878":"#a09070",fontWeight:700,whiteSpace:"nowrap"}}>
+                      {approved[name]?"Godkand":"Ej godkand"}
+                    </span>
+                  </label>
                   <div style={{flex:1}}>
                     <div className="pf" style={{fontSize:15,fontWeight:700,color:"#f0e6d3"}}>{name}</div>
                     <div className="ss" style={{fontSize:11,color:"#60504a",marginTop:2}}>{tipped} matcher tippade</div>
