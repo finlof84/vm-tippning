@@ -625,7 +625,7 @@ export default function App() {
             {/* MEDDELANDE FRAN ADMIN */}
             {siteInfo.message&&(
               <div style={{background:"rgba(245,200,66,0.08)",border:"1px solid rgba(245,200,66,0.25)",borderRadius:12,padding:"14px 20px",maxWidth:500,margin:"0 auto 16px",textAlign:"left"}}>
-                <p className="ss" style={{fontSize:11,color:"#f5c842",fontWeight:700,marginBottom:4,textTransform:"uppercase",letterSpacing:.6}}>Meddelande</p>
+                <p className="ss" style={{fontSize:11,color:"#f5c842",fontWeight:700,marginBottom:4,textTransform:"uppercase",letterSpacing:.6}}>Meddelande fr&aring;n Admin</p>
                 <p className="ss" style={{fontSize:14,color:"#f0e6d3",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{siteInfo.message}</p>
               </div>
             )}
@@ -1646,7 +1646,7 @@ function SiteInfoAdmin({siteInfo, saveSiteInfo}) {
       </p>
       <div style={{display:"flex",flexDirection:"column",gap:16,maxWidth:560}}>
         <div>
-          <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:8}}>Meddelande</p>
+          <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:8}}>Meddelande fr&aring;n Admin</p>
           <textarea value={msg} onChange={e=>setMsg(e.target.value)}
             placeholder="Skriv ett meddelande till deltagarna, t.ex. info om regler, deadlines etc."
             style={{width:"100%",minHeight:100,background:"rgba(255,255,255,0.07)",
