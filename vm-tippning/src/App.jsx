@@ -445,8 +445,8 @@ export default function App() {
     await fbSet("passwords",{...passwords,[name]:newPw});
     return true;
   }
-  async function saveSiteInfo(field, val) {
-    const upd={...siteInfo,[field]:val};
+  async function saveSiteInfo(updates) {
+    const upd={...siteInfo,...updates};
     await setDoc(doc(db,"vm2026","siteInfo"),upd);
     setSiteInfo(upd);
   }
@@ -1629,11 +1629,12 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
 function SiteInfoAdmin({siteInfo, saveSiteInfo}) {
   const [msg, setMsg] = useState(siteInfo.message||"");
   const [pot, setPot] = useState(siteInfo.prizePot||"");
+  // Sync with Firebase data when it loads
+  useEffect(()=>{ setMsg(siteInfo.message||""); setPot(siteInfo.prizePot||""); },[siteInfo.message,siteInfo.prizePot]);
   const [saved, setSaved] = useState("");
 
   async function handleSave() {
-    await saveSiteInfo("message", msg);
-    await saveSiteInfo("prizePot", pot);
+    await saveSiteInfo({message: msg, prizePot: pot});
     setSaved("Sparat!"); setTimeout(()=>setSaved(""),2000);
   }
 
