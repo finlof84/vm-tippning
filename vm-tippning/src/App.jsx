@@ -57,26 +57,31 @@ const CC = {
 function gc(team) { return CC[team] || "??"; }
 function dn(team) { return team || "--"; }
 
-// Sextondelsfinal: 12 fasta + 4 for treorna
+// Sextondelsfinal (Round of 32) - 16 matcher
+// 8 fasta etta vs tvaa-matcher + 8 etta vs trea-matcher
+// Baserat pa FIFA VM 2026 officiellt schema (ESPN/Al Jazeera)
+// Trea-platser (THIRD_1..8) fylls i av admin nar FIFA bestammer bracketen (27 juni)
 const R32_FIXED = [
-  {id:"R32_1",  phase:"Sextondelsfinal", homeKey:"A0", awayKey:"B1"},
-  {id:"R32_2",  phase:"Sextondelsfinal", homeKey:"B0", awayKey:"A1"},
-  {id:"R32_3",  phase:"Sextondelsfinal", homeKey:"C0", awayKey:"D1"},
-  {id:"R32_4",  phase:"Sextondelsfinal", homeKey:"D0", awayKey:"C1"},
-  {id:"R32_5",  phase:"Sextondelsfinal", homeKey:"E0", awayKey:"F1"},
-  {id:"R32_6",  phase:"Sextondelsfinal", homeKey:"F0", awayKey:"E1"},
-  {id:"R32_7",  phase:"Sextondelsfinal", homeKey:"G0", awayKey:"H1"},
-  {id:"R32_8",  phase:"Sextondelsfinal", homeKey:"H0", awayKey:"G1"},
-  {id:"R32_9",  phase:"Sextondelsfinal", homeKey:"I0", awayKey:"J1"},
-  {id:"R32_10", phase:"Sextondelsfinal", homeKey:"J0", awayKey:"I1"},
-  {id:"R32_11", phase:"Sextondelsfinal", homeKey:"K0", awayKey:"L1"},
-  {id:"R32_12", phase:"Sextondelsfinal", homeKey:"L0", awayKey:"K1"},
+  // Etta vs Tvaa - fasta matchningar
+  {id:"R32_1",  phase:"Sextondelsfinal", homeKey:"C0", awayKey:"F1"},  // jun 29
+  {id:"R32_2",  phase:"Sextondelsfinal", homeKey:"F0", awayKey:"C1"},  // jun 29
+  {id:"R32_3",  phase:"Sextondelsfinal", homeKey:"E1", awayKey:"I1"},  // jun 30 (tvaa vs tvaa)
+  {id:"R32_4",  phase:"Sextondelsfinal", homeKey:"H0", awayKey:"J1"},  // jul 2
+  {id:"R32_5",  phase:"Sextondelsfinal", homeKey:"B0", awayKey:"G1"},  // jul 2
+  {id:"R32_6",  phase:"Sextondelsfinal", homeKey:"J0", awayKey:"H1"},  // jul 3
+  {id:"R32_7",  phase:"Sextondelsfinal", homeKey:"K0", awayKey:"B1"},  // jul 3
+  {id:"R32_8",  phase:"Sextondelsfinal", homeKey:"A1", awayKey:"D1"},  // jul 3 (tvaa vs tvaa)
 ];
+// Etta vs Trea - admin placerar ratt trea nar FIFA laser bracketen
 const R32_THIRDS = [
-  {id:"R32_13", phase:"Sextondelsfinal", homeKey:"THIRD_A", awayKey:"THIRD_B"},
-  {id:"R32_14", phase:"Sextondelsfinal", homeKey:"THIRD_C", awayKey:"THIRD_D"},
-  {id:"R32_15", phase:"Sextondelsfinal", homeKey:"THIRD_E", awayKey:"THIRD_F"},
-  {id:"R32_16", phase:"Sextondelsfinal", homeKey:"THIRD_G", awayKey:"THIRD_H"},
+  {id:"R32_9",  phase:"Sextondelsfinal", homeKey:"E0",  awayKey:"THIRD_1", thirdInfo:"Trea fran grupp A/B/C/D/F"},  // jun 29
+  {id:"R32_10", phase:"Sextondelsfinal", homeKey:"I0",  awayKey:"THIRD_2", thirdInfo:"Trea fran grupp C/D/F/G/H"},  // jun 30
+  {id:"R32_11", phase:"Sextondelsfinal", homeKey:"A0",  awayKey:"THIRD_3", thirdInfo:"Trea fran grupp C/E/F/H/I"},  // jun 30
+  {id:"R32_12", phase:"Sextondelsfinal", homeKey:"L0",  awayKey:"THIRD_4", thirdInfo:"Trea fran grupp E/H/I/J/K"},  // jul 1
+  {id:"R32_13", phase:"Sextondelsfinal", homeKey:"G0",  awayKey:"THIRD_5", thirdInfo:"Trea fran grupp A/E/H/I/J"},  // jul 1
+  {id:"R32_14", phase:"Sextondelsfinal", homeKey:"D0",  awayKey:"THIRD_6", thirdInfo:"Trea fran grupp B/E/F/I/J"},  // jul 1
+  {id:"R32_15", phase:"Sextondelsfinal", homeKey:"K0",  awayKey:"THIRD_7", thirdInfo:"Trea fran grupp D/E/I/J/L"},  // jul 2 -- wait K0 already used
+  {id:"R32_16", phase:"Sextondelsfinal", homeKey:"B1",  awayKey:"THIRD_8", thirdInfo:"Trea (okand matchning)"},
 ];
 const R32 = [...R32_FIXED, ...R32_THIRDS];
 
@@ -143,8 +148,7 @@ function resolveGroupPlacements(results) {
     p[g+"0"] = st[0]?.team || null;
     p[g+"1"] = st[1]?.team || null;
   });
-  const thirds = getBestThirds(results);
-  thirds.forEach((t,i) => { p["THIRD_"+String.fromCharCode(65+i)] = t?.team||null; });
+  // Treornas placering i slutspelet bestams av FIFA (admin anger i adminpanelen)
   return p;
 }
 
@@ -154,7 +158,7 @@ function resolveKOTeams(matchId, placements, results, thirdOverrides) {
   if (!match) return {home:null,away:null};
   function teamFromKey(key) {
     if (/^[A-L][01]$/.test(key)) return placements[key]||null;
-    if (/^THIRD_[A-H]$/.test(key)) return (thirdOverrides&&thirdOverrides[key])||placements[key]||null;
+    if (/^THIRD_[1-8]$/.test(key)) return (thirdOverrides&&thirdOverrides[key])||null;
     if (key.endsWith("L")) return loser(key.slice(0,-1));
     return winner(key);
   }
@@ -176,7 +180,7 @@ function resolveKOTeams(matchId, placements, results, thirdOverrides) {
 function labelFromKey(key) {
   if(/^[A-L]0$/.test(key)) return "Etta grupp "+key[0];
   if(/^[A-L]1$/.test(key)) return "Tvaa grupp "+key[0];
-  if(/^THIRD_[A-H]$/.test(key)) return "Trea #"+(key.charCodeAt(6)-64);
+  if(/^THIRD_[1-8]$/.test(key)) return "Trea (bestaems 27 jun)";
   if(key.endsWith("L")) return "Forlorare "+key.slice(0,-1);
   return "Vinnare "+key;
 }
@@ -1353,7 +1357,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
       {adminTab==="thirds"&&(
         <div>
           <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:18,lineHeight:1.7}}>
-            Nar gruppspelet ar klart laser FIFA bracketen. Tilldela lagnamnen nedan for treornas 4 sextondelsfinalsmatcher.
+            Nar gruppspelet ar klart laser FIFA bracketen (27 juni). Tilldela de 8 basta treorna till ratt gruppsegrare nedan.
           </p>
           <div style={{background:"rgba(245,200,66,0.05)",border:"1px solid rgba(245,200,66,0.15)",borderRadius:9,padding:"12px 16px",marginBottom:20}}>
             <p className="ss" style={{fontSize:12,color:"#f5c842",fontWeight:700,marginBottom:8}}>Automatisk ranking (topp 8 treor just nu):</p>
@@ -1368,28 +1372,33 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
               ))
             }
           </div>
-          {R32_THIRDS.map(m=>(
-            <div key={m.id} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:9,padding:"12px 16px",marginBottom:10}}>
-              <p className="ss" style={{fontSize:12,color:"#f5c842",fontWeight:700,marginBottom:10}}>{m.id}</p>
-              <div style={{display:"flex",gap:16,flexWrap:"wrap",alignItems:"center"}}>
-                <div>
-                  <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:4}}>{m.homeKey}:</p>
-                  <select value={thirdOverrides[m.homeKey]||""} onChange={e=>handleThirdOverride(m.homeKey,e.target.value)}>
-                    <option value="">-- Valj lag --</option>
-                    {bestThirds.map(t=><option key={t.team} value={t.team}>{dn(t.team)}</option>)}
-                  </select>
+          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:14,lineHeight:1.7}}>
+            Varje trea moter en gruppsegrare. Valj ratt trea for varje match nar FIFA offentliggor bracketen den 27 juni.
+          </p>
+          {R32_THIRDS.map(m=>{
+            const groupWinner = labelFromKey(m.homeKey);
+            return(
+              <div key={m.id} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:9,padding:"12px 16px",marginBottom:10}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:6}}>
+                  <p className="ss" style={{fontSize:12,color:"#f5c842",fontWeight:700}}>{m.id}</p>
+                  <p className="ss" style={{fontSize:11,color:"#60504a"}}>{m.thirdInfo}</p>
                 </div>
-                <div className="ss" style={{fontSize:14,color:"#60504a",paddingTop:20}}>vs</div>
-                <div>
-                  <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:4}}>{m.awayKey}:</p>
-                  <select value={thirdOverrides[m.awayKey]||""} onChange={e=>handleThirdOverride(m.awayKey,e.target.value)}>
-                    <option value="">-- Valj lag --</option>
-                    {bestThirds.map(t=><option key={t.team} value={t.team}>{dn(t.team)}</option>)}
-                  </select>
+                <div style={{display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"}}>
+                  <div style={{background:"rgba(245,200,66,0.08)",border:"1px solid rgba(245,200,66,0.2)",borderRadius:6,padding:"6px 12px"}}>
+                    <span className="ss" style={{fontSize:12,fontWeight:700,color:"#f5c842"}}>{groupWinner}</span>
+                  </div>
+                  <span className="ss" style={{fontSize:13,color:"#60504a"}}>vs</span>
+                  <div style={{flex:1,minWidth:160}}>
+                    <p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:4}}>Valj trea ({m.awayKey}):</p>
+                    <select value={thirdOverrides[m.awayKey]||""} onChange={e=>handleThirdOverride(m.awayKey,e.target.value)} style={{width:"100%"}}>
+                      <option value="">-- Valj trea --</option>
+                      {bestThirds.map(t=><option key={t.team} value={t.team}>{dn(t.team)} (Grupp {t.group}, {t.pts}p)</option>)}
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -1430,7 +1439,8 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
             {filteredMatches.map(m=>{
               const disp=getDisplay(m); const dl=deadlines[m.id];
               const locked=isLocked(m.id);
-              const curVal=dlInput[m.id]||(dl?new Date(dl).toISOString().slice(0,16):"");
+              const defaultDl=DEFAULT_DEADLINES[m.id];
+              const curVal=dlInput[m.id]||(dl?new Date(dl).toISOString().slice(0,16):defaultDl?new Date(defaultDl).toISOString().slice(0,16):"");
               return(
                 <div key={m.id} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:9,padding:"11px 14px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",marginBottom:8}}>
