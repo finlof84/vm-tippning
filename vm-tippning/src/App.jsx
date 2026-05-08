@@ -207,6 +207,9 @@ export default function App() {
   const [results,        setResults]        = useState({});
   const [deadlines,      setDeadlines]      = useState({});
   const [thirdOverrides, setThirdOverrides] = useState({});
+  const [podiumTips,     setPodiumTips]     = useState({}); // { name: {winner,second,third} }
+  const [podiumDeadline, setPodiumDeadline] = useState(null); // ISO string
+  const [podiumResults,  setPodiumResults]  = useState({}); // {winner,second,third}
   const [currentUser,    setCurrentUser]    = useState(null);
   const [nameInput,      setNameInput]      = useState("");
   const [pwInput,        setPwInput]        = useState("");
@@ -232,6 +235,9 @@ export default function App() {
       onSnapshot(doc(db,"vm2026","results"),     s=>{if(s.exists())setResults(s.data());}),
       onSnapshot(doc(db,"vm2026","deadlines"),   s=>{if(s.exists())setDeadlines(s.data());}),
       onSnapshot(doc(db,"vm2026","thirdOverrides"),s=>{if(s.exists())setThirdOverrides(s.data());}),
+      onSnapshot(doc(db,"vm2026","podiumTips"),   s=>{if(s.exists())setPodiumTips(s.data());}),
+      onSnapshot(doc(db,"vm2026","podiumDeadline"),s=>{if(s.exists()&&s.data().dl)setPodiumDeadline(s.data().dl);}),
+      onSnapshot(doc(db,"vm2026","podiumResults"), s=>{if(s.exists())setPodiumResults(s.data());}),
     ];
     return()=>unsubs.forEach(u=>u());
   },[]);
@@ -309,9 +315,46 @@ export default function App() {
     await setDoc(doc(db,"vm2026","passwords"),pwUpd);
     if(currentUser===name){setCurrentUser(null); setView("start");}
   }
+  async function resetPassword(name, newPw) {
+    if(!newPw||newPw.length<2) return false;
+    await fbSet("passwords",{...passwords,[name]:newPw});
+    return true;
+  }
+  function loginAs(name, pw) {
+    if(passwords[name]===pw) {
+      setCurrentUser(name); setView("tips"); return true;
+    }
+    return false;
+  }
+  const podiumLocked = podiumDeadline && now >= new Date(podiumDeadline).getTime();
+  async function savePodiumTip(field, team) {
+    if(podiumLocked) return;
+    const upd={...podiumTips,[currentUser]:{...(podiumTips[currentUser]||{}),[field]:team}};
+    await fbSet("podiumTips",upd);
+  }
+  async function savePodiumDeadline(iso) {
+    await setDoc(doc(db,"vm2026","podiumDeadline"),{dl:iso});
+    setPodiumDeadline(iso);
+  }
+  async function savePodiumResults(field, team) {
+    const upd={...podiumResults,[field]:team};
+    await setDoc(doc(db,"vm2026","podiumResults"),upd);
+    setPodiumResults(upd);
+  }
+  function calcPodiumPoints(name) {
+    const tip=podiumTips[name]||{};
+    let pts=0;
+    if(podiumResults.winner&&tip.winner===podiumResults.winner) pts+=20;
+    if(podiumResults.second&&tip.second===podiumResults.second) pts+=15;
+    if(podiumResults.third&&tip.third===podiumResults.third)    pts+=10;
+    return pts;
+  }
 
   const leaderboard=Object.entries(participants)
-    .map(([name,tips])=>({name,points:calcTotal(tips,results),
+    .map(([name,tips])=>({name,
+      points:calcTotal(tips,results)+calcPodiumPoints(name),
+      matchPoints:calcTotal(tips,results),
+      podiumPoints:calcPodiumPoints(name),
       tipped:[...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{const t=tips[m.id];return t&&t.home!=""&&t.away!="";}).length}))
     .sort((a,b)=>b.points-a.points);
 
@@ -470,10 +513,14 @@ export default function App() {
 
             <div style={{background:"rgba(245,200,66,0.05)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:9,padding:"13px 17px",maxWidth:400,margin:"0 auto",textAlign:"left"}}>
               <p className="ss" style={{fontSize:11,color:"#a09070",lineHeight:1.8}}>
-                <strong style={{color:"#f5c842"}}>Pongsystem:</strong><br/>
+                <strong style={{color:"#f5c842"}}>Pongsystem - matcher:</strong><br/>
                 3 poang - Exakt ratt resultat<br/>
                 1 poang - Ratt utfall (vinst/oavgjort/forlust)<br/>
-                0 poang - Fel
+                0 poang - Fel<br/>
+                <strong style={{color:"#f5c842"}}>Prispall-tips (innan turnering):</strong><br/>
+                20 poang - Ratt segrare (VM-guld)<br/>
+                15 poang - Ratt tvaa (finalforlorare)<br/>
+                10 poang - Ratt trea (bronsmatch-vinnare)
               </p>
             </div>
           </div>
@@ -496,6 +543,17 @@ export default function App() {
             <div style={{background:"rgba(255,255,255,0.05)",borderRadius:4,height:5,marginBottom:22,overflow:"hidden"}}>
               <div style={{background:"#f5c842",height:"100%",width:(countTipped()/totalMatches*100)+"%",transition:"width .3s",borderRadius:4}}/>
             </div>
+            {/* PRISPALL-TIPS */}
+            <PodiumTipBox
+              currentUser={currentUser}
+              podiumTip={podiumTips[currentUser]||{}}
+              podiumDeadline={podiumDeadline}
+              podiumLocked={podiumLocked}
+              podiumResults={podiumResults}
+              savePodiumTip={savePodiumTip}
+              fmtDl={()=>podiumDeadline?new Date(podiumDeadline).toLocaleString("sv-SE",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):null}
+            />
+
             <div className="scroll-x" style={{marginBottom:12}}>
               <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.07)",minWidth:"max-content"}}>
                 <button className={"tab"+(tipPhase==="Omgang1"?" active":"")} onClick={()=>setTipPhase("Omgang1")}>Omgang 1</button>
@@ -587,7 +645,7 @@ export default function App() {
 
         {/* DELTAGARE */}
         {view==="participants"&&(
-          <ParticipantsView participants={participants} results={results} deadlines={deadlines} now={now}/>
+          <ParticipantsView participants={participants} results={results} deadlines={deadlines} now={now} loginAs={loginAs} onLoggedIn={()=>setView("tips")}/>
         )}
 
         {/* RESULTAT */}
@@ -623,7 +681,10 @@ export default function App() {
             handleResult={handleResult} setDeadline={setDeadline} rmDeadline={rmDeadline}
             bulkDeadline={bulkDeadline} bulkRoundDeadline={bulkRoundDeadline} isLocked={isLocked} fmtDl={fmtDl}
             placements={placements} bestThirds={bestThirds} handleThirdOverride={handleThirdOverride}
-            participants={participants} deleteParticipant={deleteParticipant}
+            participants={participants} deleteParticipant={deleteParticipant} resetPassword={resetPassword}
+            podiumDeadline={podiumDeadline} podiumResults={podiumResults} podiumLocked={podiumLocked}
+            savePodiumDeadline={savePodiumDeadline} savePodiumResults={savePodiumResults}
+            podiumTips={podiumTips}
           />
         )}
 
@@ -638,11 +699,79 @@ export default function App() {
   );
 }
 
+// PRISPALL-TIPS KOMPONENT
+function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, podiumResults, savePodiumTip, fmtDl}) {
+  const allTeams = Object.values(GROUPS).flat().sort((a,b)=>a.localeCompare(b));
+  const dl = fmtDl();
+
+  const slots = [
+    {key:"winner", label:"Segrare (VM-guld)",   pts:20, icon:"1"},
+    {key:"second", label:"Tvaa (finalforlorare)", pts:15, icon:"2"},
+    {key:"third",  label:"Trea (bronsmatch)",     pts:10, icon:"3"},
+  ];
+
+  function checkPts(key) {
+    if(!podiumResults[key]) return null;
+    return podiumTip[key]===podiumResults[key] ? slots.find(s=>s.key===key).pts : 0;
+  }
+
+  return(
+    <div style={{background:"rgba(245,200,66,0.06)",border:"1px solid rgba(245,200,66,0.2)",
+      borderRadius:12,padding:"18px 16px",marginBottom:22}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:8}}>
+        <div>
+          <h3 className="pf" style={{fontSize:17,color:"#f5c842",fontWeight:700}}>Prispall-tips</h3>
+          <p className="ss" style={{fontSize:11,color:"#a09070",marginTop:2}}>Tippa vem som vinner VM, kommer tvaa och trea. 20/15/10 poang.</p>
+        </div>
+        {podiumLocked
+          ? <span className="lock-badge">Last</span>
+          : dl && <span className="open-badge">Stanger {dl}</span>
+        }
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        {slots.map(s=>{
+          const pts=checkPts(s.key);
+          return(
+            <div key={s.key} style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+              <div style={{display:"flex",alignItems:"center",gap:6,minWidth:220}}>
+                <span style={{background:"#f5c842",color:"#0a1628",borderRadius:"50%",width:22,height:22,
+                  display:"flex",alignItems:"center",justifyContent:"center",
+                  fontSize:11,fontWeight:900,fontFamily:"'Source Sans 3',sans-serif",flexShrink:0}}>{s.icon}</span>
+                <span className="ss" style={{fontSize:13,fontWeight:600,color:"#f0e6d3"}}>{s.label}</span>
+                <span className="ss" style={{fontSize:11,color:"#f5c842",fontWeight:700}}>({s.pts}p)</span>
+              </div>
+              {podiumLocked?(
+                <span className="ss" style={{fontSize:13,fontWeight:700,
+                  color:pts===null?"#a09070":pts>0?"#50c878":"#e07070"}}>
+                  {podiumTip[s.key]||"Ej tippat"}
+                  {pts!==null&&<span style={{marginLeft:6,fontSize:11}}>({pts>0?"+"+pts:0}p)</span>}
+                </span>
+              ):(
+                <select value={podiumTip[s.key]||""} onChange={e=>savePodiumTip(s.key,e.target.value)}
+                  style={{flex:1,minWidth:160}}>
+                  <option value="">-- Valj lag --</option>
+                  {allTeams.map(t=><option key={t} value={t}>{dn(t)}</option>)}
+                </select>
+              )}
+              {podiumResults[s.key]&&(
+                <span className="ss" style={{fontSize:11,color:"#60504a"}}>Facit: {dn(podiumResults[s.key])}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // DELTAGARE-VY
-function ParticipantsView({participants, results, deadlines, now}) {
+function ParticipantsView({participants, results, deadlines, now, loginAs, onLoggedIn}) {
   const [selName, setSelName] = useState(null);
   const [selPhase, setSelPhase] = useState("Omgang1");
   const [selGroup, setSelGroup] = useState("A");
+  const [loginModal, setLoginModal] = useState(null); // name to login as
+  const [modalPw, setModalPw] = useState("");
+  const [modalErr, setModalErr] = useState("");
 
   function isVisible(matchId) {
     const dl=deadlines[matchId];
@@ -658,25 +787,60 @@ function ParticipantsView({participants, results, deadlines, now}) {
     return KNOCKOUT_ALL.filter(m=>m.phase===selPhase);
   }
 
+  function handleModalLogin() {
+    const ok = loginAs(loginModal, modalPw);
+    if(ok) { setLoginModal(null); setModalPw(""); setModalErr(""); onLoggedIn(); }
+    else { setModalErr("Fel losenord. Forsok igen."); }
+  }
+
   const matches=getVisibleMatches();
   const names=Object.keys(participants).sort();
   const tips=selName?(participants[selName]||{}):null;
 
   return(
     <div>
+      {/* Login modal */}
+      {loginModal&&(
+        <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.7)",
+          display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000}}>
+          <div style={{background:"#0f1e35",border:"1px solid rgba(245,200,66,0.3)",borderRadius:14,
+            padding:"28px 24px",maxWidth:360,width:"90%"}}>
+            <h3 className="pf" style={{fontSize:20,color:"#f5c842",fontWeight:700,marginBottom:6}}>Redigera {loginModal}s tips</h3>
+            <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:16}}>Ange losenord for {loginModal} for att redigera deras tips.</p>
+            <input type="password" placeholder="Losenord" value={modalPw}
+              onChange={e=>{setModalPw(e.target.value);setModalErr("");}}
+              onKeyDown={e=>e.key==="Enter"&&handleModalLogin()}
+              style={{width:"100%",marginBottom:10}}/>
+            {modalErr&&<p className="err" style={{marginBottom:10}}>{modalErr}</p>}
+            <div style={{display:"flex",gap:10}}>
+              <button className="btn" onClick={handleModalLogin} style={{flex:1}}>Logga in och redigera</button>
+              <button className="btn-ghost" onClick={()=>{setLoginModal(null);setModalPw("");setModalErr("");}}>Avbryt</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h2 className="pf" style={{fontSize:28,color:"#f5c842",fontWeight:700,marginBottom:6}}>Deltagare</h2>
       <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:22}}>
-        Tips visas forst nar matchens deadline har passerats.
+        Klicka pa ett namn for att se tips. Klicka "Redigera" for att logga in och andra tips.
       </p>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:22}}>
         {names.map(name=>(
-          <button key={name} onClick={()=>setSelName(selName===name?null:name)}
-            style={{background:selName===name?"#f5c842":"rgba(255,255,255,0.06)",
-              color:selName===name?"#0a1628":"#a09070",border:"none",borderRadius:8,
-              padding:"8px 16px",cursor:"pointer",fontWeight:700,fontSize:13,
-              fontFamily:"'Source Sans 3',sans-serif",transition:"all .15s"}}>
-            {name}
-          </button>
+          <div key={name} style={{display:"flex",alignItems:"center",gap:4}}>
+            <button onClick={()=>setSelName(selName===name?null:name)}
+              style={{background:selName===name?"#f5c842":"rgba(255,255,255,0.06)",
+                color:selName===name?"#0a1628":"#a09070",border:"none",borderRadius:"8px 0 0 8px",
+                padding:"8px 14px",cursor:"pointer",fontWeight:700,fontSize:13,
+                fontFamily:"'Source Sans 3',sans-serif",transition:"all .15s"}}>
+              {name}
+            </button>
+            <button onClick={()=>{setLoginModal(name);setModalPw("");setModalErr("");}}
+              style={{background:"rgba(245,200,66,0.12)",color:"#f5c842",border:"1px solid rgba(245,200,66,0.2)",
+                borderRadius:"0 8px 8px 0",padding:"8px 10px",cursor:"pointer",fontSize:11,fontWeight:700,
+                fontFamily:"'Source Sans 3',sans-serif",whiteSpace:"nowrap"}}>
+              Redigera
+            </button>
+          </div>
         ))}
         {names.length===0&&<p className="ss" style={{color:"#60504a"}}>Inga deltagare an.</p>}
       </div>
@@ -952,13 +1116,17 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
   adminTab,setAdminTab,dlInput,setDlInput,rdlInput,setRdlInput,
   filteredMatches,getDisplay,getTeams,handleResult,setDeadline,rmDeadline,
   bulkDeadline,bulkRoundDeadline,isLocked,fmtDl,
-  placements,bestThirds,handleThirdOverride,participants,deleteParticipant}) {
+  placements,bestThirds,handleThirdOverride,participants,deleteParticipant,resetPassword,
+  podiumDeadline,podiumResults,podiumLocked,savePodiumDeadline,savePodiumResults,podiumTips}) {
+
+  const [pdlInput, setPdlInput] = useState(podiumDeadline?new Date(podiumDeadline).toISOString().slice(0,16):"");
+  const allTeams = Object.values(GROUPS).flat().sort((a,b)=>a.localeCompare(b));
 
   return(
     <div>
       <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:22}}>Admin - BKS VM-tipp 2026</h2>
       <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.08)",marginBottom:22,flexWrap:"wrap"}}>
-        {[["results","Resultat"],["thirds","Treornas matcher"],["deadlines","Deadlines"],["participants","Deltagare"]].map(([k,l])=>(
+        {[["results","Resultat"],["thirds","Treornas matcher"],["deadlines","Deadlines"],["podium","Prispall"],["participants","Deltagare"]].map(([k,l])=>(
           <button key={k} className={"tab"+(adminTab===k?" active":"")} onClick={()=>setAdminTab(k)}>{l}</button>
         ))}
       </div>
@@ -1105,31 +1273,150 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
         </div>
       )}
 
-      {adminTab==="participants"&&(
+      {adminTab==="podium"&&(
         <div>
-          <h3 className="pf" style={{fontSize:18,color:"#f5c842",fontWeight:700,marginBottom:6}}>Hantera deltagare</h3>
-          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:20}}>
-            {Object.keys(participants).length} registrerade deltagare.
+          <h3 className="pf" style={{fontSize:18,color:"#f5c842",fontWeight:700,marginBottom:6}}>Prispall-administration</h3>
+          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:20,lineHeight:1.7}}>
+            Satt deadline for prispall-tips och registrera officiellt utfall nar VM ar klart.
           </p>
-          {Object.keys(participants).length===0?(
-            <p className="ss" style={{color:"#60504a"}}>Inga deltagare an.</p>
-          ):(
-            <div style={{display:"flex",flexDirection:"column",gap:8}}>
-              {Object.keys(participants).sort().map(name=>{
-                const tips=participants[name]||{};
-                const tipped=[...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{const t=tips[m.id];return t&&t.home!=""&&t.away!="";}).length;
-                return(
-                  <div key={name} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:9,padding:"12px 16px",display:"flex",alignItems:"center",gap:12}}>
-                    <div style={{flex:1}}>
-                      <div className="pf" style={{fontSize:15,fontWeight:700,color:"#f0e6d3"}}>{name}</div>
-                      <div className="ss" style={{fontSize:11,color:"#60504a",marginTop:2}}>{tipped} matcher tippade</div>
-                    </div>
-                    <button className="btn btn-sm btn-danger" onClick={()=>deleteParticipant(name)}>Ta bort</button>
-                  </div>
-                );
-              })}
+
+          {/* Deadline */}
+          <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:10,padding:"16px",marginBottom:20}}>
+            <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:10}}>Deadline for prispall-tips</p>
+            <p className="ss" style={{fontSize:11,color:"#a09070",marginBottom:12}}>Satt samma deadline som Omgang 1 (fore forsta matchen).</p>
+            <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
+              <input type="datetime-local" value={pdlInput}
+                onChange={e=>setPdlInput(e.target.value)}/>
+              <button className="btn btn-sm" onClick={()=>{if(pdlInput)savePodiumDeadline(new Date(pdlInput).toISOString());}}>Spara deadline</button>
+              {podiumLocked&&<span className="lock-badge">Last nu</span>}
+              {!podiumLocked&&podiumDeadline&&<span className="open-badge">Stanger {new Date(podiumDeadline).toLocaleString("sv-SE",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}</span>}
             </div>
-          )}
+          </div>
+
+          {/* Officiellt utfall */}
+          <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:10,padding:"16px",marginBottom:20}}>
+            <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:10}}>Registrera officiellt utfall (efter finalen)</p>
+            {[
+              {key:"winner",label:"Segrare (VM-guld)",pts:20},
+              {key:"second",label:"Tvaa (finalforlorare)",pts:15},
+              {key:"third", label:"Trea (bronsmatch-vinnare)",pts:10},
+            ].map(s=>(
+              <div key={s.key} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10,flexWrap:"wrap"}}>
+                <span className="ss" style={{fontSize:13,fontWeight:600,color:"#f0e6d3",minWidth:200}}>{s.label} ({s.pts}p):</span>
+                <select value={podiumResults[s.key]||""} onChange={e=>savePodiumResults(s.key,e.target.value)} style={{flex:1,minWidth:160}}>
+                  <option value="">-- Valj lag --</option>
+                  {allTeams.map(t=><option key={t} value={t}>{dn(t)}</option>)}
+                </select>
+                {podiumResults[s.key]&&<span className="ss" style={{fontSize:12,color:"#50c878",fontWeight:700}}>{dn(podiumResults[s.key])}</span>}
+              </div>
+            ))}
+          </div>
+
+          {/* Oversikt over deltagarnas tips */}
+          <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:10,padding:"16px"}}>
+            <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:10}}>Deltagarnas prispall-tips</p>
+            {Object.keys(podiumTips).length===0?(
+              <p className="ss" style={{color:"#60504a",fontSize:12}}>Inga prispall-tips inlagda an.</p>
+            ):(
+              <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+                <thead>
+                  <tr style={{borderBottom:"1px solid rgba(255,255,255,0.07)"}}>
+                    {["Deltagare","Segrare","Tvaa","Trea","Poang"].map(h=>(
+                      <th key={h} style={{padding:"6px 10px",textAlign:"left",color:"#60504a",fontFamily:"'Source Sans 3',sans-serif",fontWeight:700,fontSize:10,textTransform:"uppercase"}}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(podiumTips).sort(([a],[b])=>a.localeCompare(b)).map(([name,tip])=>{
+                    let pts=0;
+                    if(podiumResults.winner&&tip.winner===podiumResults.winner) pts+=20;
+                    if(podiumResults.second&&tip.second===podiumResults.second) pts+=15;
+                    if(podiumResults.third&&tip.third===podiumResults.third)    pts+=10;
+                    return(
+                      <tr key={name} style={{borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+                        <td style={{padding:"7px 10px",fontFamily:"'Source Sans 3',sans-serif",fontWeight:700,color:"#f0e6d3"}}>{name}</td>
+                        <td style={{padding:"7px 10px",fontFamily:"'Source Sans 3',sans-serif",color:podiumResults.winner?(tip.winner===podiumResults.winner?"#50c878":"#e07070"):"#a09070"}}>{dn(tip.winner)||"-"}</td>
+                        <td style={{padding:"7px 10px",fontFamily:"'Source Sans 3',sans-serif",color:podiumResults.second?(tip.second===podiumResults.second?"#50c878":"#e07070"):"#a09070"}}>{dn(tip.second)||"-"}</td>
+                        <td style={{padding:"7px 10px",fontFamily:"'Source Sans 3',sans-serif",color:podiumResults.third?(tip.third===podiumResults.third?"#50c878":"#e07070"):"#a09070"}}>{dn(tip.third)||"-"}</td>
+                        <td style={{padding:"7px 10px",fontFamily:"'Source Sans 3',sans-serif",fontWeight:700,color:pts>0?"#f5c842":"#a09070"}}>{pts>0?"+"+pts+"p":"-"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      )}
+
+      {adminTab==="participants"&&(
+        <AdminParticipants participants={participants} deleteParticipant={deleteParticipant} resetPassword={resetPassword}/>
+      )}
+    </div>
+  );
+}
+
+// ADMIN DELTAGARE
+function AdminParticipants({participants, deleteParticipant, resetPassword}) {
+  const [resetName, setResetName] = useState(null);
+  const [newPw, setNewPw] = useState("");
+  const [newPw2, setNewPw2] = useState("");
+  const [pwErr, setPwErr] = useState("");
+  const [pwOk, setPwOk] = useState("");
+
+  async function handleReset() {
+    if(!newPw||newPw.length<2){setPwErr("Ange minst 2 tecken.");return;}
+    if(newPw!==newPw2){setPwErr("Losenorden matchar inte.");return;}
+    const ok = await resetPassword(resetName, newPw);
+    if(ok){setPwOk("Losenord aterstalt!"); setNewPw(""); setNewPw2(""); setPwErr("");
+      setTimeout(()=>{setPwOk("");setResetName(null);},2000);}
+    else setPwErr("Nagot gick fel.");
+  }
+
+  return(
+    <div>
+      <h3 className="pf" style={{fontSize:18,color:"#f5c842",fontWeight:700,marginBottom:6}}>Hantera deltagare</h3>
+      <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:20}}>
+        {Object.keys(participants).length} registrerade deltagare.
+      </p>
+      {Object.keys(participants).length===0?(
+        <p className="ss" style={{color:"#60504a"}}>Inga deltagare an.</p>
+      ):(
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          {Object.keys(participants).sort().map(name=>{
+            const tips=participants[name]||{};
+            const tipped=[...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{const t=tips[m.id];return t&&t.home!=""&&t.away!="";}).length;
+            const isResetting=resetName===name;
+            return(
+              <div key={name} style={{background:"rgba(255,255,255,0.04)",border:"1px solid "+(isResetting?"rgba(245,200,66,0.3)":"rgba(255,255,255,0.07)"),borderRadius:9,padding:"12px 16px"}}>
+                <div style={{display:"flex",alignItems:"center",gap:12}}>
+                  <div style={{flex:1}}>
+                    <div className="pf" style={{fontSize:15,fontWeight:700,color:"#f0e6d3"}}>{name}</div>
+                    <div className="ss" style={{fontSize:11,color:"#60504a",marginTop:2}}>{tipped} matcher tippade</div>
+                  </div>
+                  <button className="btn btn-sm" style={{background:"rgba(245,200,66,0.15)",color:"#f5c842",border:"1px solid rgba(245,200,66,0.3)"}}
+                    onClick={()=>{setResetName(isResetting?null:name);setNewPw("");setNewPw2("");setPwErr("");setPwOk("");}}>
+                    {isResetting?"Avbryt":"Aterstall losenord"}
+                  </button>
+                  <button className="btn btn-sm btn-danger" onClick={()=>deleteParticipant(name)}>Ta bort</button>
+                </div>
+                {isResetting&&(
+                  <div style={{marginTop:14,paddingTop:12,borderTop:"1px solid rgba(255,255,255,0.07)"}}>
+                    <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:10}}>Satt nytt losenord for {name}:</p>
+                    <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+                      <input type="password" placeholder="Nytt losenord" value={newPw}
+                        onChange={e=>{setNewPw(e.target.value);setPwErr("");setPwOk("");}} style={{flex:1,minWidth:140}}/>
+                      <input type="password" placeholder="Bekrafta losenord" value={newPw2}
+                        onChange={e=>{setNewPw2(e.target.value);setPwErr("");setPwOk("");}} style={{flex:1,minWidth:140}}/>
+                      <button className="btn btn-sm" onClick={handleReset}>Spara</button>
+                    </div>
+                    {pwErr&&<p className="err" style={{marginTop:8}}>{pwErr}</p>}
+                    {pwOk&&<p className="ss" style={{marginTop:8,color:"#50c878",fontSize:12}}>{pwOk}</p>}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
