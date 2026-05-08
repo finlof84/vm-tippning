@@ -18,11 +18,11 @@ const GROUPS = {
   L: ["England", "Kroatien", "Panama", "Ghana"],
 };
 
-// Matchpar per omg&aring;ng inom varje grupp
+// Matchpar per omgång inom varje grupp
 // Baserat pa officiellt FIFA VM 2026 schema:
-// Omg&aring;ng 1: match 1 (lag0 vs lag1) och match 2 (lag2 vs lag3)
-// Omg&aring;ng 2: match 3 (lag0 vs lag2) och match 4 (lag1 vs lag3)  
-// Omg&aring;ng 3: match 5 (lag0 vs lag3) och match 6 (lag1 vs lag2) - spelas samtidigt
+// Omgång 1: match 1 (lag0 vs lag1) och match 2 (lag2 vs lag3)
+// Omgång 2: match 3 (lag0 vs lag2) och match 4 (lag1 vs lag3)  
+// Omgång 3: match 5 (lag0 vs lag3) och match 6 (lag1 vs lag2) - spelas samtidigt
 const ROUND_MAP = { "01":1, "23":1, "02":2, "13":2, "03":3, "12":3 };
 
 const GROUP_MATCHES = Object.entries(GROUPS).flatMap(([group, teams]) => {
@@ -58,30 +58,30 @@ function gc(team) { return CC[team] || "??"; }
 function dn(team) { return team || "--"; }
 
 // Sextondelsfinal (Round of 32) - 16 matcher
-// 8 fasta etta vs tv&aring;&aring;-matcher + 8 etta vs trea-matcher
+// 8 fasta etta vs tvåå-matcher + 8 etta vs trea-matcher
 // Baserat pa FIFA VM 2026 officiellt schema (ESPN/Al Jazeera)
-// Trea-platser (THIRD_1..8) fylls i av admin n&auml;r FIFA bestammer bracketen (27 juni)
+// Trea-platser (THIRD_1..8) fylls i av admin när FIFA bestammer bracketen (27 juni)
 const R32_FIXED = [
-  // Etta vs Tv&aring;&aring; - fasta matchning&aring;r
+  // Etta vs Två - fasta matchningår
   {id:"R32_1",  phase:"Sextondelsfinal", homeKey:"C0", awayKey:"F1"},  // jun 29
   {id:"R32_2",  phase:"Sextondelsfinal", homeKey:"F0", awayKey:"C1"},  // jun 29
-  {id:"R32_3",  phase:"Sextondelsfinal", homeKey:"E1", awayKey:"I1"},  // jun 30 (tv&aring;&aring; vs tv&aring;&aring;)
+  {id:"R32_3",  phase:"Sextondelsfinal", homeKey:"E1", awayKey:"I1"},  // jun 30 (två vs två)
   {id:"R32_4",  phase:"Sextondelsfinal", homeKey:"H0", awayKey:"J1"},  // jul 2
   {id:"R32_5",  phase:"Sextondelsfinal", homeKey:"B0", awayKey:"G1"},  // jul 2
   {id:"R32_6",  phase:"Sextondelsfinal", homeKey:"J0", awayKey:"H1"},  // jul 3
   {id:"R32_7",  phase:"Sextondelsfinal", homeKey:"K0", awayKey:"B1"},  // jul 3
-  {id:"R32_8",  phase:"Sextondelsfinal", homeKey:"A1", awayKey:"D1"},  // jul 3 (tv&aring;&aring; vs tv&aring;&aring;)
+  {id:"R32_8",  phase:"Sextondelsfinal", homeKey:"A1", awayKey:"D1"},  // jul 3 (två vs två)
 ];
-// Etta vs Trea - admin placerar r&auml;tt trea n&auml;r FIFA laser bracketen
+// Etta vs Trea - admin placerar rätt trea när FIFA laser bracketen
 const R32_THIRDS = [
-  {id:"R32_9",  phase:"Sextondelsfinal", homeKey:"E0",  awayKey:"THIRD_1", thirdInfo:"Trea fr&aring;n grupp A/B/C/D/F"},  // jun 29
-  {id:"R32_10", phase:"Sextondelsfinal", homeKey:"I0",  awayKey:"THIRD_2", thirdInfo:"Trea fr&aring;n grupp C/D/F/G/H"},  // jun 30
-  {id:"R32_11", phase:"Sextondelsfinal", homeKey:"A0",  awayKey:"THIRD_3", thirdInfo:"Trea fr&aring;n grupp C/E/F/H/I"},  // jun 30
-  {id:"R32_12", phase:"Sextondelsfinal", homeKey:"L0",  awayKey:"THIRD_4", thirdInfo:"Trea fr&aring;n grupp E/H/I/J/K"},  // jul 1
-  {id:"R32_13", phase:"Sextondelsfinal", homeKey:"G0",  awayKey:"THIRD_5", thirdInfo:"Trea fr&aring;n grupp A/E/H/I/J"},  // jul 1
-  {id:"R32_14", phase:"Sextondelsfinal", homeKey:"D0",  awayKey:"THIRD_6", thirdInfo:"Trea fr&aring;n grupp B/E/F/I/J"},  // jul 1
-  {id:"R32_15", phase:"Sextondelsfinal", homeKey:"K0",  awayKey:"THIRD_7", thirdInfo:"Trea fr&aring;n grupp D/E/I/J/L"},  // jul 2 -- wait K0 already used
-  {id:"R32_16", phase:"Sextondelsfinal", homeKey:"B1",  awayKey:"THIRD_8", thirdInfo:"Trea (ok&auml;nd matchning)"},
+  {id:"R32_9",  phase:"Sextondelsfinal", homeKey:"E0",  awayKey:"THIRD_1", thirdInfo:"Trea från grupp A/B/C/D/F"},  // jun 29
+  {id:"R32_10", phase:"Sextondelsfinal", homeKey:"I0",  awayKey:"THIRD_2", thirdInfo:"Trea från grupp C/D/F/G/H"},  // jun 30
+  {id:"R32_11", phase:"Sextondelsfinal", homeKey:"A0",  awayKey:"THIRD_3", thirdInfo:"Trea från grupp C/E/F/H/I"},  // jun 30
+  {id:"R32_12", phase:"Sextondelsfinal", homeKey:"L0",  awayKey:"THIRD_4", thirdInfo:"Trea från grupp E/H/I/J/K"},  // jul 1
+  {id:"R32_13", phase:"Sextondelsfinal", homeKey:"G0",  awayKey:"THIRD_5", thirdInfo:"Trea från grupp A/E/H/I/J"},  // jul 1
+  {id:"R32_14", phase:"Sextondelsfinal", homeKey:"D0",  awayKey:"THIRD_6", thirdInfo:"Trea från grupp B/E/F/I/J"},  // jul 1
+  {id:"R32_15", phase:"Sextondelsfinal", homeKey:"K0",  awayKey:"THIRD_7", thirdInfo:"Trea från grupp D/E/I/J/L"},  // jul 2 -- wait K0 already used
+  {id:"R32_16", phase:"Sextondelsfinal", homeKey:"B1",  awayKey:"THIRD_8", thirdInfo:"Trea (okänd matchning)"},
 ];
 const R32 = [...R32_FIXED, ...R32_THIRDS];
 
@@ -179,9 +179,9 @@ function resolveKOTeams(matchId, placements, results, thirdOverrides) {
 
 function labelFromKey(key) {
   if(/^[A-L]0$/.test(key)) return "Etta grupp "+key[0];
-  if(/^[A-L]1$/.test(key)) return "Tv&aring;&aring; grupp "+key[0];
+  if(/^[A-L]1$/.test(key)) return "Två grupp "+key[0];
   if(/^THIRD_[1-8]$/.test(key)) return "Trea (bestaems 27 jun)";
-  if(key.endsWith("L")) return "F&ouml;rlorare "+key.slice(0,-1);
+  if(key.endsWith("L")) return "Förlorare "+key.slice(0,-1);
   return "Vinnare "+key;
 }
 
@@ -330,7 +330,7 @@ export default function App() {
   const [pwInput,        setPwInput]        = useState("");
   const [newPwInput,     setNewPwInput]     = useState("");
   const [loginError,     setLoginError]     = useState("");
-  const [tipPhase,       setTipPhase]       = useState("Omg&aring;ng1");
+  const [tipPhase,       setTipPhase]       = useState("Omgång1");
   const [tipGroup,       setTipGroup]       = useState("A");
   const [adminCode,      setAdminCode]      = useState("");
   const [isAdmin,        setIsAdmin]        = useState(false);
@@ -382,15 +382,15 @@ export default function App() {
   // Login/register
   async function handleJoin() {
     const name=nameInput.trim();
-    if(!name||!pwInput) { setLoginError("Ange namn och l&ouml;senord."); return; }
+    if(!name||!pwInput) { setLoginError("Ange namn och lösenord."); return; }
     if(participants[name]!==undefined) {
-      // Befintlig deltagare - logg&aring; in
-      if(passwords[name]!==pwInput) { setLoginError("Fel l&ouml;senord."); return; }
+      // Befintlig deltagare - loggå in
+      if(passwords[name]!==pwInput) { setLoginError("Fel lösenord."); return; }
     } else {
       // Kolla att namnet inte redan finns (case-insensitive)
       const nameTaken = Object.keys(participants).some(n=>n.toLowerCase()===name.toLowerCase());
-      if(nameTaken) { setLoginError("Namnet ar redan upptaget. V&auml;lj ett annat."); return; }
-      // Ny deltagare - registrera (ett l&ouml;senord racker)
+      if(nameTaken) { setLoginError("Namnet ar redan upptaget. Välj ett annat."); return; }
+      // Ny deltagare - registrera (ett lösenord racker)
       await fbSet("participants",{...participants,[name]:{}});
       await fbSet("passwords",{...passwords,[name]:pwInput});
     }
@@ -407,7 +407,7 @@ export default function App() {
   }
   function handleAdminLogin() {
     if(adminCode===ADMIN_CODE){setIsAdmin(true);setView("admin");}
-    else alert("Fel l&ouml;senord");
+    else alert("Fel lösenord");
   }
   async function handleResult(mid,side,val) {
     await fbSet("results",{...results,[mid]:{...(results[mid]||{}),[side]:val}});
@@ -507,9 +507,9 @@ export default function App() {
   }
   const filteredMatches=sortByDeadline(
     tipPhase==="Grupp"?GROUP_MATCHES.filter(m=>m.group===tipGroup)
-    :tipPhase==="Omg&aring;ng1"?getMatchesForRound(1)
-    :tipPhase==="Omg&aring;ng2"?getMatchesForRound(2)
-    :tipPhase==="Omg&aring;ng3"?getMatchesForRound(3)
+    :tipPhase==="Omgång1"?getMatchesForRound(1)
+    :tipPhase==="Omgång2"?getMatchesForRound(2)
+    :tipPhase==="Omgång3"?getMatchesForRound(3)
     :KNOCKOUT_ALL.filter(m=>m.phase===tipPhase)
   );
 
@@ -610,51 +610,15 @@ export default function App() {
               filter:"drop-shadow(0 0 16px rgba(245,200,66,0.2))"
             }}/>
             <h1 className="pf" style={{fontSize:38,color:"#f5c842",fontWeight:900,lineHeight:1.1,marginBottom:6}}>P14 HIKs VM-tipp 2026</h1>
-            <p className="ss" style={{fontSize:17,color:"#a09070",marginBottom:5}}>USA &middot; Mexiko &middot; Kanada</p>
+            <p className="ss" style={{fontSize:17,color:"#a09070",marginBottom:5}}>USA · Mexiko · Kanada</p>
             <p className="ss" style={{fontSize:13,color:"#60504a",marginBottom:40}}>11 juni - 19 juli 2026</p>
-
-            <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:14,padding:"20px 28px",maxWidth:560,margin:"0 auto 20px",textAlign:"left"}}>
-              <p className="pf" style={{fontSize:15,color:"#f5c842",fontWeight:700,marginBottom:14,textAlign:"center"}}>Hur fungerar tippningen?</p>
-              <div style={{display:"flex",flexDirection:"column",gap:10}}>
-                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-                  <span style={{fontSize:16,flexShrink:0}}>&#128100;</span>
-                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Registrera dig och betala</strong> - Skapa din anvandare och swisha xx kr till 0700-000000. Du syns pa topplistan n&auml;r admin godk&auml;nt din betalning.
-                  </p>
-                </div>
-                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-                  <span style={{fontSize:16,flexShrink:0}}>&#9917;</span>
-                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Tippa alla 104 matcher</strong> - gruppspel och slutspel. Ange hur m&aring;nga mal du tror varje lag gor.
-                  </p>
-                </div>
-                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-                  <span style={{fontSize:16,flexShrink:0}}>&#128274;</span>
-                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Deadlines</strong> - Omg&aring;ng 1 l&aring;ses 11 juni kl 21:00. Omg&aring;ng 2 l&aring;ses 18 juni kl 19:00. Omg&aring;ng 3 l&aring;ses 24 juni kl 21:00. Slutspelsmatcher l&aring;ses individuellt vid matchstart.
-                  </p>
-                </div>
-                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-                  <span style={{fontSize:16,flexShrink:0}}>&#127941;</span>
-                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Po&auml;ng per match</strong> - 3p for exakt r&auml;tt resultat &bull; 1p for r&auml;tt utfall (vinst/oavgjort/f&ouml;rlust) &bull; 0p om fel.
-                  </p>
-                </div>
-                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-                  <span style={{fontSize:16,flexShrink:0}}>&#127942;</span>
-                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Prispall-tips</strong> - Tippa segrare (20p), tv&aring;&aring; (15p) och trea (10p) innan turneringen b&ouml;rjar. Maste l&aring;mpas innan 11 juni kl 21:00.
-                  </p>
-                </div>
-              </div>
-            </div>
 
             {/* VINSTPOTT */}
             {siteInfo.prizePot&&(
               <div style={{background:"rgba(80,200,120,0.08)",border:"1px solid rgba(80,200,120,0.3)",borderRadius:12,padding:"16px 24px",maxWidth:500,margin:"0 auto 16px",textAlign:"center"}}>
                 <p className="ss" style={{fontSize:11,color:"#50c878",fontWeight:700,marginBottom:6,textTransform:"uppercase",letterSpacing:.8}}>Vinstpott</p>
                 <p className="pf" style={{fontSize:32,color:"#50c878",fontWeight:900}}>{siteInfo.prizePot}</p>
-                <p className="ss" style={{fontSize:11,color:"#60504a",marginTop:6}}>60% till ettan &bull; 30% till tv&aring;&aring;n &bull; 10% till trean</p>
+                <p className="ss" style={{fontSize:11,color:"#60504a",marginTop:6}}>60% till ettan &bull; 30% till tvåan &bull; 10% till trean</p>
               </div>
             )}
 
@@ -665,6 +629,42 @@ export default function App() {
                 <p className="ss" style={{fontSize:14,color:"#f0e6d3",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{siteInfo.message}</p>
               </div>
             )}
+
+            <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:14,padding:"20px 28px",maxWidth:560,margin:"0 auto 20px",textAlign:"left"}}>
+              <p className="pf" style={{fontSize:15,color:"#f5c842",fontWeight:700,marginBottom:14,textAlign:"center"}}>Hur fungerar tippningen?</p>
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:16,flexShrink:0}}>&#128100;</span>
+                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
+                    <strong style={{color:"#f0e6d3"}}>Registrera dig och betala</strong> - Skapa din användare och swisha xx kr till 0700-000000. Du syns på topplistan när admin godkänt din betalning.
+                  </p>
+                </div>
+                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:16,flexShrink:0}}>&#9917;</span>
+                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
+                    <strong style={{color:"#f0e6d3"}}>Tippa alla 104 matcher</strong> - gruppspel och slutspel. Ange hur många mål du tror varje lag gör.
+                  </p>
+                </div>
+                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:16,flexShrink:0}}>&#128274;</span>
+                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
+                    <strong style={{color:"#f0e6d3"}}>Deadlines</strong> - Omgång 1 låses 11 juni kl 21:00. Omgång 2 låses 18 juni kl 19:00. Omgång 3 låses 24 juni kl 21:00. Slutspelsmatcher låses individuellt vid matchstart.
+                  </p>
+                </div>
+                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:16,flexShrink:0}}>&#127941;</span>
+                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
+                    <strong style={{color:"#f0e6d3"}}>Poäng per match</strong> - 3p for exakt rätt resultat &bull; 1p for rätt utfall (vinst/oavgjort/förlust) &bull; 0p om fel.
+                  </p>
+                </div>
+                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:16,flexShrink:0}}>&#127942;</span>
+                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
+                    <strong style={{color:"#f0e6d3"}}>Prispall-tips</strong> - Tippa segrare (20p), två (15p) och trea (10p) innan turneringen börjar. Måste låmpas innan 11 juni kl 21:00.
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* ANTAL DELTAGARE */}
             <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:20}}>
@@ -685,31 +685,31 @@ export default function App() {
             ):(
               <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.15)",borderRadius:14,padding:"26px 22px",maxWidth:400,margin:"0 auto 20px"}}>
                 <h2 className="pf" style={{fontSize:19,color:"#f5c842",marginBottom:6,fontWeight:700}}>
-                  {nameInput&&participants[nameInput]?"Logg&aring; in":"Registrera dig"}
+                  {nameInput&&participants[nameInput]?"Loggå in":"Registrera dig"}
                 </h2>
                 <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:16}}>
                   {nameInput&&participants[nameInput]
-                    ?"Ange ditt l&ouml;senord for att logg&aring; in och redigera dina tips."
-                    :"Ange ditt namn och v&auml;lj ett l&ouml;senord."}
+                    ?"Ange ditt lösenord for att loggå in och redigera dina tips."
+                    :"Ange ditt namn och välj ett lösenord."}
                 </p>
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
                   <input type="text" placeholder="Ditt namn" value={nameInput}
                     onChange={e=>{setNameInput(e.target.value);setLoginError("");}}
                     style={{width:"100%"}}/>
                   {nameInput&&!participants[nameInput]&&Object.keys(participants).map(n=>n.toLowerCase()).includes(nameInput.trim().toLowerCase())&&nameInput.trim()!==""&&(
-                    <p className="err">Namnet "{nameInput.trim()}" ar redan upptaget. V&auml;lj ett annat namn.</p>
+                    <p className="err">Namnet "{nameInput.trim()}" ar redan upptaget. Välj ett annat namn.</p>
                   )}
-                  <input type="password" placeholder="L&ouml;senord" value={pwInput}
+                  <input type="password" placeholder="Lösenord" value={pwInput}
                     onChange={e=>{setPwInput(e.target.value);setLoginError("");}}
                     onKeyDown={e=>e.key==="Enter"&&handleJoin()}
                     style={{width:"100%"}}/>
                   {loginError&&<p className="err">{loginError}</p>}
                   <button className="btn" onClick={handleJoin} style={{width:"100%"}}>
-                    {nameInput&&participants[nameInput]?"Logg&aring; in":"Registrera och tippa!"}
+                    {nameInput&&participants[nameInput]?"Loggå in":"Registrera och tippa!"}
                   </button>
                   {!nameInput||!participants[nameInput]?(
                     <p className="ss" style={{fontSize:11,color:"#60504a",textAlign:"center"}}>
-                      Redan registrerad? G&aring; till <button onClick={()=>setView("participants")} style={{background:"none",border:"none",color:"#f5c842",cursor:"pointer",fontSize:11,fontFamily:"'Source Sans 3',sans-serif",textDecoration:"underline",padding:0}}>Deltagare</button> och klicka Redigera.
+                      Redan registrerad? Gå till <button onClick={()=>setView("participants")} style={{background:"none",border:"none",color:"#f5c842",cursor:"pointer",fontSize:11,fontFamily:"'Source Sans 3',sans-serif",textDecoration:"underline",padding:0}}>Deltagare</button> och klicka Redigera.
                     </p>
                   ):null}
                 </div>
@@ -731,7 +731,7 @@ export default function App() {
               <div style={{display:"flex",gap:9,alignItems:"center"}}>
                 {saveStatus&&<span className="ss" style={{fontSize:13,color:"#50c878"}}>{saveStatus}</span>}
                 <button className="btn btn-sm" onClick={handleSave}>Spara</button>
-                <button className="btn-ghost" style={{padding:"6px 14px",fontSize:12,borderRadius:6}} onClick={()=>setView("changepw")}>Byt l&ouml;senord</button>
+                <button className="btn-ghost" style={{padding:"6px 14px",fontSize:12,borderRadius:6}} onClick={()=>setView("changepw")}>Byt lösenord</button>
                 <button className="btn-ghost" style={{padding:"6px 14px",fontSize:12,borderRadius:6}} onClick={()=>{setCurrentUser(null);setView("start");}}>Logga ut</button>
               </div>
             </div>
@@ -751,9 +751,9 @@ export default function App() {
 
             <div className="scroll-x" style={{marginBottom:12}}>
               <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.07)",minWidth:"max-content"}}>
-                <button className={"tab"+(tipPhase==="Omg&aring;ng1"?" active":"")} onClick={()=>setTipPhase("Omg&aring;ng1")}>Omg&aring;ng 1</button>
-                <button className={"tab"+(tipPhase==="Omg&aring;ng2"?" active":"")} onClick={()=>setTipPhase("Omg&aring;ng2")}>Omg&aring;ng 2</button>
-                <button className={"tab"+(tipPhase==="Omg&aring;ng3"?" active":"")} onClick={()=>setTipPhase("Omg&aring;ng3")}>Omg&aring;ng 3</button>
+                <button className={"tab"+(tipPhase==="Omgång1"?" active":"")} onClick={()=>setTipPhase("Omgång1")}>Omgång 1</button>
+                <button className={"tab"+(tipPhase==="Omgång2"?" active":"")} onClick={()=>setTipPhase("Omgång2")}>Omgång 2</button>
+                <button className={"tab"+(tipPhase==="Omgång3"?" active":"")} onClick={()=>setTipPhase("Omgång3")}>Omgång 3</button>
                 <button className={"tab"+(tipPhase==="Grupp"?" active":"")} onClick={()=>setTipPhase("Grupp")}>Per grupp</button>
                 {PHASES.filter(p=>p!=="Grupp").map(p=><button key={p} className={"tab"+(tipPhase===p?" active":"")} onClick={()=>setTipPhase(p)}>{p}</button>)}
               </div>
@@ -765,12 +765,12 @@ export default function App() {
                 ))}
               </div>
             )}
-            {(tipPhase==="Omg&aring;ng1"||tipPhase==="Omg&aring;ng2"||tipPhase==="Omg&aring;ng3")&&(
+            {(tipPhase==="Omgång1"||tipPhase==="Omgång2"||tipPhase==="Omgång3")&&(
               <div style={{background:"rgba(245,200,66,0.05)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:8,padding:"8px 14px",marginBottom:14}}>
                 <span className="ss" style={{fontSize:11,color:"#a09070"}}>
-                  {tipPhase==="Omg&aring;ng1"?"Omg&aring;ng 1: 11-17 juni - varje grupps f&ouml;rsta 2 matcher":
-                   tipPhase==="Omg&aring;ng2"?"Omg&aring;ng 2: 18-24 juni - varje grupps matcher 3 och 4":
-                   "Omg&aring;ng 3: 25-27 juni - avg&ouml;rande omg&aring;ng, b&aring;da matcherna i varje grupp spelas samtidigt"}
+                  {tipPhase==="Omgång1"?"Omgång 1: 11-17 juni - varje grupps första 2 matcher":
+                   tipPhase==="Omgång2"?"Omgång 2: 18-24 juni - varje grupps matcher 3 och 4":
+                   "Omgång 3: 25-27 juni - avgörande omgång, båda matcherna i varje grupp spelas samtidigt"}
                 </span>
               </div>
             )}
@@ -797,7 +797,7 @@ export default function App() {
                           onChange={e=>handleTip(m.id,"away",e.target.value)}/>
                       </div>
                       {locked&&<span className="lock-badge">Last</span>}
-                      {!locked&&dl&&<span className="open-badge">St&auml;nger {dl}</span>}
+                      {!locked&&dl&&<span className="open-badge">Stänger {dl}</span>}
                     </div>
                     <span className="tn"><TL team={at} label={disp.away}/></span>
                     {hasResult&&<span className="ss" style={{fontSize:12,fontWeight:700,minWidth:26,textAlign:"center",
@@ -813,9 +813,9 @@ export default function App() {
         {view==="leaderboard"&&(
           <div>
             <h2 className="pf" style={{fontSize:28,color:"#f5c842",fontWeight:700,marginBottom:5}}>Topplista</h2>
-            <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:26}}>Uppdateras n&auml;r resultat registreras</p>
+            <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:26}}>Uppdateras när resultat registreras</p>
             {leaderboard.length===0?(
-              <p className="ss" style={{color:"#60504a",textAlign:"center",padding:"60px 0"}}>Inga tippare &auml;nnu!</p>
+              <p className="ss" style={{color:"#60504a",textAlign:"center",padding:"60px 0"}}>Inga tippare ännu!</p>
             ):(
               <div style={{display:"flex",flexDirection:"column",gap:7}}>
                 {leaderboard.map((e,i)=>(
@@ -829,7 +829,7 @@ export default function App() {
                     </div>
                     <div style={{textAlign:"right"}}>
                       <div className="pf" style={{fontSize:24,fontWeight:900,color:i===0?"#f5c842":"#f0e6d3"}}>{e.points}</div>
-                      <div className="ss" style={{fontSize:10,color:"#60504a"}}>po&auml;ng</div>
+                      <div className="ss" style={{fontSize:10,color:"#60504a"}}>poäng</div>
                     </div>
                   </div>
                 ))}
@@ -868,9 +868,9 @@ export default function App() {
           <div style={{maxWidth:370,margin:"60px auto",textAlign:"center"}}>
             <h2 className="pf" style={{fontSize:22,color:"#f5c842",marginBottom:20,fontWeight:700}}>Admin</h2>
             <div style={{display:"flex",gap:8}}>
-              <input type="password" placeholder="L&ouml;senord" value={adminCode}
+              <input type="password" placeholder="Lösenord" value={adminCode}
                 onChange={e=>setAdminCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleAdminLogin()} style={{flex:1}}/>
-              <button className="btn" onClick={handleAdminLogin}>Logg&aring; in</button>
+              <button className="btn" onClick={handleAdminLogin}>Loggå in</button>
             </div>
           </div>
         )}
@@ -897,7 +897,7 @@ export default function App() {
 
         {view==="tips"&&!currentUser&&(
           <div style={{textAlign:"center",padding:"60px 0"}}>
-            <p className="ss" style={{color:"#a09070",marginBottom:16}}>Logg&aring; in pa startsidan for att se och redigera dina tips.</p>
+            <p className="ss" style={{color:"#a09070",marginBottom:16}}>Loggå in pa startsidan for att se och redigera dina tips.</p>
             <button className="btn" onClick={()=>setView("start")}>Till startsidan</button>
           </div>
         )}
@@ -916,38 +916,38 @@ function ChangePwView({currentUser, passwords, onSaved, onCancel}) {
 
   async function handleSave() {
     setErr(""); setOk("");
-    if(passwords[currentUser] !== oldPw) { setErr("Nuvarande l&ouml;senord stammer inte."); return; }
-    if(newPw.length < 2) { setErr("Nytt l&ouml;senord maste vara minst 2 tecken."); return; }
-    if(newPw !== newPw2) { setErr("De nya l&ouml;senorden matchar inte."); return; }
+    if(passwords[currentUser] !== oldPw) { setErr("Nuvarande lösenord stammer inte."); return; }
+    if(newPw.length < 2) { setErr("Nytt lösenord måste vara minst 2 tecken."); return; }
+    if(newPw !== newPw2) { setErr("De nya lösenorden matchar inte."); return; }
     await fbSet("passwords", {...passwords, [currentUser]: newPw});
-    setOk("L&ouml;senord uppdat! Omdirigerar..."); 
+    setOk("Lösenord uppdat! Omdirigerar..."); 
     setTimeout(onSaved, 1500);
   }
 
   return(
     <div style={{maxWidth:420,margin:"60px auto"}}>
-      <h2 className="pf" style={{fontSize:26,color:"#f5c842",fontWeight:700,marginBottom:6}}>Byt l&ouml;senord</h2>
+      <h2 className="pf" style={{fontSize:26,color:"#f5c842",fontWeight:700,marginBottom:6}}>Byt lösenord</h2>
       <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:24}}>Inloggad som <strong style={{color:"#f0e6d3"}}>{currentUser}</strong></p>
       <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.15)",borderRadius:12,padding:"24px 20px",display:"flex",flexDirection:"column",gap:12}}>
         <div>
-          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:6}}>Nuvarande l&ouml;senord</p>
-          <input type="password" placeholder="Nuvarande l&ouml;senord" value={oldPw}
+          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:6}}>Nuvarande lösenord</p>
+          <input type="password" placeholder="Nuvarande lösenord" value={oldPw}
             onChange={e=>{setOldPw(e.target.value);setErr("");}} style={{width:"100%"}}/>
         </div>
         <div>
-          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:6}}>Nytt l&ouml;senord</p>
-          <input type="password" placeholder="Nytt l&ouml;senord" value={newPw}
+          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:6}}>Nytt lösenord</p>
+          <input type="password" placeholder="Nytt lösenord" value={newPw}
             onChange={e=>{setNewPw(e.target.value);setErr("");}} style={{width:"100%"}}/>
         </div>
         <div>
-          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:6}}>Bekr&auml;fta nytt l&ouml;senord</p>
-          <input type="password" placeholder="Upprepa nytt l&ouml;senord" value={newPw2}
+          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:6}}>Bekräfta nytt lösenord</p>
+          <input type="password" placeholder="Upprepa nytt lösenord" value={newPw2}
             onChange={e=>{setNewPw2(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&handleSave()} style={{width:"100%"}}/>
         </div>
         {err&&<p className="err">{err}</p>}
         {ok&&<p className="ss" style={{color:"#50c878",fontSize:13}}>{ok}</p>}
         <div style={{display:"flex",gap:10,marginTop:4}}>
-          <button className="btn" onClick={handleSave} style={{flex:1}}>Spara nytt l&ouml;senord</button>
+          <button className="btn" onClick={handleSave} style={{flex:1}}>Spara nytt lösenord</button>
           <button className="btn-ghost" onClick={onCancel}>Avbryt</button>
         </div>
       </div>
@@ -962,7 +962,7 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
 
   const slots = [
     {key:"winner", label:"Segrare (VM-guld)",   pts:20, icon:"1"},
-    {key:"second", label:"Tv&aring;&aring; (finalf&ouml;rlorare)", pts:15, icon:"2"},
+    {key:"second", label:"Två (finalförlorare)", pts:15, icon:"2"},
     {key:"third",  label:"Trea (bronsmatch)",     pts:10, icon:"3"},
   ];
 
@@ -977,11 +977,11 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:8}}>
         <div>
           <h3 className="pf" style={{fontSize:17,color:"#f5c842",fontWeight:700}}>Prispall-tips</h3>
-          <p className="ss" style={{fontSize:11,color:"#a09070",marginTop:2}}>Tippa vem som vinner VM, kommer tv&aring;&aring; och trea. 20/15/10 po&auml;ng.</p>
+          <p className="ss" style={{fontSize:11,color:"#a09070",marginTop:2}}>Tippa vem som vinner VM, kommer två och trea. 20/15/10 poäng.</p>
         </div>
         {podiumLocked
           ? <span className="lock-badge">Last</span>
-          : dl && <span className="open-badge">St&auml;nger {dl}</span>
+          : dl && <span className="open-badge">Stänger {dl}</span>
         }
       </div>
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
@@ -1005,7 +1005,7 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
               ):(
                 <select value={podiumTip[s.key]||""} onChange={e=>savePodiumTip(s.key,e.target.value)}
                   style={{flex:1,minWidth:160}}>
-                  <option value="">-- V&auml;lj lag --</option>
+                  <option value="">-- Välj lag --</option>
                   {allTeams.map(t=><option key={t} value={t}>{dn(t)}</option>)}
                 </select>
               )}
@@ -1023,7 +1023,7 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
 // DELTAGARE-VY
 function ParticipantsView({participants, results, deadlines, now, loginAs, onLoggedIn}) {
   const [selName, setSelName] = useState(null);
-  const [selPhase, setSelPhase] = useState("Omg&aring;ng1");
+  const [selPhase, setSelPhase] = useState("Omgång1");
   const [selGroup, setSelGroup] = useState("A");
   const [loginModal, setLoginModal] = useState(null); // name to login as
   const [modalPw, setModalPw] = useState("");
@@ -1036,9 +1036,9 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
   }
 
   function getVisibleMatches() {
-    if(selPhase==="Omg&aring;ng1") return getMatchesForRound(1);
-    if(selPhase==="Omg&aring;ng2") return getMatchesForRound(2);
-    if(selPhase==="Omg&aring;ng3") return getMatchesForRound(3);
+    if(selPhase==="Omgång1") return getMatchesForRound(1);
+    if(selPhase==="Omgång2") return getMatchesForRound(2);
+    if(selPhase==="Omgång3") return getMatchesForRound(3);
     if(selPhase==="Grupp") return GROUP_MATCHES.filter(m=>m.group===selGroup);
     return KNOCKOUT_ALL.filter(m=>m.phase===selPhase);
   }
@@ -1046,7 +1046,7 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
   function handleModalLogin() {
     const ok = loginAs(loginModal, modalPw);
     if(ok) { setLoginModal(null); setModalPw(""); setModalErr(""); onLoggedIn(); }
-    else { setModalErr("Fel l&ouml;senord. Forsok igen."); }
+    else { setModalErr("Fel lösenord. Forsok igen."); }
   }
 
   const matches=getVisibleMatches();
@@ -1062,14 +1062,14 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
           <div style={{background:"#0f1e35",border:"1px solid rgba(245,200,66,0.3)",borderRadius:14,
             padding:"28px 24px",maxWidth:360,width:"90%"}}>
             <h3 className="pf" style={{fontSize:20,color:"#f5c842",fontWeight:700,marginBottom:6}}>Redigera {loginModal}s tips</h3>
-            <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:16}}>Ange l&ouml;senord for {loginModal} for att redigera deras tips.</p>
-            <input type="password" placeholder="L&ouml;senord" value={modalPw}
+            <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:16}}>Ange lösenord for {loginModal} for att redigera deras tips.</p>
+            <input type="password" placeholder="Lösenord" value={modalPw}
               onChange={e=>{setModalPw(e.target.value);setModalErr("");}}
               onKeyDown={e=>e.key==="Enter"&&handleModalLogin()}
               style={{width:"100%",marginBottom:10}}/>
             {modalErr&&<p className="err" style={{marginBottom:10}}>{modalErr}</p>}
             <div style={{display:"flex",gap:10}}>
-              <button className="btn" onClick={handleModalLogin} style={{flex:1}}>Logg&aring; in och redigera</button>
+              <button className="btn" onClick={handleModalLogin} style={{flex:1}}>Loggå in och redigera</button>
               <button className="btn-ghost" onClick={()=>{setLoginModal(null);setModalPw("");setModalErr("");}}>Avbryt</button>
             </div>
           </div>
@@ -1078,7 +1078,7 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
 
       <h2 className="pf" style={{fontSize:28,color:"#f5c842",fontWeight:700,marginBottom:6}}>Deltagare</h2>
       <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:22}}>
-        Klicka pa ett namn for att se tips. Klicka "Redigera" for att logg&aring; in och &auml;ndra tips.
+        Klicka pa ett namn for att se tips. Klicka "Redigera" for att loggå in och ändra tips.
       </p>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:22}}>
         {names.map(name=>(
@@ -1098,16 +1098,16 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
             </button>
           </div>
         ))}
-        {names.length===0&&<p className="ss" style={{color:"#60504a"}}>Inga deltagare &auml;n.</p>}
+        {names.length===0&&<p className="ss" style={{color:"#60504a"}}>Inga deltagare än.</p>}
       </div>
       {selName&&(
         <div>
           <h3 className="pf" style={{fontSize:20,color:"#f5c842",fontWeight:700,marginBottom:14}}>{selName}s tips</h3>
           <div className="scroll-x" style={{marginBottom:12}}>
             <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.07)",minWidth:"max-content"}}>
-              <button className={"tab"+(selPhase==="Omg&aring;ng1"?" active":"")} onClick={()=>setSelPhase("Omg&aring;ng1")}>Omg&aring;ng 1</button>
-              <button className={"tab"+(selPhase==="Omg&aring;ng2"?" active":"")} onClick={()=>setSelPhase("Omg&aring;ng2")}>Omg&aring;ng 2</button>
-              <button className={"tab"+(selPhase==="Omg&aring;ng3"?" active":"")} onClick={()=>setSelPhase("Omg&aring;ng3")}>Omg&aring;ng 3</button>
+              <button className={"tab"+(selPhase==="Omgång1"?" active":"")} onClick={()=>setSelPhase("Omgång1")}>Omgång 1</button>
+              <button className={"tab"+(selPhase==="Omgång2"?" active":"")} onClick={()=>setSelPhase("Omgång2")}>Omgång 2</button>
+              <button className={"tab"+(selPhase==="Omgång3"?" active":"")} onClick={()=>setSelPhase("Omgång3")}>Omgång 3</button>
               <button className={"tab"+(selPhase==="Grupp"?" active":"")} onClick={()=>setSelPhase("Grupp")}>Per grupp</button>
               {PHASES.filter(p=>p!=="Grupp").map(p=>(
                 <button key={p} className={"tab"+(selPhase===p?" active":"")} onClick={()=>setSelPhase(p)}>{p}</button>
@@ -1147,7 +1147,7 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
                     ):visible&&!hasTip?(
                       <span className="ss" style={{fontSize:11,color:"#a05050"}}>Ej tippat</span>
                     ):(
-                      <span className="ss" style={{fontSize:11,color:"#50403a"}}>D&ouml;lda</span>
+                      <span className="ss" style={{fontSize:11,color:"#50403a"}}>Dölda</span>
                     )}
                   </div>
                   {aTeam&&<span className="tn" style={{color:visible?"#f0e6d3":"#604848"}}>{dn(aTeam)}</span>}
@@ -1165,7 +1165,7 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
       )}
       {!selName&&names.length>0&&(
         <div style={{textAlign:"center",padding:"40px 0",color:"#60504a"}}>
-          <p className="ss" style={{fontSize:14}}>V&auml;lj en deltagare ovan for att se deras tips.</p>
+          <p className="ss" style={{fontSize:14}}>Välj en deltagare ovan for att se deras tips.</p>
         </div>
       )}
     </div>
@@ -1433,12 +1433,12 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
       {adminTab==="thirds"&&(
         <div>
           <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:18,lineHeight:1.7}}>
-            N&auml;r gruppspelet ar klart laser FIFA bracketen (27 juni). Tilldela de 8 basta treorna till r&auml;tt gruppsegrare ned&auml;n.
+            När gruppspelet ar klart laser FIFA bracketen (27 juni). Tilldela de 8 basta treorna till rätt gruppsegrare nedän.
           </p>
           <div style={{background:"rgba(245,200,66,0.05)",border:"1px solid rgba(245,200,66,0.15)",borderRadius:9,padding:"12px 16px",marginBottom:20}}>
             <p className="ss" style={{fontSize:12,color:"#f5c842",fontWeight:700,marginBottom:8}}>Automatisk ranking (topp 8 treor just nu):</p>
             {bestThirds.length===0
-              ?<p className="ss" style={{fontSize:12,color:"#60504a"}}>Inga gruppresultat registrerade &auml;n.</p>
+              ?<p className="ss" style={{fontSize:12,color:"#60504a"}}>Inga gruppresultat registrerade än.</p>
               :bestThirds.map((t,i)=>(
                 <div key={t.team} style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
                   <span className="fc">{gc(t.team)}</span>
@@ -1449,7 +1449,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
             }
           </div>
           <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:14,lineHeight:1.7}}>
-            Varje trea moter en gruppsegrare. V&auml;lj r&auml;tt trea for varje match n&auml;r FIFA offentliggor bracketen den 27 juni.
+            Varje trea moter en gruppsegrare. Välj rätt trea for varje match när FIFA offentliggor bracketen den 27 juni.
           </p>
           {R32_THIRDS.map(m=>{
             const groupWinner = labelFromKey(m.homeKey);
@@ -1465,9 +1465,9 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
                   </div>
                   <span className="ss" style={{fontSize:13,color:"#60504a"}}>vs</span>
                   <div style={{flex:1,minWidth:160}}>
-                    <p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:4}}>V&auml;lj trea ({m.awayKey}):</p>
+                    <p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:4}}>Välj trea ({m.awayKey}):</p>
                     <select value={thirdOverrides[m.awayKey]||""} onChange={e=>handleThirdOverride(m.awayKey,e.target.value)} style={{width:"100%"}}>
-                      <option value="">-- V&auml;lj trea --</option>
+                      <option value="">-- Välj trea --</option>
                       {bestThirds.map(t=><option key={t.team} value={t.team}>{dn(t.team)} (Grupp {t.group}, {t.pts}p)</option>)}
                     </select>
                   </div>
@@ -1481,21 +1481,21 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
       {adminTab==="deadlines"&&(
         <div>
           <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:18,lineHeight:1.7}}>
-            S&auml;tt deadline per match eller per omg&aring;ng. N&auml;r deadline passerar l&aring;ses tipsen automatiskt.
+            Sätt deadline per match eller per omgång. När deadline passerar låses tipsen automatiskt.
           </p>
-          {/* Bulk per omg&aring;ng */}
+          {/* Bulk per omgång */}
           <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:10,padding:"16px",marginBottom:20}}>
-            <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:4}}>S&auml;tt deadline for hel omg&aring;ng</p>
-            <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:12}}>Forinstallda tider = f&ouml;rsta matchen i varje omg&aring;ng. &Auml;ndras vid behov.</p>
+            <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:4}}>Sätt deadline for hel omgång</p>
+            <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:12}}>Forinstallda tider = första matchen i varje omgång. Ändras vid behov.</p>
             {[1,2,3].map(r=>(
               <div key={r} style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap",marginBottom:10}}>
-                <span className="ss" style={{fontSize:13,fontWeight:700,color:"#f0e6d3",minWidth:80}}>Omg&aring;ng {r}:</span>
+                <span className="ss" style={{fontSize:13,fontWeight:700,color:"#f0e6d3",minWidth:80}}>Omgång {r}:</span>
                 <span className="ss" style={{fontSize:11,color:"#60504a",flex:1}}>{getMatchesForRound(r).length} matcher</span>
                 <input type="datetime-local" value={rdlInput["r"+r]||""}
                   onChange={e=>setRdlInput(prev=>({...prev,["r"+r]:e.target.value}))}/>
                 <button className="btn btn-sm" onClick={()=>{
                   const v=rdlInput["r"+r]; if(v) bulkRoundDeadline(r,new Date(v).toISOString());
-                }}>S&auml;tt for alla {getMatchesForRound(r).length} matcher</button>
+                }}>Sätt for alla {getMatchesForRound(r).length} matcher</button>
               </div>
             ))}
           </div>
@@ -1522,7 +1522,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
                   <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap",marginBottom:8}}>
                     <span className="ss" style={{fontSize:13,fontWeight:600,color:"#f0e6d3",flex:1}}>{disp.home} - {disp.away}</span>
                     {locked&&<span className="lock-badge">Last</span>}
-                    {!locked&&dl&&<span className="open-badge">St&auml;nger {fmtDl(m.id)}</span>}
+                    {!locked&&dl&&<span className="open-badge">Stänger {fmtDl(m.id)}</span>}
                     {!dl&&<span className="ss" style={{fontSize:10,color:"#60504a"}}>Ingen deadline</span>}
                   </div>
                   <div style={{display:"flex",gap:7,alignItems:"center",flexWrap:"wrap"}}>
@@ -1542,19 +1542,19 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
         <div>
           <h3 className="pf" style={{fontSize:18,color:"#f5c842",fontWeight:700,marginBottom:6}}>Prispall-administration</h3>
           <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:20,lineHeight:1.7}}>
-            S&auml;tt deadline for prispall-tips och registrera officiellt utfall n&auml;r VM ar klart.
+            Sätt deadline for prispall-tips och registrera officiellt utfall när VM ar klart.
           </p>
 
           {/* Deadline */}
           <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:10,padding:"16px",marginBottom:20}}>
             <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:10}}>Deadline for prispall-tips</p>
-            <p className="ss" style={{fontSize:11,color:"#a09070",marginBottom:12}}>S&auml;tt samma deadline som Omg&aring;ng 1 (fore f&ouml;rsta matchen).</p>
+            <p className="ss" style={{fontSize:11,color:"#a09070",marginBottom:12}}>Sätt samma deadline som Omgång 1 (fore första matchen).</p>
             <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
               <input type="datetime-local" value={pdlInput}
                 onChange={e=>setPdlInput(e.target.value)}/>
               <button className="btn btn-sm" onClick={()=>{if(pdlInput)savePodiumDeadline(new Date(pdlInput).toISOString());}}>Spara deadline</button>
               {podiumLocked&&<span className="lock-badge">Last nu</span>}
-              {!podiumLocked&&podiumDeadline&&<span className="open-badge">St&auml;nger {new Date(podiumDeadline).toLocaleString("sv-SE",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}</span>}
+              {!podiumLocked&&podiumDeadline&&<span className="open-badge">Stänger {new Date(podiumDeadline).toLocaleString("sv-SE",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}</span>}
             </div>
           </div>
 
@@ -1563,13 +1563,13 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
             <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:10}}>Registrera officiellt utfall (efter finalen)</p>
             {[
               {key:"winner",label:"Segrare (VM-guld)",pts:20},
-              {key:"second",label:"Tv&aring;&aring; (finalf&ouml;rlorare)",pts:15},
+              {key:"second",label:"Två (finalförlorare)",pts:15},
               {key:"third", label:"Trea (bronsmatch-vinnare)",pts:10},
             ].map(s=>(
               <div key={s.key} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10,flexWrap:"wrap"}}>
                 <span className="ss" style={{fontSize:13,fontWeight:600,color:"#f0e6d3",minWidth:200}}>{s.label} ({s.pts}p):</span>
                 <select value={podiumResults[s.key]||""} onChange={e=>savePodiumResults(s.key,e.target.value)} style={{flex:1,minWidth:160}}>
-                  <option value="">-- V&auml;lj lag --</option>
+                  <option value="">-- Välj lag --</option>
                   {allTeams.map(t=><option key={t} value={t}>{dn(t)}</option>)}
                 </select>
                 {podiumResults[s.key]&&<span className="ss" style={{fontSize:12,color:"#50c878",fontWeight:700}}>{dn(podiumResults[s.key])}</span>}
@@ -1581,12 +1581,12 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
           <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:10,padding:"16px"}}>
             <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:10}}>Deltagarnas prispall-tips</p>
             {Object.keys(podiumTips).length===0?(
-              <p className="ss" style={{color:"#60504a",fontSize:12}}>Inga prispall-tips inlagda &auml;n.</p>
+              <p className="ss" style={{color:"#60504a",fontSize:12}}>Inga prispall-tips inlagda än.</p>
             ):(
               <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
                 <thead>
                   <tr style={{borderBottom:"1px solid rgba(255,255,255,0.07)"}}>
-                    {["Deltagare","Segrare","Tv&aring;&aring;","Trea","Po&auml;ng"].map(h=>(
+                    {["Deltagare","Segrare","Två","Trea","Poäng"].map(h=>(
                       <th key={h} style={{padding:"6px 10px",textAlign:"left",color:"#60504a",fontFamily:"'Source Sans 3',sans-serif",fontWeight:700,fontSize:10,textTransform:"uppercase"}}>{h}</th>
                     ))}
                   </tr>
@@ -1641,7 +1641,7 @@ function SiteInfoAdmin({siteInfo, saveSiteInfo}) {
     <div>
       <h3 className="pf" style={{fontSize:18,color:"#f5c842",fontWeight:700,marginBottom:6}}>Startsida - meddelande och vinstpott</h3>
       <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:24,lineHeight:1.7}}>
-        Meddelandet och vinstpotten visas pa startsidan for alla bes&ouml;kare. Lamma blankt for att d&ouml;ljas.
+        Meddelandet och vinstpotten visas pa startsidan for alla besökare. Lamma blankt for att döljas.
       </p>
       <div style={{display:"flex",flexDirection:"column",gap:16,maxWidth:560}}>
         <div>
@@ -1652,13 +1652,13 @@ function SiteInfoAdmin({siteInfo, saveSiteInfo}) {
               border:"1px solid rgba(255,200,80,0.25)",borderRadius:6,color:"#f0e6d3",
               padding:"10px 12px",fontSize:14,fontFamily:"'Source Sans 3',sans-serif",
               outline:"none",resize:"vertical",lineHeight:1.6}}/>
-          <p className="ss" style={{fontSize:11,color:"#60504a",marginTop:4}}>Visas i en gul ruta pa startsid&auml;n. Lamma blankt for att d&ouml;ljas.</p>
+          <p className="ss" style={{fontSize:11,color:"#60504a",marginTop:4}}>Visas i en gul ruta pa startsidän. Lamma blankt for att döljas.</p>
         </div>
         <div>
           <p className="ss" style={{fontSize:13,fontWeight:700,color:"#50c878",marginBottom:8}}>Vinstpott</p>
           <input type="text" placeholder="T.ex. 500 kr eller En runda pa krogen!" value={pot}
             onChange={e=>setPot(e.target.value)} style={{width:"100%"}}/>
-          <p className="ss" style={{fontSize:11,color:"#60504a",marginTop:4}}>Visas i en gron ruta pa startsid&auml;n. Lamma blankt for att d&ouml;ljas.</p>
+          <p className="ss" style={{fontSize:11,color:"#60504a",marginTop:4}}>Visas i en gron ruta pa startsidän. Lamma blankt for att döljas.</p>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
           <button className="btn" onClick={handleSave}>Spara</button>
@@ -1679,9 +1679,9 @@ function AdminParticipants({participants, deleteParticipant, resetPassword, appr
 
   async function handleReset() {
     if(!newPw||newPw.length<2){setPwErr("Ange minst 2 tecken.");return;}
-    if(newPw!==newPw2){setPwErr("L&ouml;senorden matchar inte.");return;}
+    if(newPw!==newPw2){setPwErr("Lösenorden matchar inte.");return;}
     const ok = await resetPassword(resetName, newPw);
-    if(ok){setPwOk("L&ouml;senord &aring;terstalt!"); setNewPw(""); setNewPw2(""); setPwErr("");
+    if(ok){setPwOk("Lösenord återstalt!"); setNewPw(""); setNewPw2(""); setPwErr("");
       setTimeout(()=>{setPwOk("");setResetName(null);},2000);}
     else setPwErr("Nagot gick fel.");
   }
@@ -1693,7 +1693,7 @@ function AdminParticipants({participants, deleteParticipant, resetPassword, appr
         {Object.keys(participants).length} registrerade deltagare.
       </p>
       {Object.keys(participants).length===0?(
-        <p className="ss" style={{color:"#60504a"}}>Inga deltagare &auml;n.</p>
+        <p className="ss" style={{color:"#60504a"}}>Inga deltagare än.</p>
       ):(
         <div style={{display:"flex",flexDirection:"column",gap:8}}>
           {Object.keys(participants).sort().map(name=>{
@@ -1707,7 +1707,7 @@ function AdminParticipants({participants, deleteParticipant, resetPassword, appr
                     <input type="checkbox" checked={!!approved[name]} onChange={()=>toggleApproved(name)}
                       style={{width:16,height:16,accentColor:"#50c878",cursor:"pointer"}}/>
                     <span className="ss" style={{fontSize:12,color:approved[name]?"#50c878":"#a09070",fontWeight:700,whiteSpace:"nowrap"}}>
-                      {approved[name]?"Godk&auml;nd":"Ej godk&auml;nd"}
+                      {approved[name]?"Godkänd":"Ej godkänd"}
                     </span>
                   </label>
                   <div style={{flex:1}}>
@@ -1716,17 +1716,17 @@ function AdminParticipants({participants, deleteParticipant, resetPassword, appr
                   </div>
                   <button className="btn btn-sm" style={{background:"rgba(245,200,66,0.15)",color:"#f5c842",border:"1px solid rgba(245,200,66,0.3)"}}
                     onClick={()=>{setResetName(isResetting?null:name);setNewPw("");setNewPw2("");setPwErr("");setPwOk("");}}>
-                    {isResetting?"Avbryt":"&Aring;terst&auml;ll l&ouml;senord"}
+                    {isResetting?"Avbryt":"Återställ lösenord"}
                   </button>
                   <button className="btn btn-sm btn-danger" onClick={()=>deleteParticipant(name)}>Ta bort</button>
                 </div>
                 {isResetting&&(
                   <div style={{marginTop:14,paddingTop:12,borderTop:"1px solid rgba(255,255,255,0.07)"}}>
-                    <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:10}}>S&auml;tt nytt l&ouml;senord for {name}:</p>
+                    <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:10}}>Sätt nytt lösenord for {name}:</p>
                     <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
-                      <input type="password" placeholder="Nytt l&ouml;senord" value={newPw}
+                      <input type="password" placeholder="Nytt lösenord" value={newPw}
                         onChange={e=>{setNewPw(e.target.value);setPwErr("");setPwOk("");}} style={{flex:1,minWidth:140}}/>
-                      <input type="password" placeholder="Bekr&auml;fta l&ouml;senord" value={newPw2}
+                      <input type="password" placeholder="Bekräfta lösenord" value={newPw2}
                         onChange={e=>{setNewPw2(e.target.value);setPwErr("");setPwOk("");}} style={{flex:1,minWidth:140}}/>
                       <button className="btn btn-sm" onClick={handleReset}>Spara</button>
                     </div>
@@ -1772,7 +1772,7 @@ function BracketView({placements, results, getTeams, bestThirds}) {
   return(
     <div>
       <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:6}}>Slutspelstrad</h2>
-      <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:20}}>VM 2026: 32 lag - 5 omg&aring;ng&aring;r till final</p>
+      <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:20}}>VM 2026: 32 lag - 5 omgångår till final</p>
       <div style={{overflowX:"auto",paddingBottom:16}}>
         <div style={{display:"flex",gap:12,alignItems:"flex-start",minWidth:1100}}>
           <Col><H t="Sextondelsfinal"/>{["R32_1","R32_3","R32_5","R32_7"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}</Col>
