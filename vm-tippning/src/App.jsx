@@ -649,14 +649,7 @@ export default function App() {
               </div>
             </div>
 
-            <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:20}}>
-              <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:12,padding:"14px 28px",textAlign:"center"}}>
-                <div className="pf" style={{fontSize:20,color:"#f5c842",fontWeight:700,marginBottom:2}}>{Object.keys(participants).length}</div>
-                <div className="ss" style={{fontSize:12,color:"#60504a"}}>registrerade tippare</div>
-              </div>
-            </div>
-
-            {/* VINSTPOTT - hogst upp */}
+            {/* VINSTPOTT */}
             {siteInfo.prizePot&&(
               <div style={{background:"rgba(80,200,120,0.08)",border:"1px solid rgba(80,200,120,0.3)",borderRadius:12,padding:"16px 24px",maxWidth:500,margin:"0 auto 16px",textAlign:"center"}}>
                 <p className="ss" style={{fontSize:11,color:"#50c878",fontWeight:700,marginBottom:6,textTransform:"uppercase",letterSpacing:.8}}>Vinstpott</p>
@@ -672,6 +665,14 @@ export default function App() {
                 <p className="ss" style={{fontSize:14,color:"#f0e6d3",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{siteInfo.message}</p>
               </div>
             )}
+
+            {/* ANTAL DELTAGARE */}
+            <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:20}}>
+              <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:12,padding:"14px 28px",textAlign:"center"}}>
+                <div className="pf" style={{fontSize:20,color:"#f5c842",fontWeight:700,marginBottom:2}}>{Object.keys(participants).length}</div>
+                <div className="ss" style={{fontSize:12,color:"#60504a"}}>registrerade tippare</div>
+              </div>
+            </div>
 
             {currentUser?(
               <div style={{background:"rgba(80,200,120,0.08)",border:"1px solid rgba(80,200,120,0.25)",borderRadius:14,padding:"20px 24px",maxWidth:400,margin:"0 auto 20px"}}>
@@ -715,18 +716,7 @@ export default function App() {
               </div>
             )}
 
-            <div style={{background:"rgba(245,200,66,0.05)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:9,padding:"13px 17px",maxWidth:400,margin:"0 auto",textAlign:"left"}}>
-              <p className="ss" style={{fontSize:11,color:"#a09070",lineHeight:1.8}}>
-                <strong style={{color:"#f5c842"}}>Pongsystem - matcher:</strong><br/>
-                3 poang - Exakt ratt resultat<br/>
-                1 poang - Ratt utfall (vinst/oavgjort/forlust)<br/>
-                0 poang - Fel<br/>
-                <strong style={{color:"#f5c842"}}>Prispall-tips (innan turnering):</strong><br/>
-                20 poang - Ratt segrare (VM-guld)<br/>
-                15 poang - Ratt tvaa (finalforlorare)<br/>
-                10 poang - Ratt trea (bronsmatch-vinnare)
-              </p>
-            </div>
+
           </div>
         )}
 
