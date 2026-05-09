@@ -1777,32 +1777,68 @@ function BracketView({placements, results, getTeams, bestThirds}) {
   return(
     <div>
       <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:6}}>Slutspelstrad</h2>
-      <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:20}}>VM 2026: 32 lag - 5 omgångår till final</p>
+      <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:20}}>VM 2026: 32 lag - 5 omgangar till final</p>
+      <p className="ss" style={{fontSize:11,color:"#80a8f0",marginBottom:16}}>
+        * Trea (T) = en av de 8 basta treorna - admin placerar ut dem nar FIFA lastlar bracketen 27 juni
+      </p>
       <div style={{overflowX:"auto",paddingBottom:16}}>
-        <div style={{display:"flex",gap:12,alignItems:"flex-start",minWidth:1100}}>
-          <Col><H t="Sextondelsfinal"/>{["R32_1","R32_3","R32_5","R32_7"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}</Col>
-          <Col pt={16}><H t="Attondel"/>{["R16_1","R16_2"].map(id=><div key={id} style={{marginBottom:8}}><MB mid={id}/></div>)}</Col>
-          <Col pt={44}><H t="Kvartsfinal"/><div style={{marginBottom:20}}><MB mid="QF_1"/></div></Col>
-          <Col pt={76}><H t="Semifinal"/><div style={{marginBottom:32}}><MB mid="SF_1"/></div></Col>
-          <Col pt={100}><H t="Final" gold={true}/><MB mid="FINAL"/><div style={{marginTop:16}}><H t="Bronsmatch"/><MB mid="BRONS"/></div></Col>
-          <Col pt={76}><H t="Semifinal"/><MB mid="SF_2"/></Col>
-          <Col pt={44}><H t="Kvartsfinal"/><MB mid="QF_2"/></Col>
-          <Col pt={16}><H t="Attondel"/>{["R16_3","R16_4"].map(id=><div key={id} style={{marginBottom:8}}><MB mid={id}/></div>)}</Col>
-          <Col><H t="Sextondelsfinal"/>{["R32_9","R32_11","R32_2","R32_4"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}</Col>
-        </div>
-      </div>
-      <div style={{marginTop:28,borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:20}}>
-        <div style={{fontSize:11,fontFamily:"'Source Sans 3',sans-serif",color:"#80a8f0",fontWeight:700,textTransform:"uppercase",letterSpacing:.8,marginBottom:14}}>
-          De 8 basta treornas del av bracketen
-        </div>
-        <div style={{overflowX:"auto",paddingBottom:8}}>
-          <div style={{display:"flex",gap:12,alignItems:"flex-start",minWidth:900}}>
-            <Col><H t="Sextondelsfinal"/>{["R32_13","R32_15","R32_6","R32_8"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}</Col>
-            <Col pt={16}><H t="Attondel"/>{["R16_7","R16_8"].map(id=><div key={id} style={{marginBottom:8}}><MB mid={id}/></div>)}</Col>
-            <Col pt={44}><H t="Kvartsfinal"/><MB mid="QF_3"/></Col>
-            <Col pt={16}><H t="Attondel"/>{["R16_5","R16_6"].map(id=><div key={id} style={{marginBottom:8}}><MB mid={id}/></div>)}</Col>
-            <Col><H t="Sextondelsfinal"/>{["R32_14","R32_16","R32_10","R32_12"].map(id=><div key={id} style={{marginBottom:3}}><MB mid={id}/></div>)}</Col>
-          </div>
+        <div style={{display:"flex",gap:10,alignItems:"flex-start",minWidth:1300}}>
+
+          {/* VANSTER HALVA: R32_1,3,5,7,9,11,13,15 -> R16_1..4 -> QF_1,2 -> SF_1 */}
+          <Col>
+            <H t="Sextondelsfinal"/>
+            {["R32_1","R32_3","R32_5","R32_7","R32_9","R32_11","R32_13","R32_15"].map(id=>(
+              <div key={id} style={{marginBottom:3}}><MB mid={id}/></div>
+            ))}
+          </Col>
+          <Col pt={20}>
+            <H t="Attondel"/>
+            {["R16_1","R16_2","R16_3","R16_4"].map(id=>(
+              <div key={id} style={{marginBottom:10}}><MB mid={id}/></div>
+            ))}
+          </Col>
+          <Col pt={56}>
+            <H t="Kvartsfinal"/>
+            {["QF_1","QF_2"].map(id=>(
+              <div key={id} style={{marginBottom:28}}><MB mid={id}/></div>
+            ))}
+          </Col>
+          <Col pt={100}>
+            <H t="Semifinal"/>
+            <MB mid="SF_1"/>
+          </Col>
+
+          {/* MITTEN: Final + Bronsmatch */}
+          <Col pt={130}>
+            <H t="Final" gold={true}/>
+            <MB mid="FINAL"/>
+            <div style={{marginTop:24}}><H t="Bronsmatch"/><MB mid="BRONS"/></div>
+          </Col>
+
+          {/* HOGER HALVA: SF_2 -> QF_3,4 -> R16_5..8 -> R32_2,4,6,8,10,12,14,16 */}
+          <Col pt={100}>
+            <H t="Semifinal"/>
+            <MB mid="SF_2"/>
+          </Col>
+          <Col pt={56}>
+            <H t="Kvartsfinal"/>
+            {["QF_3","QF_4"].map(id=>(
+              <div key={id} style={{marginBottom:28}}><MB mid={id}/></div>
+            ))}
+          </Col>
+          <Col pt={20}>
+            <H t="Attondel"/>
+            {["R16_5","R16_6","R16_7","R16_8"].map(id=>(
+              <div key={id} style={{marginBottom:10}}><MB mid={id}/></div>
+            ))}
+          </Col>
+          <Col>
+            <H t="Sextondelsfinal"/>
+            {["R32_2","R32_4","R32_6","R32_8","R32_10","R32_12","R32_14","R32_16"].map(id=>(
+              <div key={id} style={{marginBottom:3}}><MB mid={id}/></div>
+            ))}
+          </Col>
+
         </div>
       </div>
       <div style={{marginTop:28,borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:20}}>
