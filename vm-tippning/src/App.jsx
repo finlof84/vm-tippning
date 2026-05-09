@@ -636,13 +636,13 @@ export default function App() {
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>&#128100;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Registrera dig och betala</strong> - Skapa din användare och swisha xx kr till 0700-000000. Du syns på topplistan när admin godkänt din betalning.
+                    <strong style={{color:"#f0e6d3"}}>Registrera dig och betala</strong> - Skapa din användare och swisha 60 kr till 0700-000000 (gratis för HIK P14). Hälften går till vinstpotten och hälften till P14s lagkassa. Du syns på topplistan när admin godkänt din betalning.
                   </p>
                 </div>
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>&#9917;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Tippa alla 104 matcher</strong> - gruppspel och slutspel. Ange hur många mål du tror varje lag gör.
+                    <strong style={{color:"#f0e6d3"}}>Tippa ett resultat för varje match</strong> - gruppspel och slutspel.
                   </p>
                 </div>
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
