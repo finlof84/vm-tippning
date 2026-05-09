@@ -648,7 +648,11 @@ export default function App() {
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>&#128274;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Deadlines</strong> - Omgång 1 låses 11 juni kl 21:00. Omgång 2 låses 18 juni kl 19:00. Omgång 3 låses 24 juni kl 21:00. Slutspelsmatcher låses individuellt vid matchstart.
+                    <strong style={{color:"#f0e6d3"}}>Deadlines</strong><br/>
+                    &nbsp;&nbsp;&#x1F4C5; Omgång 1 &mdash; 11 juni kl 21:00<br/>
+                    &nbsp;&nbsp;&#x1F4C5; Omgång 2 &mdash; 18 juni kl 19:00<br/>
+                    &nbsp;&nbsp;&#x1F4C5; Omgång 3 &mdash; 24 juni kl 21:00<br/>
+                    &nbsp;&nbsp;&#x1F3C6; Slutspel &mdash; låses individuellt vid matchstart
                   </p>
                 </div>
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
