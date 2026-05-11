@@ -649,9 +649,9 @@ export default function App() {
                   <span style={{fontSize:16,flexShrink:0}}>&#128274;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
                     <strong style={{color:"#f0e6d3"}}>Deadlines</strong><br/>
-                    &nbsp;&nbsp;&#x1F4C5; Omgång 1 &mdash; 11 juni kl 21:00<br/>
-                    &nbsp;&nbsp;&#x1F4C5; Omgång 2 &mdash; 18 juni kl 19:00<br/>
-                    &nbsp;&nbsp;&#x1F4C5; Omgång 3 &mdash; 24 juni kl 21:00<br/>
+                    &nbsp;&nbsp;&#x1F4C5; Gruppspel omgång 1 &mdash; 11 juni kl 21:00<br/>
+                    &nbsp;&nbsp;&#x1F4C5; Gruppspel omgång 2 &mdash; 18 juni kl 19:00<br/>
+                    &nbsp;&nbsp;&#x1F4C5; Gruppspel omgång 3 &mdash; 24 juni kl 21:00<br/>
                     &nbsp;&nbsp;&#x1F3C6; Slutspel &mdash; låses individuellt vid matchstart
                   </p>
                 </div>
@@ -1179,8 +1179,21 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
 // RESULTAT-VY
 function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
   const [tab, setTab] = useState("groups");
+  const [groupSubTab, setGroupSubTab] = useState("omgang1");
   const [selGroup, setSelGroup] = useState("A");
   const [koPhase, setKoPhase] = useState("Sextondelsfinal");
+
+  // Helper: label for a knockout match (e.g. "Vinnare grupp E - Tvåan grupp F")
+  function koLabel(m) {
+    function keyLabel(key) {
+      if (/^[A-L]0$/.test(key)) return "Etta grupp "+key[0];
+      if (/^[A-L]1$/.test(key)) return "Tvåan grupp "+key[0];
+      if (/^THIRD_[1-8]$/.test(key)) return "Bästa trea #"+key[6];
+      if (key.endsWith("L")) return "Förlorare "+key.slice(0,-1);
+      return "Vinnare "+key;
+    }
+    return keyLabel(m.homeKey)+" &mdash; "+keyLabel(m.awayKey);
+  }
 
   function GroupTable({group}) {
     const matches=GROUP_MATCHES.filter(m=>m.group===group);
@@ -1265,29 +1278,82 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
     );
   }
 
+  function RoundMatches({round}) {
+    const rMatches = sortByDeadline(getMatchesForRound(round));
+    const groups = [...new Set(rMatches.map(m=>m.group))].sort();
+    return(
+      <div>
+        {groups.map(g=>{
+          const gMatches = rMatches.filter(m=>m.group===g);
+          return(
+            <div key={g} style={{marginBottom:16}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                <span className="ss" style={{fontSize:11,fontWeight:700,color:"#f5c842",textTransform:"uppercase",letterSpacing:.6}}>Grupp {g}</span>
+                <div style={{flex:1,height:1,background:"rgba(255,255,255,0.06)"}}/>
+              </div>
+              {gMatches.map(m=>{
+                const r=results[m.id]; const played=r&&r.home!=""&&r.away!="";
+                return(
+                  <div key={m.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 2px",marginBottom:4}}>
+                    <span className="fc">{gc(m.home)}</span>
+                    <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc",textAlign:"right"}}>{dn(m.home)}</span>
+                    <div style={{minWidth:64,textAlign:"center",background:played?"rgba(255,255,255,0.09)":"rgba(255,255,255,0.03)",
+                      border:"1px solid "+(played?"rgba(255,255,255,0.15)":"rgba(255,255,255,0.05)"),borderRadius:8,padding:"4px 10px"}}>
+                      {played?<span className="pf" style={{fontSize:15,fontWeight:700,color:"#f0e6d3"}}>{r.home} - {r.away}</span>
+                        :<span className="ss" style={{fontSize:11,color:"#50403a"}}>vs</span>}
+                    </div>
+                    <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc"}}>{dn(m.away)}</span>
+                    <span className="fc">{gc(m.away)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   const koPhases=["Sextondelsfinal","Attondelsfinaler","Kvartsfinal","Semifinal","Bronsmatch","Final"];
-  const koMatches=KNOCKOUT_ALL.filter(m=>m.phase===koPhase);
+  const koMatches=sortByDeadline(KNOCKOUT_ALL.filter(m=>m.phase===koPhase));
 
   return(
     <div>
       <h2 className="pf" style={{fontSize:28,color:"#f5c842",fontWeight:700,marginBottom:6}}>Resultat</h2>
-      <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:22}}>Officiella matchresultat och gruppstallningar</p>
+      <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:22}}>Officiella matchresultat och gruppställningar</p>
       <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.08)",marginBottom:22}}>
-        {[["groups","Gruppspel"],["knockout","Slutspel"],["thirds","Basta treor"]].map(([k,l])=>(
+        {[["groups","Gruppspel"],["knockout","Slutspel"],["thirds","Bästa treor"]].map(([k,l])=>(
           <button key={k} className={"tab"+(tab===k?" active":"")} onClick={()=>setTab(k)}>{l}</button>
         ))}
       </div>
+
+      {/* -- GRUPPSPEL -- */}
       {tab==="groups"&&(
         <div>
-          <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:20}}>
-            {Object.keys(GROUPS).map(g=>(
-              <button key={g} className={"gbtn"+(selGroup===g?" active":"")} onClick={()=>setSelGroup(g)}>Grupp {g}</button>
+          {/* Sub-tabs: Omgång 1/2/3 + Per grupp */}
+          <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",marginBottom:18}}>
+            {[["omgang1","Omgång 1"],["omgang2","Omgång 2"],["omgang3","Omgång 3"],["pergrupp","Per grupp"]].map(([k,l])=>(
+              <button key={k} className={"tab"+(groupSubTab===k?" active":"")} onClick={()=>setGroupSubTab(k)}>{l}</button>
             ))}
           </div>
-          <GroupTable group={selGroup}/>
-          <p className="ss" style={{fontSize:11,color:"#504840",marginTop:-8}}>&gt; = vidare | * = basta trea (vidare)</p>
+          {groupSubTab==="omgang1"&&<RoundMatches round={1}/>}
+          {groupSubTab==="omgang2"&&<RoundMatches round={2}/>}
+          {groupSubTab==="omgang3"&&<RoundMatches round={3}/>}
+          {groupSubTab==="pergrupp"&&(
+            <div>
+              <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:20}}>
+                {Object.keys(GROUPS).map(g=>(
+                  <button key={g} className={"gbtn"+(selGroup===g?" active":"")} onClick={()=>setSelGroup(g)}>Grupp {g}</button>
+                ))}
+              </div>
+              <GroupTable group={selGroup}/>
+              <p className="ss" style={{fontSize:11,color:"#504840",marginTop:-8}}>&gt; = vidare | * = bästa trea (vidare)</p>
+            </div>
+          )}
         </div>
       )}
+
+      {/* -- SLUTSPEL -- */}
       {tab==="knockout"&&(
         <div>
           <div className="scroll-x" style={{marginBottom:18}}>
@@ -1302,31 +1368,37 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
               const gh=played?parseInt(r.home):null; const ga=played?parseInt(r.away):null;
               const homeWon=played&&gh>ga; const awayWon=played&&ga>gh;
               const ht=getTeams(m.id).home; const at=getTeams(m.id).away;
+              const matchLabel=koLabel(m);
               return(
                 <div key={m.id} style={{background:played?"rgba(255,255,255,0.05)":"rgba(255,255,255,0.03)",
                   border:"1px solid "+(played?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.05)"),
-                  borderRadius:11,padding:"14px 18px",display:"flex",alignItems:"center",gap:10}}>
-                  {ht&&<span className="fc">{gc(ht)}</span>}
-                  <span className="ss" style={{fontSize:13,fontWeight:700,flex:1,textAlign:"right",
-                    color:homeWon?"#f5c842":played?"#a09070":"#d0c8bc"}}>{disp.home}</span>
-                  <div style={{minWidth:68,textAlign:"center",background:played?"rgba(255,255,255,0.09)":"rgba(255,255,255,0.04)",
-                    border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 10px"}}>
-                    {played?<span className="pf" style={{fontSize:17,fontWeight:900,color:"#f0e6d3"}}>{gh}-{ga}</span>
-                      :<span className="ss" style={{fontSize:13,color:"#50403a"}}>vs</span>}
+                  borderRadius:11,padding:"12px 18px"}}>
+                  {!played&&<p className="ss" style={{fontSize:10,color:"#50403a",marginBottom:6,textAlign:"center"}}>{matchLabel}</p>}
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    {ht&&<span className="fc">{gc(ht)}</span>}
+                    <span className="ss" style={{fontSize:13,fontWeight:700,flex:1,textAlign:"right",
+                      color:homeWon?"#f5c842":played?"#a09070":"#d0c8bc"}}>{disp.home}</span>
+                    <div style={{minWidth:68,textAlign:"center",background:played?"rgba(255,255,255,0.09)":"rgba(255,255,255,0.04)",
+                      border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 10px"}}>
+                      {played?<span className="pf" style={{fontSize:17,fontWeight:900,color:"#f0e6d3"}}>{gh}-{ga}</span>
+                        :<span className="ss" style={{fontSize:13,color:"#50403a"}}>vs</span>}
+                    </div>
+                    <span className="ss" style={{fontSize:13,fontWeight:700,flex:1,
+                      color:awayWon?"#f5c842":played?"#a09070":"#d0c8bc"}}>{disp.away}</span>
+                    {at&&<span className="fc">{gc(at)}</span>}
                   </div>
-                  <span className="ss" style={{fontSize:13,fontWeight:700,flex:1,
-                    color:awayWon?"#f5c842":played?"#a09070":"#d0c8bc"}}>{disp.away}</span>
-                  {at&&<span className="fc">{gc(at)}</span>}
                 </div>
               );
             })}
           </div>
         </div>
       )}
+
+      {/* -- BÄSTA TREOR -- */}
       {tab==="thirds"&&(
         <div>
           <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:18,lineHeight:1.7}}>
-            De 8 basta treorna kvalificerar sig till sextondelsfinalerna.
+            De 8 bästa treorna kvalificerar sig till sextondelsfinalerna.
           </p>
           <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,overflow:"hidden"}}>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
@@ -1371,6 +1443,112 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
   );
 }
 
+
+// ADMIN RESULTAT
+function AdminResults({results, handleResult, getTeams, getDisplay, placements}) {
+  const [phase, setPhase] = useState("omgang1");
+  const [group, setGroup] = useState("A");
+  const allTeams = Object.values(GROUPS).flat().sort((a,b)=>dn(a).localeCompare(dn(b)));
+
+  function koMatchLabel(m) {
+    function keyLabel(key) {
+      if (/^[A-L]0$/.test(key)) { const t=placements[key]; return t?dn(t):"Etta grupp "+key[0]; }
+      if (/^[A-L]1$/.test(key)) { const t=placements[key]; return t?dn(t):"Tvåan grupp "+key[0]; }
+      if (/^THIRD_[1-8]$/.test(key)) return "Bästa trea #"+key[6];
+      if (key.endsWith("L")) return "Förlorare "+key.slice(0,-1);
+      const wm=KNOCKOUT_ALL.find(x=>x.id===key);
+      const wt=getTeams(key);
+      return wt.home?dn(wt.home):"Vinnare "+key;
+    }
+    return keyLabel(m.homeKey)+" &mdash; "+keyLabel(m.awayKey);
+  }
+
+  function MatchRow({m, showLabel=false}) {
+    const r=results[m.id]||{home:"",away:""};
+    const done=r.home!=""&&r.away!="";
+    const disp=getDisplay(m);
+    const ht=m.phase==="Grupp"?m.home:getTeams(m.id).home;
+    const at=m.phase==="Grupp"?m.away:getTeams(m.id).away;
+    return(
+      <div style={{background:done?"rgba(80,200,120,0.06)":"rgba(255,255,255,0.04)",
+        border:"1px solid "+(done?"rgba(80,200,120,0.25)":"rgba(255,255,255,0.07)"),
+        borderRadius:9,padding:"10px 14px",marginBottom:6}}>
+        {showLabel&&<p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:6}}>{koMatchLabel(m)}</p>}
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          {ht&&<span className="fc">{gc(ht)}</span>}
+          <span className="tn" style={{textAlign:"right"}}>{disp.home}</span>
+          <div style={{display:"flex",alignItems:"center",gap:5}}>
+            <input type="number" min="0" max="20" value={r.home} onChange={e=>handleResult(m.id,"home",e.target.value)}/>
+            <span className="ss" style={{color:"#60504a",fontSize:11}}>-</span>
+            <input type="number" min="0" max="20" value={r.away} onChange={e=>handleResult(m.id,"away",e.target.value)}/>
+          </div>
+          <span className="tn">{disp.away}</span>
+          {at&&<span className="fc">{gc(at)}</span>}
+          {done&&<span style={{fontSize:12,color:"#50c878",fontFamily:"'Source Sans 3',sans-serif",fontWeight:700}}>OK</span>}
+        </div>
+      </div>
+    );
+  }
+
+  function RoundAdmin({round}) {
+    const ms=sortByDeadline(getMatchesForRound(round));
+    const groups=[...new Set(ms.map(m=>m.group))].sort();
+    return(
+      <div>
+        {groups.map(g=>(
+          <div key={g} style={{marginBottom:16}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+              <span className="ss" style={{fontSize:11,fontWeight:700,color:"#f5c842",textTransform:"uppercase",letterSpacing:.6}}>Grupp {g}</span>
+              <div style={{flex:1,height:1,background:"rgba(255,255,255,0.06)"}}/>
+            </div>
+            {ms.filter(m=>m.group===g).map(m=><MatchRow key={m.id} m={m}/>)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  const koPhases=["Sextondelsfinal","Attondelsfinaler","Kvartsfinal","Semifinal","Bronsmatch","Final"];
+  const koMatches=sortByDeadline(KNOCKOUT_ALL.filter(m=>m.phase===phase));
+
+  return(
+    <div>
+      <div className="scroll-x" style={{marginBottom:16}}>
+        <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",minWidth:"max-content"}}>
+          {[["omgang1","Omgång 1"],["omgang2","Omgång 2"],["omgang3","Omgång 3"],["pergrupp","Per grupp"],
+            ...koPhases.map(p=>[p,p])].map(([k,l])=>(
+            <button key={k} className={"tab"+(phase===k?" active":"")} onClick={()=>setPhase(k)}>{l}</button>
+          ))}
+        </div>
+      </div>
+
+      {phase==="omgang1"&&<RoundAdmin round={1}/>}
+      {phase==="omgang2"&&<RoundAdmin round={2}/>}
+      {phase==="omgang3"&&<RoundAdmin round={3}/>}
+
+      {phase==="pergrupp"&&(
+        <div>
+          <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
+            {Object.keys(GROUPS).map(g=>(
+              <button key={g} className={"gbtn"+(group===g?" active":"")} onClick={()=>setGroup(g)}>Grupp {g}</button>
+            ))}
+          </div>
+          {sortByDeadline(GROUP_MATCHES.filter(m=>m.group===group)).map(m=><MatchRow key={m.id} m={m}/>)}
+        </div>
+      )}
+
+      {koPhases.includes(phase)&&(
+        <div>
+          {koMatches.length===0
+            ?<p className="ss" style={{color:"#60504a",fontSize:13}}>Inga matcher i denna fas ännu.</p>
+            :koMatches.map(m=><MatchRow key={m.id} m={m} showLabel={true}/>)
+          }
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ADMIN-VY
 function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGroup,setTipGroup,
   adminTab,setAdminTab,dlInput,setDlInput,rdlInput,setRdlInput,
@@ -1394,44 +1572,10 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
       </div>
 
       {adminTab==="results"&&(
-        <div>
-          <div className="scroll-x" style={{marginBottom:11}}>
-            <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",minWidth:"max-content"}}>
-              {PHASES.map(p=><button key={p} className={"tab"+(tipPhase===p?" active":"")} onClick={()=>setTipPhase(p)}>{p}</button>)}
-            </div>
-          </div>
-          {tipPhase==="Grupp"&&(
-            <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
-              {Object.keys(GROUPS).map(g=>(
-                <button key={g} className={"gbtn"+(tipGroup===g?" active":"")} onClick={()=>setTipGroup(g)}>Grupp {g}</button>
-              ))}
-            </div>
-          )}
-          <div style={{display:"flex",flexDirection:"column",gap:7}}>
-            {filteredMatches.map(m=>{
-              const r=results[m.id]||{home:"",away:""}; const done=r.home!=""&&r.away!="";
-              const disp=getDisplay(m);
-              const ht=m.phase==="Grupp"?m.home:getTeams(m.id).home;
-              const at=m.phase==="Grupp"?m.away:getTeams(m.id).away;
-              return(
-                <div key={m.id} style={{background:done?"rgba(80,200,120,0.06)":"rgba(255,255,255,0.04)",
-                  border:"1px solid "+(done?"rgba(80,200,120,0.25)":"rgba(255,255,255,0.07)"),
-                  borderRadius:9,padding:"11px 14px",display:"flex",alignItems:"center",gap:8}}>
-                  {ht&&<span className="fc">{gc(ht)}</span>}
-                  <span className="tn" style={{textAlign:"right"}}>{disp.home}</span>
-                  <div style={{display:"flex",alignItems:"center",gap:5}}>
-                    <input type="number" min="0" max="20" value={r.home} onChange={e=>handleResult(m.id,"home",e.target.value)}/>
-                    <span className="ss" style={{color:"#60504a",fontSize:11}}>-</span>
-                    <input type="number" min="0" max="20" value={r.away} onChange={e=>handleResult(m.id,"away",e.target.value)}/>
-                  </div>
-                  <span className="tn">{disp.away}</span>
-                  {at&&<span className="fc">{gc(at)}</span>}
-                  {done&&<span style={{fontSize:13,color:"#50c878",fontFamily:"'Source Sans 3',sans-serif",fontWeight:700}}>OK</span>}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <AdminResults
+          results={results} handleResult={handleResult} getTeams={getTeams} getDisplay={getDisplay}
+          placements={placements}
+        />
       )}
 
       {adminTab==="thirds"&&(
