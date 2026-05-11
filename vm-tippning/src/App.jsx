@@ -218,7 +218,7 @@ function koLabel(m, placements={}, getTeams=()=>({home:null,away:null})) {
     const wt=getTeams(key);
     return wt&&wt.home?dn(wt.home):"Vinnare "+key;
   }
-  return keyLabel(m.homeKey)+" - "+keyLabel(m.awayKey);
+  return keyLabel(m.homeKey)+" vs "+keyLabel(m.awayKey);
 }
 
 const DEFAULT_DEADLINES = {
@@ -1477,7 +1477,7 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
       <div style={{background:done?"rgba(80,200,120,0.06)":"rgba(255,255,255,0.04)",
         border:"1px solid "+(done?"rgba(80,200,120,0.25)":"rgba(255,255,255,0.07)"),
         borderRadius:9,padding:"10px 14px",marginBottom:6}}>
-        {showLabel&&<p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:6}}>{koMatchLabel(m)}</p>}
+        {showLabel&&<p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:6,textAlign:"center"}}>{koMatchLabel(m)}</p>}
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           {ht&&<span className="fc">{gc(ht)}</span>}
           <span className="tn" style={{textAlign:"right"}}>{disp.home}</span>
