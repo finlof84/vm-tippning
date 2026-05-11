@@ -200,6 +200,27 @@ function calcTotal(tips, results) {
 
 const ADMIN_CODE = "vm2026admin";
 
+// Global sort helper - uses DEFAULT_DEADLINES which is defined globally
+function sortByDeadline(matches, deadlines={}) {
+  return [...matches].sort((a,b)=>{
+    const da=deadlines[a.id]||DEFAULT_DEADLINES[a.id]||"9999";
+    const db2=deadlines[b.id]||DEFAULT_DEADLINES[b.id]||"9999";
+    return da.localeCompare(db2);
+  });
+}
+
+function koLabel(m, placements={}, getTeams=()=>({home:null,away:null})) {
+  function keyLabel(key) {
+    if (/^[A-L]0$/.test(key)) { const t=placements[key]; return t?dn(t):"Etta grupp "+key[0]; }
+    if (/^[A-L]1$/.test(key)) { const t=placements[key]; return t?dn(t):"Tvaan grupp "+key[0]; }
+    if (/^THIRD_[1-8]$/.test(key)) return "Basta trea #"+key[6];
+    if (key.endsWith("L")) return "Forlorare "+key.slice(0,-1);
+    const wt=getTeams(key);
+    return wt&&wt.home?dn(wt.home):"Vinnare "+key;
+  }
+  return keyLabel(m.homeKey)+" - "+keyLabel(m.awayKey);
+}
+
 const DEFAULT_DEADLINES = {
   "A01": "2026-06-11T19:00:00.000Z",
   "A02": "2026-06-18T17:00:00.000Z",
@@ -498,14 +519,10 @@ export default function App() {
   function countTipped(){
     return[...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{const t=userTips[m.id];return t&&t.home!=""&&t.away!="";}).length;
   }
-  function sortByDeadline(matches) {
-    return [...matches].sort((a,b)=>{
-      const da=deadlines[a.id]||DEFAULT_DEADLINES[a.id]||"9999";
-      const db2=deadlines[b.id]||DEFAULT_DEADLINES[b.id]||"9999";
-      return da.localeCompare(db2);
-    });
+  function sortByDeadlineLocal(matches) {
+    return sortByDeadline(matches, deadlines);
   }
-  const filteredMatches=sortByDeadline(
+  const filteredMatches=sortByDeadlineLocal(
     tipPhase==="Grupp"?GROUP_MATCHES.filter(m=>m.group===tipGroup)
     :tipPhase==="Omgång1"?getMatchesForRound(1)
     :tipPhase==="Omgång2"?getMatchesForRound(2)
@@ -849,7 +866,7 @@ export default function App() {
 
         {/* RESULTAT */}
         {view==="results"&&(
-          <ResultsView results={results} getTeams={getTeams} getDisplay={getDisplay} placements={placements} bestThirds={bestThirds}/>
+          <ResultsView results={results} getTeams={getTeams} getDisplay={getDisplay} placements={placements} bestThirds={bestThirds} deadlines={deadlines}/>
         )}
 
         {/* SLUTSPEL */}
@@ -1177,7 +1194,7 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
 }
 
 // RESULTAT-VY
-function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
+function ResultsView({results, getTeams, getDisplay, placements, bestThirds, deadlines={}}) {
   const [tab, setTab] = useState("groups");
   const [groupSubTab, setGroupSubTab] = useState("omgang1");
   const [selGroup, setSelGroup] = useState("A");
@@ -1279,7 +1296,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
   }
 
   function RoundMatches({round}) {
-    const rMatches = sortByDeadline(getMatchesForRound(round));
+    const rMatches = sortByDeadline(getMatchesForRound(round), deadlines);
     const groups = [...new Set(rMatches.map(m=>m.group))].sort();
     return(
       <div>
@@ -1315,7 +1332,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
   }
 
   const koPhases=["Sextondelsfinal","Attondelsfinaler","Kvartsfinal","Semifinal","Bronsmatch","Final"];
-  const koMatches=sortByDeadline(KNOCKOUT_ALL.filter(m=>m.phase===koPhase));
+  const koMatches=sortByDeadline(KNOCKOUT_ALL.filter(m=>m.phase===koPhase), deadlines);
 
   return(
     <div>
@@ -1445,23 +1462,10 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds}) {
 
 
 // ADMIN RESULTAT
-function AdminResults({results, handleResult, getTeams, getDisplay, placements}) {
+function AdminResults({results, handleResult, getTeams, getDisplay, placements, deadlines={}}) {
   const [phase, setPhase] = useState("omgang1");
   const [group, setGroup] = useState("A");
-  const allTeams = Object.values(GROUPS).flat().sort((a,b)=>dn(a).localeCompare(dn(b)));
-
-  function koMatchLabel(m) {
-    function keyLabel(key) {
-      if (/^[A-L]0$/.test(key)) { const t=placements[key]; return t?dn(t):"Etta grupp "+key[0]; }
-      if (/^[A-L]1$/.test(key)) { const t=placements[key]; return t?dn(t):"Tvåan grupp "+key[0]; }
-      if (/^THIRD_[1-8]$/.test(key)) return "Bästa trea #"+key[6];
-      if (key.endsWith("L")) return "Förlorare "+key.slice(0,-1);
-      const wm=KNOCKOUT_ALL.find(x=>x.id===key);
-      const wt=getTeams(key);
-      return wt.home?dn(wt.home):"Vinnare "+key;
-    }
-    return keyLabel(m.homeKey)+" &mdash; "+keyLabel(m.awayKey);
-  }
+  function koMatchLabel(m) { return koLabel(m, placements, getTeams); }
 
   function MatchRow({m, showLabel=false}) {
     const r=results[m.id]||{home:"",away:""};
@@ -1491,7 +1495,7 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements})
   }
 
   function RoundAdmin({round}) {
-    const ms=sortByDeadline(getMatchesForRound(round));
+    const ms=sortByDeadline(getMatchesForRound(round), deadlines);
     const groups=[...new Set(ms.map(m=>m.group))].sort();
     return(
       <div>
@@ -1509,7 +1513,7 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements})
   }
 
   const koPhases=["Sextondelsfinal","Attondelsfinaler","Kvartsfinal","Semifinal","Bronsmatch","Final"];
-  const koMatches=sortByDeadline(KNOCKOUT_ALL.filter(m=>m.phase===phase));
+  const koMatches=sortByDeadline(KNOCKOUT_ALL.filter(m=>m.phase===phase), deadlines);
 
   return(
     <div>
@@ -1533,7 +1537,7 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements})
               <button key={g} className={"gbtn"+(group===g?" active":"")} onClick={()=>setGroup(g)}>Grupp {g}</button>
             ))}
           </div>
-          {sortByDeadline(GROUP_MATCHES.filter(m=>m.group===group)).map(m=><MatchRow key={m.id} m={m}/>)}
+          {sortByDeadline(GROUP_MATCHES.filter(m=>m.group===group), deadlines).map(m=><MatchRow key={m.id} m={m}/>)}
         </div>
       )}
 
@@ -1574,7 +1578,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
       {adminTab==="results"&&(
         <AdminResults
           results={results} handleResult={handleResult} getTeams={getTeams} getDisplay={getDisplay}
-          placements={placements}
+          placements={placements} deadlines={deadlines}
         />
       )}
 
