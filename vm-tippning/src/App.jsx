@@ -152,11 +152,13 @@ function resolveGroupPlacements(results) {
   return p;
 }
 
-function resolveKOTeams(matchId, placements, results, thirdOverrides) {
+function resolveKOTeams(matchId, placements, results, thirdOverrides, matchOverrides={}) {
   const all = KNOCKOUT_ALL;
   const match = all.find(m => m.id === matchId);
   if (!match) return {home:null,away:null};
-  function teamFromKey(key) {
+  function teamFromKey(key, side) {
+    // Manual override takes priority
+    if(side && matchOverrides && matchOverrides[matchId+"_"+side]) return matchOverrides[matchId+"_"+side];
     if (/^[A-L][01]$/.test(key)) return placements[key]||null;
     if (/^THIRD_[1-8]$/.test(key)) return (thirdOverrides&&thirdOverrides[key])||null;
     if (key.endsWith("L")) return loser(key.slice(0,-1));
@@ -165,16 +167,16 @@ function resolveKOTeams(matchId, placements, results, thirdOverrides) {
   function winner(id) {
     const r=results[id]; if(!r||r.home===""||r.away==="") return null;
     const gh=parseInt(r.home),ga=parseInt(r.away); if(isNaN(gh)||isNaN(ga)) return null;
-    const {home:ht,away:at}=resolveKOTeams(id,placements,results,thirdOverrides);
+    const {home:ht,away:at}=resolveKOTeams(id,placements,results,thirdOverrides,matchOverrides);
     if(gh>ga) return ht; if(ga>gh) return at; return null;
   }
   function loser(id) {
     const r=results[id]; if(!r||r.home===""||r.away==="") return null;
     const gh=parseInt(r.home),ga=parseInt(r.away); if(isNaN(gh)||isNaN(ga)) return null;
-    const {home:ht,away:at}=resolveKOTeams(id,placements,results,thirdOverrides);
+    const {home:ht,away:at}=resolveKOTeams(id,placements,results,thirdOverrides,matchOverrides);
     if(gh>ga) return at; if(ga>gh) return ht; return null;
   }
-  return {home:teamFromKey(match.homeKey),away:teamFromKey(match.awayKey)};
+  return {home:teamFromKey(match.homeKey,"home"),away:teamFromKey(match.awayKey,"away")};
 }
 
 function labelFromKey(key) {
@@ -341,6 +343,7 @@ export default function App() {
   const [results,        setResults]        = useState({});
   const [deadlines,      setDeadlines]      = useState({});
   const [thirdOverrides, setThirdOverrides] = useState({});
+  const [matchOverrides, setMatchOverrides] = useState({}); // { "R32_1_home": "Brasilien", ... }
   const [approved,       setApproved]       = useState({}); // { name: true/false }
   const [siteInfo,       setSiteInfo]       = useState({}); // { message, prizePot }
   const [podiumTips,     setPodiumTips]     = useState({}); // { name: {winner,second,third} }
@@ -374,6 +377,7 @@ export default function App() {
         else setDeadlines(DEFAULT_DEADLINES);
       }),
       onSnapshot(doc(db,"vm2026","thirdOverrides"),s=>{if(s.exists())setThirdOverrides(s.data());}),
+      onSnapshot(doc(db,"vm2026","matchOverrides"),s=>{if(s.exists())setMatchOverrides(s.data());}),
       onSnapshot(doc(db,"vm2026","podiumTips"),   s=>{if(s.exists())setPodiumTips(s.data());}),
       onSnapshot(doc(db,"vm2026","podiumDeadline"),s=>{
         if(s.exists()&&s.data().dl) setPodiumDeadline(s.data().dl);
@@ -387,7 +391,7 @@ export default function App() {
   },[]);
 
   const placements = resolveGroupPlacements(results);
-  function getTeams(mid) { return resolveKOTeams(mid,placements,results,thirdOverrides); }
+  function getTeams(mid) { return resolveKOTeams(mid,placements,results,thirdOverrides,matchOverrides); }
   function getDisplay(m) {
     if(m.phase==="Grupp") return {home:dn(m.home),away:dn(m.away)};
     const {home,away}=getTeams(m.id);
@@ -449,6 +453,14 @@ export default function App() {
     const upd={...deadlines};
     getMatchesForRound(round).forEach(m=>{upd[m.id]=iso;});
     await fbSet("deadlines",upd);
+  }
+  async function saveMatchOverride(matchId, side, team) {
+    const key = matchId+"_"+side;
+    const upd = {...matchOverrides};
+    if(team) upd[key] = team;
+    else delete upd[key];
+    await setDoc(doc(db,"vm2026","matchOverrides"), upd);
+    setMatchOverrides(upd);
   }
   async function handleThirdOverride(key,team) {
     await fbSet("thirdOverrides",{...thirdOverrides,[key]:team});
@@ -921,6 +933,7 @@ export default function App() {
             savePodiumDeadline={savePodiumDeadline} savePodiumResults={savePodiumResults}
             podiumTips={podiumTips}
             siteInfo={siteInfo} saveSiteInfo={saveSiteInfo}
+            matchOverrides={matchOverrides} saveMatchOverride={saveMatchOverride}
           />
         )}
 
@@ -1470,17 +1483,24 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
 
 
 // ADMIN RESULTAT
-function AdminResults({results, handleResult, getTeams, getDisplay, placements, deadlines={}}) {
+function AdminResults({results, handleResult, getTeams, getDisplay, placements, deadlines={}, matchOverrides={}, saveMatchOverride}) {
   const [phase, setPhase] = useState("omgang1");
   const [group, setGroup] = useState("A");
   function koMatchLabel(m) { return koLabel(m, placements, getTeams); }
+
+  const allTeams = Object.values(GROUPS).flat().sort((a,b)=>dn(a).localeCompare(dn(b)));
 
   function MatchRow({m, showLabel=false}) {
     const r=results[m.id]||{home:"",away:""};
     const done=r.home!=""&&r.away!="";
     const disp=getDisplay(m);
-    const ht=m.phase==="Grupp"?m.home:getTeams(m.id).home;
-    const at=m.phase==="Grupp"?m.away:getTeams(m.id).away;
+    const isKO = m.phase!=="Grupp";
+    const autoTeams = isKO ? getTeams(m.id) : {home:m.home,away:m.away};
+    const ht = autoTeams.home;
+    const at = autoTeams.away;
+    const hasHomeOverride = matchOverrides[m.id+"_home"];
+    const hasAwayOverride = matchOverrides[m.id+"_away"];
+    const [showOverride, setShowOverride] = useState(false);
     return(
       <div style={{background:done?"rgba(80,200,120,0.06)":"rgba(255,255,255,0.04)",
         border:"1px solid "+(done?"rgba(80,200,120,0.25)":"rgba(255,255,255,0.07)"),
@@ -1488,16 +1508,64 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
         {showLabel&&<p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:6,textAlign:"center"}} dangerouslySetInnerHTML={{__html:koMatchLabel(m)}}/>}
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           {ht&&<span className="fc">{gc(ht)}</span>}
-          <span className="tn" style={{textAlign:"right"}}>{disp.home}</span>
+          <span className="tn" style={{textAlign:"right",color:(hasHomeOverride?"#f5c842":"#f0e6d3")}}>{disp.home}</span>
           <div style={{display:"flex",alignItems:"center",gap:5}}>
             <input type="number" min="0" max="20" value={r.home} onChange={e=>handleResult(m.id,"home",e.target.value)}/>
             <span className="ss" style={{color:"#60504a",fontSize:11}}>-</span>
             <input type="number" min="0" max="20" value={r.away} onChange={e=>handleResult(m.id,"away",e.target.value)}/>
           </div>
-          <span className="tn">{disp.away}</span>
+          <span className="tn" style={{color:(hasAwayOverride?"#f5c842":"#f0e6d3")}}>{disp.away}</span>
           {at&&<span className="fc">{gc(at)}</span>}
           {done&&<span style={{fontSize:12,color:"#50c878",fontFamily:"'Source Sans 3',sans-serif",fontWeight:700}}>OK</span>}
+          {isKO&&(
+            <button onClick={()=>setShowOverride(!showOverride)}
+              style={{background:"rgba(245,200,66,0.1)",border:"1px solid rgba(245,200,66,0.2)",borderRadius:5,
+                padding:"3px 8px",cursor:"pointer",fontSize:10,color:"#f5c842",
+                fontFamily:"'Source Sans 3',sans-serif",fontWeight:700,whiteSpace:"nowrap"}}>
+              {showOverride?"Stäng":"Ändra lag"}
+            </button>
+          )}
         </div>
+        {isKO&&showOverride&&(
+          <div style={{marginTop:10,paddingTop:10,borderTop:"1px solid rgba(255,255,255,0.06)",
+            display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"}}>
+            <div>
+              <p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:4}}>Hemmalag:</p>
+              <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                <select value={matchOverrides[m.id+"_home"]||""}
+                  onChange={e=>saveMatchOverride(m.id,"home",e.target.value)}
+                  style={{fontSize:12,padding:"4px 8px"}}>
+                  <option value="">-- Auto ({ht?dn(ht):"okänt"}) --</option>
+                  {allTeams.map(t=><option key={t} value={t}>{dn(t)}</option>)}
+                </select>
+                {hasHomeOverride&&<button onClick={()=>saveMatchOverride(m.id,"home","")}
+                  style={{background:"rgba(180,50,50,0.2)",border:"1px solid rgba(180,50,50,0.3)",
+                    borderRadius:4,padding:"3px 7px",cursor:"pointer",fontSize:10,color:"#e07070",
+                    fontFamily:"'Source Sans 3',sans-serif"}}>Återställ</button>}
+              </div>
+            </div>
+            <div>
+              <p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:4}}>Bortalag:</p>
+              <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                <select value={matchOverrides[m.id+"_away"]||""}
+                  onChange={e=>saveMatchOverride(m.id,"away",e.target.value)}
+                  style={{fontSize:12,padding:"4px 8px"}}>
+                  <option value="">-- Auto ({at?dn(at):"okänt"}) --</option>
+                  {allTeams.map(t=><option key={t} value={t}>{dn(t)}</option>)}
+                </select>
+                {hasAwayOverride&&<button onClick={()=>saveMatchOverride(m.id,"away","")}
+                  style={{background:"rgba(180,50,50,0.2)",border:"1px solid rgba(180,50,50,0.3)",
+                    borderRadius:4,padding:"3px 7px",cursor:"pointer",fontSize:10,color:"#e07070",
+                    fontFamily:"'Source Sans 3',sans-serif"}}>Återställ</button>}
+              </div>
+            </div>
+            {(hasHomeOverride||hasAwayOverride)&&(
+              <p className="ss" style={{fontSize:10,color:"#f5c842",marginTop:4}}>
+                Manuell override aktiv - visas i gult
+              </p>
+            )}
+          </div>
+        )}
       </div>
     );
   }
@@ -1587,6 +1655,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
         <AdminResults
           results={results} handleResult={handleResult} getTeams={getTeams} getDisplay={getDisplay}
           placements={placements} deadlines={deadlines}
+          matchOverrides={matchOverrides} saveMatchOverride={saveMatchOverride}
         />
       )}
 
