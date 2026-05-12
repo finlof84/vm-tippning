@@ -409,7 +409,7 @@ export default function App() {
     const name=nameInput.trim();
     if(!name||!pwInput) { setLoginError("Ange namn och lösenord."); return; }
     if(participants[name]!==undefined) {
-      // Befintlig deltagare - loggå in
+      // Befintlig deltagare - logga in
       if(passwords[name]!==pwInput) { setLoginError("Fel lösenord."); return; }
     } else {
       // Kolla att namnet inte redan finns (case-insensitive)
@@ -718,11 +718,11 @@ export default function App() {
             ):(
               <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.15)",borderRadius:14,padding:"26px 22px",maxWidth:400,margin:"0 auto 20px"}}>
                 <h2 className="pf" style={{fontSize:19,color:"#f5c842",marginBottom:6,fontWeight:700}}>
-                  {nameInput&&participants[nameInput]?"Loggå in":"Registrera dig"}
+                  {nameInput&&participants[nameInput]?"Logga in":"Registrera dig"}
                 </h2>
                 <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:16}}>
                   {nameInput&&participants[nameInput]
-                    ?"Ange ditt lösenord for att loggå in och redigera dina tips."
+                    ?"Ange ditt lösenord for att logga in och redigera dina tips."
                     :"Ange ditt namn och välj ett lösenord."}
                 </p>
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
@@ -746,7 +746,7 @@ export default function App() {
                   )}
                   {loginError&&<p className="err">{loginError}</p>}
                   <button className="btn" onClick={handleJoin} style={{width:"100%"}}>
-                    {nameInput&&participants[nameInput]?"Loggå in":"Registrera och tippa!"}
+                    {nameInput&&participants[nameInput]?"Logga in":"Registrera och tippa!"}
                   </button>
                   {!nameInput||!participants[nameInput]?(
                     <p className="ss" style={{fontSize:11,color:"#60504a",textAlign:"center"}}>
@@ -911,7 +911,7 @@ export default function App() {
             <div style={{display:"flex",gap:8}}>
               <input type="password" placeholder="Lösenord" value={adminCode}
                 onChange={e=>setAdminCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleAdminLogin()} style={{flex:1}}/>
-              <button className="btn" onClick={handleAdminLogin}>Loggå in</button>
+              <button className="btn" onClick={handleAdminLogin}>Logga in</button>
             </div>
           </div>
         )}
@@ -939,7 +939,7 @@ export default function App() {
 
         {view==="tips"&&!currentUser&&(
           <div style={{textAlign:"center",padding:"60px 0"}}>
-            <p className="ss" style={{color:"#a09070",marginBottom:16}}>Loggå in pa startsidan for att se och redigera dina tips.</p>
+            <p className="ss" style={{color:"#a09070",marginBottom:16}}>Logga in pa startsidan for att se och redigera dina tips.</p>
             <button className="btn" onClick={()=>setView("start")}>Till startsidan</button>
           </div>
         )}
@@ -1111,7 +1111,7 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
               style={{width:"100%",marginBottom:10}}/>
             {modalErr&&<p className="err" style={{marginBottom:10}}>{modalErr}</p>}
             <div style={{display:"flex",gap:10}}>
-              <button className="btn" onClick={handleModalLogin} style={{flex:1}}>Loggå in och redigera</button>
+              <button className="btn" onClick={handleModalLogin} style={{flex:1}}>Logga in och redigera</button>
               <button className="btn-ghost" onClick={()=>{setLoginModal(null);setModalPw("");setModalErr("");}}>Avbryt</button>
             </div>
           </div>
@@ -1120,7 +1120,7 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
 
       <h2 className="pf" style={{fontSize:28,color:"#f5c842",fontWeight:700,marginBottom:6}}>Deltagare</h2>
       <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:22}}>
-        Klicka pa ett namn for att se tips. Klicka "Redigera" for att loggå in och ändra tips.
+        Klicka pa ett namn for att se tips. Klicka "Redigera" for att logga in och ändra tips.
       </p>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:22}}>
         {names.map(name=>(
@@ -1490,6 +1490,9 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
 
   const allTeams = Object.values(GROUPS).flat().sort((a,b)=>dn(a).localeCompare(dn(b)));
 
+  const [openOverrides, setOpenOverrides] = useState({});
+  function toggleOverride(id) { setOpenOverrides(prev=>({...prev,[id]:!prev[id]})); }
+
   function MatchRow({m, showLabel=false}) {
     const r=results[m.id]||{home:"",away:""};
     const done=r.home!=""&&r.away!="";
@@ -1500,7 +1503,7 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
     const at = autoTeams.away;
     const hasHomeOverride = matchOverrides[m.id+"_home"];
     const hasAwayOverride = matchOverrides[m.id+"_away"];
-    const [showOverride, setShowOverride] = useState(false);
+    const showOverride = !!openOverrides[m.id];
     return(
       <div style={{background:done?"rgba(80,200,120,0.06)":"rgba(255,255,255,0.04)",
         border:"1px solid "+(done?"rgba(80,200,120,0.25)":"rgba(255,255,255,0.07)"),
@@ -1518,7 +1521,7 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
           {at&&<span className="fc">{gc(at)}</span>}
           {done&&<span style={{fontSize:12,color:"#50c878",fontFamily:"'Source Sans 3',sans-serif",fontWeight:700}}>OK</span>}
           {isKO&&(
-            <button onClick={()=>setShowOverride(!showOverride)}
+            <button onClick={()=>toggleOverride(m.id)}
               style={{background:"rgba(245,200,66,0.1)",border:"1px solid rgba(245,200,66,0.2)",borderRadius:5,
                 padding:"3px 8px",cursor:"pointer",fontSize:10,color:"#f5c842",
                 fontFamily:"'Source Sans 3',sans-serif",fontWeight:700,whiteSpace:"nowrap"}}>
