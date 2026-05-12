@@ -1484,7 +1484,97 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
 }
 
 
-// ADMIN RESULTAT
+// ADMIN RESULTAT - helper components (top-level to avoid hooks-in-nested-components error)
+function AdminMatchRow({m, results, handleResult, getDisplay, getTeams, matchOverrides, saveMatchOverride,
+  openOverrides, toggleOverride, allTeams, placements}) {
+  const r = results[m.id]||{home:"",away:""};
+  const done = r.home!=""&&r.away!="";
+  const disp = getDisplay(m);
+  const isKO = m.phase!=="Grupp";
+  const autoTeams = isKO ? getTeams(m.id) : {home:m.home, away:m.away};
+  const ht = autoTeams.home;
+  const at = autoTeams.away;
+  const hasHomeOverride = matchOverrides[m.id+"_home"];
+  const hasAwayOverride = matchOverrides[m.id+"_away"];
+  const showOverride = !!openOverrides[m.id];
+  const matchLbl = isKO ? koLabel(m, placements, getTeams) : null;
+
+  // For group matches: show home/away label
+  function groupTeamLabel(team, key) {
+    const lbl = labelFromKey(key)||"";
+    return lbl;
+  }
+
+  return(
+    <div style={{background:done?"rgba(80,200,120,0.06)":"rgba(255,255,255,0.04)",
+      border:"1px solid "+(done?"rgba(80,200,120,0.25)":"rgba(255,255,255,0.07)"),
+      borderRadius:9,padding:"10px 14px",marginBottom:6}}>
+      {matchLbl&&<p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:6,textAlign:"center"}}
+        dangerouslySetInnerHTML={{__html:matchLbl}}/>}
+      <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+        {ht&&<span className="fc">{gc(ht)}</span>}
+        <span className="tn" style={{textAlign:"right",color:hasHomeOverride?"#f5c842":"#f0e6d3"}}>{disp.home}</span>
+        <div style={{display:"flex",alignItems:"center",gap:5}}>
+          <input type="number" min="0" max="20" value={r.home}
+            onChange={e=>handleResult(m.id,"home",e.target.value)}/>
+          <span className="ss" style={{color:"#60504a",fontSize:11}}>-</span>
+          <input type="number" min="0" max="20" value={r.away}
+            onChange={e=>handleResult(m.id,"away",e.target.value)}/>
+        </div>
+        <span className="tn" style={{color:hasAwayOverride?"#f5c842":"#f0e6d3"}}>{disp.away}</span>
+        {at&&<span className="fc">{gc(at)}</span>}
+        {done&&<span style={{fontSize:12,color:"#50c878",fontFamily:"'Source Sans 3',sans-serif",fontWeight:700}}>OK</span>}
+        {isKO&&(
+          <button onClick={()=>toggleOverride(m.id)}
+            style={{background:"rgba(245,200,66,0.1)",border:"1px solid rgba(245,200,66,0.2)",borderRadius:5,
+              padding:"3px 8px",cursor:"pointer",fontSize:10,color:"#f5c842",
+              fontFamily:"'Source Sans 3',sans-serif",fontWeight:700,whiteSpace:"nowrap"}}>
+            {showOverride?"Stang":"Andra lag"}
+          </button>
+        )}
+      </div>
+      {isKO&&showOverride&&(
+        <div style={{marginTop:10,paddingTop:10,borderTop:"1px solid rgba(255,255,255,0.06)",
+          display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"}}>
+          <div>
+            <p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:4}}>Hemmalag:</p>
+            <div style={{display:"flex",gap:6,alignItems:"center"}}>
+              <select value={matchOverrides[m.id+"_home"]||""}
+                onChange={e=>saveMatchOverride(m.id,"home",e.target.value)}
+                style={{fontSize:12,padding:"4px 8px"}}>
+                <option value="">-- Auto ({ht?dn(ht):"okant"}) --</option>
+                {allTeams.map(t=><option key={t} value={t}>{dn(t)}</option>)}
+              </select>
+              {hasHomeOverride&&<button onClick={()=>saveMatchOverride(m.id,"home","")}
+                style={{background:"rgba(180,50,50,0.2)",border:"1px solid rgba(180,50,50,0.3)",
+                  borderRadius:4,padding:"3px 7px",cursor:"pointer",fontSize:10,color:"#e07070",
+                  fontFamily:"'Source Sans 3',sans-serif"}}>Aterstall</button>}
+            </div>
+          </div>
+          <div>
+            <p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:4}}>Bortalag:</p>
+            <div style={{display:"flex",gap:6,alignItems:"center"}}>
+              <select value={matchOverrides[m.id+"_away"]||""}
+                onChange={e=>saveMatchOverride(m.id,"away",e.target.value)}
+                style={{fontSize:12,padding:"4px 8px"}}>
+                <option value="">-- Auto ({at?dn(at):"okant"}) --</option>
+                {allTeams.map(t=><option key={t} value={t}>{dn(t)}</option>)}
+              </select>
+              {hasAwayOverride&&<button onClick={()=>saveMatchOverride(m.id,"away","")}
+                style={{background:"rgba(180,50,50,0.2)",border:"1px solid rgba(180,50,50,0.3)",
+                  borderRadius:4,padding:"3px 7px",cursor:"pointer",fontSize:10,color:"#e07070",
+                  fontFamily:"'Source Sans 3',sans-serif"}}>Aterstall</button>}
+            </div>
+          </div>
+          {(hasHomeOverride||hasAwayOverride)&&(
+            <p className="ss" style={{fontSize:10,color:"#f5c842"}}>Manuell override aktiv</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AdminResults({results, handleResult, getTeams, getDisplay, placements, deadlines={}, matchOverrides={}, saveMatchOverride}) {
   const [phase, setPhase] = useState("omgang1");
   const [group, setGroup] = useState("A");
@@ -1493,91 +1583,16 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
   const allTeams = Object.values(GROUPS).flat().sort((a,b)=>dn(a).localeCompare(dn(b)));
 
   function toggleOverride(id) { setOpenOverrides(prev=>({...prev,[id]:!prev[id]})); }
-  function koMatchLabel(m) { return koLabel(m, placements, getTeams); }
 
-  function MatchRow({m, showLabel=false}) {
-    const r=results[m.id]||{home:"",away:""};
-    const done=r.home!=""&&r.away!="";
-    const disp=getDisplay(m);
-    const isKO = m.phase!=="Grupp";
-    const autoTeams = isKO ? getTeams(m.id) : {home:m.home,away:m.away};
-    const ht = autoTeams.home;
-    const at = autoTeams.away;
-    const hasHomeOverride = matchOverrides[m.id+"_home"];
-    const hasAwayOverride = matchOverrides[m.id+"_away"];
-    const showOverride = !!openOverrides[m.id];
-    return(
-      <div style={{background:done?"rgba(80,200,120,0.06)":"rgba(255,255,255,0.04)",
-        border:"1px solid "+(done?"rgba(80,200,120,0.25)":"rgba(255,255,255,0.07)"),
-        borderRadius:9,padding:"10px 14px",marginBottom:6}}>
-        {showLabel&&<p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:6,textAlign:"center"}} dangerouslySetInnerHTML={{__html:koMatchLabel(m)}}/>}
-        <div style={{display:"flex",alignItems:"center",gap:8}}>
-          {ht&&<span className="fc">{gc(ht)}</span>}
-          <span className="tn" style={{textAlign:"right",color:(hasHomeOverride?"#f5c842":"#f0e6d3")}}>{disp.home}</span>
-          <div style={{display:"flex",alignItems:"center",gap:5}}>
-            <input type="number" min="0" max="20" value={r.home} onChange={e=>handleResult(m.id,"home",e.target.value)}/>
-            <span className="ss" style={{color:"#60504a",fontSize:11}}>-</span>
-            <input type="number" min="0" max="20" value={r.away} onChange={e=>handleResult(m.id,"away",e.target.value)}/>
-          </div>
-          <span className="tn" style={{color:(hasAwayOverride?"#f5c842":"#f0e6d3")}}>{disp.away}</span>
-          {at&&<span className="fc">{gc(at)}</span>}
-          {done&&<span style={{fontSize:12,color:"#50c878",fontFamily:"'Source Sans 3',sans-serif",fontWeight:700}}>OK</span>}
-          {isKO&&(
-            <button onClick={()=>toggleOverride(m.id)}
-              style={{background:"rgba(245,200,66,0.1)",border:"1px solid rgba(245,200,66,0.2)",borderRadius:5,
-                padding:"3px 8px",cursor:"pointer",fontSize:10,color:"#f5c842",
-                fontFamily:"'Source Sans 3',sans-serif",fontWeight:700,whiteSpace:"nowrap"}}>
-              {showOverride?"Stäng":"Ändra lag"}
-            </button>
-          )}
-        </div>
-        {isKO&&showOverride&&(
-          <div style={{marginTop:10,paddingTop:10,borderTop:"1px solid rgba(255,255,255,0.06)",
-            display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"}}>
-            <div>
-              <p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:4}}>Hemmalag:</p>
-              <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                <select value={matchOverrides[m.id+"_home"]||""}
-                  onChange={e=>saveMatchOverride(m.id,"home",e.target.value)}
-                  style={{fontSize:12,padding:"4px 8px"}}>
-                  <option value="">-- Auto ({ht?dn(ht):"okänt"}) --</option>
-                  {allTeams.map(t=><option key={t} value={t}>{dn(t)}</option>)}
-                </select>
-                {hasHomeOverride&&<button onClick={()=>saveMatchOverride(m.id,"home","")}
-                  style={{background:"rgba(180,50,50,0.2)",border:"1px solid rgba(180,50,50,0.3)",
-                    borderRadius:4,padding:"3px 7px",cursor:"pointer",fontSize:10,color:"#e07070",
-                    fontFamily:"'Source Sans 3',sans-serif"}}>Återställ</button>}
-              </div>
-            </div>
-            <div>
-              <p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:4}}>Bortalag:</p>
-              <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                <select value={matchOverrides[m.id+"_away"]||""}
-                  onChange={e=>saveMatchOverride(m.id,"away",e.target.value)}
-                  style={{fontSize:12,padding:"4px 8px"}}>
-                  <option value="">-- Auto ({at?dn(at):"okänt"}) --</option>
-                  {allTeams.map(t=><option key={t} value={t}>{dn(t)}</option>)}
-                </select>
-                {hasAwayOverride&&<button onClick={()=>saveMatchOverride(m.id,"away","")}
-                  style={{background:"rgba(180,50,50,0.2)",border:"1px solid rgba(180,50,50,0.3)",
-                    borderRadius:4,padding:"3px 7px",cursor:"pointer",fontSize:10,color:"#e07070",
-                    fontFamily:"'Source Sans 3',sans-serif"}}>Återställ</button>}
-              </div>
-            </div>
-            {(hasHomeOverride||hasAwayOverride)&&(
-              <p className="ss" style={{fontSize:10,color:"#f5c842",marginTop:4}}>
-                Manuell override aktiv - visas i gult
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  }
+  const rowProps = {results, handleResult, getDisplay, getTeams, matchOverrides, saveMatchOverride,
+    openOverrides, toggleOverride, allTeams, placements};
 
-  function RoundAdmin({round}) {
-    const ms=sortByDeadline(getMatchesForRound(round), deadlines);
-    const groups=[...new Set(ms.map(m=>m.group))].sort();
+  const koPhases = ["Sextondelsfinal","Attondelsfinaler","Kvartsfinal","Semifinal","Bronsmatch","Final"];
+  const koMatches = sortByDeadline(KNOCKOUT_ALL.filter(m=>m.phase===phase), deadlines);
+
+  function RoundView({round}) {
+    const ms = sortByDeadline(getMatchesForRound(round), deadlines);
+    const groups = [...new Set(ms.map(m=>m.group))].sort();
     return(
       <div>
         {groups.map(g=>(
@@ -1586,30 +1601,38 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
               <span className="ss" style={{fontSize:11,fontWeight:700,color:"#f5c842",textTransform:"uppercase",letterSpacing:.6}}>Grupp {g}</span>
               <div style={{flex:1,height:1,background:"rgba(255,255,255,0.06)"}}/>
             </div>
-            {ms.filter(m=>m.group===g).map(m=><MatchRow key={m.id} m={m}/>)}
+            {ms.filter(m=>m.group===g).map(m=>(
+              <AdminMatchRow key={m.id} m={m} {...rowProps}
+                results={results}
+                getDisplay={getDisplay}
+                getTeams={getTeams}
+                matchOverrides={matchOverrides}
+                saveMatchOverride={saveMatchOverride}
+                openOverrides={openOverrides}
+                toggleOverride={toggleOverride}
+                allTeams={allTeams}
+                placements={placements}/>
+            ))}
           </div>
         ))}
       </div>
     );
   }
 
-  const koPhases=["Sextondelsfinal","Attondelsfinaler","Kvartsfinal","Semifinal","Bronsmatch","Final"];
-  const koMatches=sortByDeadline(KNOCKOUT_ALL.filter(m=>m.phase===phase), deadlines);
-
   return(
     <div>
       <div className="scroll-x" style={{marginBottom:16}}>
         <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.06)",minWidth:"max-content"}}>
-          {[["omgang1","Omgång 1"],["omgang2","Omgång 2"],["omgang3","Omgång 3"],["pergrupp","Per grupp"],
+          {[["omgang1","Omgang 1"],["omgang2","Omgang 2"],["omgang3","Omgang 3"],["pergrupp","Per grupp"],
             ...koPhases.map(p=>[p,p])].map(([k,l])=>(
             <button key={k} className={"tab"+(phase===k?" active":"")} onClick={()=>setPhase(k)}>{l}</button>
           ))}
         </div>
       </div>
 
-      {phase==="omgang1"&&<RoundAdmin round={1}/>}
-      {phase==="omgang2"&&<RoundAdmin round={2}/>}
-      {phase==="omgang3"&&<RoundAdmin round={3}/>}
+      {phase==="omgang1"&&<RoundView round={1}/>}
+      {phase==="omgang2"&&<RoundView round={2}/>}
+      {phase==="omgang3"&&<RoundView round={3}/>}
 
       {phase==="pergrupp"&&(
         <div>
@@ -1618,15 +1641,19 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
               <button key={g} className={"gbtn"+(group===g?" active":"")} onClick={()=>setGroup(g)}>Grupp {g}</button>
             ))}
           </div>
-          {sortByDeadline(GROUP_MATCHES.filter(m=>m.group===group), deadlines).map(m=><MatchRow key={m.id} m={m}/>)}
+          {sortByDeadline(GROUP_MATCHES.filter(m=>m.group===group), deadlines).map(m=>(
+            <AdminMatchRow key={m.id} m={m} {...rowProps}/>
+          ))}
         </div>
       )}
 
       {koPhases.includes(phase)&&(
         <div>
           {koMatches.length===0
-            ?<p className="ss" style={{color:"#60504a",fontSize:13}}>Inga matcher i denna fas ännu.</p>
-            :koMatches.map(m=><MatchRow key={m.id} m={m} showLabel={true}/>)
+            ?<p className="ss" style={{color:"#60504a",fontSize:13}}>Inga matcher i denna fas.</p>
+            :koMatches.map(m=>(
+              <AdminMatchRow key={m.id} m={m} {...rowProps}/>
+            ))
           }
         </div>
       )}
@@ -1982,22 +2009,35 @@ function AdminParticipants({participants, deleteParticipant, resetPassword, appr
 // SLUTSPELSTRAD
 function BracketView({placements, results, getTeams, bestThirds}) {
   function TR({mid, side}) {
+    const match=KNOCKOUT_ALL.find(m=>m.id===mid)||{homeKey:"",awayKey:""};
     const {home,away}=getTeams(mid);
     const team=side==="home"?home:away;
     const r=results[mid];
     const rh=r?parseInt(r.home):NaN; const ra=r?parseInt(r.away):NaN;
     const hasScore=!isNaN(rh)&&!isNaN(ra);
     const won=hasScore&&((side==="home"&&rh>ra)||(side==="away"&&ra>rh));
+    const keyLabel = side==="home"?match.homeKey:match.awayKey;
+    function getOriginLabel(key) {
+      if(/^[A-L]0$/.test(key)) return "Etta grupp "+key[0];
+      if(/^[A-L]1$/.test(key)) return "Tvaan grupp "+key[0];
+      if(/^THIRD_[1-8]$/.test(key)) return "Trea #"+key[6];
+      return null;
+    }
+    const originLabel = getOriginLabel(keyLabel);
     return(
-      <div style={{display:"flex",alignItems:"center",gap:4,padding:"4px 8px",
+      <div style={{display:"flex",flexDirection:"column",gap:1,padding:"4px 8px",
         background:won?"rgba(245,200,66,0.1)":team?"rgba(255,255,255,0.04)":"rgba(255,255,255,0.02)",
-        borderRadius:4,minWidth:165,border:"1px solid "+(won?"rgba(245,200,66,0.28)":"rgba(255,255,255,0.06)")}}>
-        {team&&<span className="fc" style={{fontSize:8}}>{gc(team)}</span>}
-        <span style={{fontSize:10,fontFamily:"'Source Sans 3',sans-serif",fontWeight:600,
-          color:team?(won?"#f5c842":"#f0e6d3"):"#50403a",flex:1,overflow:"hidden",
-          textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{team?dn(team):"--"}</span>
-        {hasScore&&<span style={{fontSize:10,fontFamily:"'Source Sans 3',sans-serif",fontWeight:700,
-          color:won?"#f5c842":"#70605a"}}>{side==="home"?rh:ra}</span>}
+        borderRadius:4,minWidth:170,border:"1px solid "+(won?"rgba(245,200,66,0.28)":"rgba(255,255,255,0.06)")}}>
+        <div style={{display:"flex",alignItems:"center",gap:4}}>
+          {team&&<span className="fc" style={{fontSize:8}}>{gc(team)}</span>}
+          <span style={{fontSize:10,fontFamily:"'Source Sans 3',sans-serif",fontWeight:600,
+            color:team?(won?"#f5c842":"#f0e6d3"):"#50403a",flex:1,overflow:"hidden",
+            textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{team?dn(team):"--"}</span>
+          {hasScore&&<span style={{fontSize:10,fontFamily:"'Source Sans 3',sans-serif",fontWeight:700,
+            color:won?"#f5c842":"#70605a"}}>{side==="home"?rh:ra}</span>}
+        </div>
+        {originLabel&&<span style={{fontSize:8,fontFamily:"'Source Sans 3',sans-serif",
+          color:"#50403a",paddingLeft:team?20:0}}>{originLabel}</span>}
       </div>
     );
   }
