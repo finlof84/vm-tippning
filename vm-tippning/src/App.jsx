@@ -1376,9 +1376,9 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
               <button key={k} className={"tab"+(groupSubTab===k?" active":"")} onClick={()=>setGroupSubTab(k)}>{l}</button>
             ))}
           </div>
-          {groupSubTab==="omgang1"&&{renderRoundMatches(1)}}
-          {groupSubTab==="omgang2"&&{renderRoundMatches(2)}}
-          {groupSubTab==="omgang3"&&{renderRoundMatches(3)}}
+          {groupSubTab==="omgang1"&&renderRoundMatches(1)}
+          {groupSubTab==="omgang2"&&renderRoundMatches(2)}
+          {groupSubTab==="omgang3"&&renderRoundMatches(3)}
           {groupSubTab==="pergrupp"&&(
             <div>
               <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:20}}>
