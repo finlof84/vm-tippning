@@ -86,24 +86,26 @@ const R32_THIRDS = [
 const R32 = [...R32_FIXED, ...R32_THIRDS];
 
 const R16 = [
-  {id:"R16_1", phase:"Attondelsfinaler", homeKey:"R32_1",  awayKey:"R32_2"},
-  {id:"R16_2", phase:"Attondelsfinaler", homeKey:"R32_3",  awayKey:"R32_4"},
-  {id:"R16_3", phase:"Attondelsfinaler", homeKey:"R32_5",  awayKey:"R32_6"},
-  {id:"R16_4", phase:"Attondelsfinaler", homeKey:"R32_7",  awayKey:"R32_8"},
-  {id:"R16_5", phase:"Attondelsfinaler", homeKey:"R32_9",  awayKey:"R32_10"},
-  {id:"R16_6", phase:"Attondelsfinaler", homeKey:"R32_11", awayKey:"R32_12"},
-  {id:"R16_7", phase:"Attondelsfinaler", homeKey:"R32_13", awayKey:"R32_14"},
-  {id:"R16_8", phase:"Attondelsfinaler", homeKey:"R32_15", awayKey:"R32_16"},
+  // Spain-halvan: vinnare fran par av R32
+  {id:"R16_1", phase:"Attondelsfinaler", homeKey:"R32_1",  awayKey:"R32_9"},   // 1F/2C vs 1E/trea
+  {id:"R16_2", phase:"Attondelsfinaler", homeKey:"R32_2",  awayKey:"R32_10"},  // 1C/2F vs 1I/trea
+  {id:"R16_3", phase:"Attondelsfinaler", homeKey:"R32_3",  awayKey:"R32_11"},  // 2E/2I vs 1G/trea
+  {id:"R16_4", phase:"Attondelsfinaler", homeKey:"R32_4",  awayKey:"R32_12"},  // 1H/2J vs 1D/trea
+  // Argentina-halvan
+  {id:"R16_5", phase:"Attondelsfinaler", homeKey:"R32_5",  awayKey:"R32_13"},  // 2A/2B vs 1A/trea
+  {id:"R16_6", phase:"Attondelsfinaler", homeKey:"R32_6",  awayKey:"R32_14"},  // 1J/2H vs 1L/trea
+  {id:"R16_7", phase:"Attondelsfinaler", homeKey:"R32_7",  awayKey:"R32_15"},  // 2K/2L vs 1B/trea
+  {id:"R16_8", phase:"Attondelsfinaler", homeKey:"R32_8",  awayKey:"R32_16"},  // 2D/2G vs 1K/trea
 ];
 const QF = [
-  {id:"QF_1", phase:"Kvartsfinal", homeKey:"R16_1", awayKey:"R16_2"},
-  {id:"QF_2", phase:"Kvartsfinal", homeKey:"R16_3", awayKey:"R16_4"},
-  {id:"QF_3", phase:"Kvartsfinal", homeKey:"R16_5", awayKey:"R16_6"},
-  {id:"QF_4", phase:"Kvartsfinal", homeKey:"R16_7", awayKey:"R16_8"},
+  {id:"QF_1", phase:"Kvartsfinal", homeKey:"R16_1", awayKey:"R16_2"},  // Spain-halvan
+  {id:"QF_2", phase:"Kvartsfinal", homeKey:"R16_3", awayKey:"R16_4"},  // Spain-halvan
+  {id:"QF_3", phase:"Kvartsfinal", homeKey:"R16_5", awayKey:"R16_6"},  // Argentina-halvan
+  {id:"QF_4", phase:"Kvartsfinal", homeKey:"R16_7", awayKey:"R16_8"},  // Argentina-halvan
 ];
 const SF = [
-  {id:"SF_1", phase:"Semifinal", homeKey:"QF_1", awayKey:"QF_2"},
-  {id:"SF_2", phase:"Semifinal", homeKey:"QF_3", awayKey:"QF_4"},
+  {id:"SF_1", phase:"Semifinal", homeKey:"QF_1", awayKey:"QF_2"},  // Spain-halvan -> Dallas 14 jul
+  {id:"SF_2", phase:"Semifinal", homeKey:"QF_3", awayKey:"QF_4"},  // Argentina-halvan -> Atlanta 15 jul
 ];
 const LATE = [
   {id:"BRONS", phase:"Bronsmatch", homeKey:"SF_1L", awayKey:"SF_2L"},
@@ -1230,7 +1232,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
       if (key.endsWith("L")) return "Förlorare "+key.slice(0,-1);
       return "Vinnare "+key;
     }
-    return keyLabel(m.homeKey)+" &mdash; "+keyLabel(m.awayKey);
+    return keyLabel(m.homeKey)+" vs "+keyLabel(m.awayKey);
   }
 
   function GroupTable({group}) {
@@ -1486,12 +1488,12 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
 function AdminResults({results, handleResult, getTeams, getDisplay, placements, deadlines={}, matchOverrides={}, saveMatchOverride}) {
   const [phase, setPhase] = useState("omgang1");
   const [group, setGroup] = useState("A");
-  function koMatchLabel(m) { return koLabel(m, placements, getTeams); }
+  const [openOverrides, setOpenOverrides] = useState({});
 
   const allTeams = Object.values(GROUPS).flat().sort((a,b)=>dn(a).localeCompare(dn(b)));
 
-  const [openOverrides, setOpenOverrides] = useState({});
   function toggleOverride(id) { setOpenOverrides(prev=>({...prev,[id]:!prev[id]})); }
+  function koMatchLabel(m) { return koLabel(m, placements, getTeams); }
 
   function MatchRow({m, showLabel=false}) {
     const r=results[m.id]||{home:"",away:""};
@@ -1643,6 +1645,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
   siteInfo,saveSiteInfo}) {
 
   const [pdlInput, setPdlInput] = useState(podiumDeadline?new Date(podiumDeadline).toISOString().slice(0,16):"");
+  useEffect(()=>{ if(podiumDeadline) setPdlInput(new Date(podiumDeadline).toISOString().slice(0,16)); },[podiumDeadline]);
   const allTeams = Object.values(GROUPS).flat().sort((a,b)=>a.localeCompare(b));
 
   return(
@@ -2012,58 +2015,64 @@ function BracketView({placements, results, getTeams, bestThirds}) {
       <div style={{overflowX:"auto",paddingBottom:16}}>
         <div style={{display:"flex",gap:10,alignItems:"flex-start",minWidth:1300}}>
 
-          {/* VANSTER: R32_1+2, R32_3+4, R32_5+6, R32_7+8 -> R16_1..4 -> QF_1,2 -> SF_1 */}
+          {/* VANSTER (Spain-halvan): R32_1+R32_9, R32_2+R32_10, R32_3+R32_11, R32_4+R32_12 -> R16_1..4 -> QF_1,2 -> SF_1 */}
           <Col>
             <H t="Sextondelsfinal"/>
-            {["R32_1","R32_2","R32_3","R32_4","R32_5","R32_6","R32_7","R32_8"].map(id=>(
-              <div key={id} style={{marginBottom:id==="R32_2"||id==="R32_4"||id==="R32_6"?10:3}}><MB mid={id}/></div>
+            {[["R32_1","R32_9"],["R32_2","R32_10"],["R32_3","R32_11"],["R32_4","R32_12"]].map(([a,b],i)=>(
+              <div key={a} style={{marginBottom:i<3?8:0}}>
+                <div style={{marginBottom:2}}><MB mid={a}/></div>
+                <div style={{marginBottom:0}}><MB mid={b}/></div>
+              </div>
             ))}
           </Col>
-          <Col pt={22}>
-            <H t="Åttondel"/>
+          <Col pt={20}>
+            <H t="Attondelsfinaler"/>
             {["R16_1","R16_2","R16_3","R16_4"].map(id=>(
-              <div key={id} style={{marginBottom:12}}><MB mid={id}/></div>
+              <div key={id} style={{marginBottom:10}}><MB mid={id}/></div>
             ))}
           </Col>
-          <Col pt={64}>
+          <Col pt={56}>
             <H t="Kvartsfinal"/>
             {["QF_1","QF_2"].map(id=>(
-              <div key={id} style={{marginBottom:32}}><MB mid={id}/></div>
+              <div key={id} style={{marginBottom:28}}><MB mid={id}/></div>
             ))}
           </Col>
-          <Col pt={116}>
-            <H t="Semifinal"/>
+          <Col pt={108}>
+            <H t="Semifinal (14 jul)"/>
             <MB mid="SF_1"/>
           </Col>
 
           {/* MITTEN: Final + Bronsmatch */}
-          <Col pt={148}>
+          <Col pt={140}>
             <H t="Final" gold={true}/>
             <MB mid="FINAL"/>
-            <div style={{marginTop:28}}><H t="Bronsmatch"/><MB mid="BRONS"/></div>
+            <div style={{marginTop:24}}><H t="Bronsmatch (18 jul)"/><MB mid="BRONS"/></div>
           </Col>
 
-          {/* HOGER: SF_2 -> QF_3,4 -> R16_5..8 -> R32_9+10..R32_15+16 */}
-          <Col pt={116}>
-            <H t="Semifinal"/>
+          {/* HOGER (Argentina-halvan): R32_5+R32_13, R32_6+R32_14, R32_7+R32_15, R32_8+R32_16 */}
+          <Col pt={108}>
+            <H t="Semifinal (15 jul)"/>
             <MB mid="SF_2"/>
           </Col>
-          <Col pt={64}>
+          <Col pt={56}>
             <H t="Kvartsfinal"/>
             {["QF_3","QF_4"].map(id=>(
-              <div key={id} style={{marginBottom:32}}><MB mid={id}/></div>
+              <div key={id} style={{marginBottom:28}}><MB mid={id}/></div>
             ))}
           </Col>
-          <Col pt={22}>
-            <H t="Åttondel"/>
+          <Col pt={20}>
+            <H t="Attondelsfinaler"/>
             {["R16_5","R16_6","R16_7","R16_8"].map(id=>(
-              <div key={id} style={{marginBottom:12}}><MB mid={id}/></div>
+              <div key={id} style={{marginBottom:10}}><MB mid={id}/></div>
             ))}
           </Col>
           <Col>
             <H t="Sextondelsfinal"/>
-            {["R32_9","R32_10","R32_11","R32_12","R32_13","R32_14","R32_15","R32_16"].map(id=>(
-              <div key={id} style={{marginBottom:id==="R32_10"||id==="R32_12"||id==="R32_14"?10:3}}><MB mid={id}/></div>
+            {[["R32_5","R32_13"],["R32_6","R32_14"],["R32_7","R32_15"],["R32_8","R32_16"]].map(([a,b],i)=>(
+              <div key={a} style={{marginBottom:i<3?8:0}}>
+                <div style={{marginBottom:2}}><MB mid={a}/></div>
+                <div style={{marginBottom:0}}><MB mid={b}/></div>
+              </div>
             ))}
           </Col>
 
