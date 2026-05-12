@@ -603,8 +603,8 @@ export default function App() {
     .err{color:#e07070;font-size:12px;font-family:'Source Sans 3',sans-serif;margin-top:8px;}
   `;
 
-  function FC({team}){return <span className="fc">{gc(team)}</span>;}
-  function TL({team,label}){
+  const FC = ({team})=><span className="fc">{gc(team)}</span>;
+  const TL = ({team,label})=>{
     if(!team) return <span style={{color:"#50403a"}}>{label||"--"}</span>;
     return <><FC team={team}/>{dn(team)}</>;
   }
@@ -1235,7 +1235,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
     return keyLabel(m.homeKey)+" vs "+keyLabel(m.awayKey);
   }
 
-  function GroupTable({group}) {
+  function renderGroupTable(group) {
     const matches=GROUP_MATCHES.filter(m=>m.group===group);
     const standing=calcGroupStandings(group,results);
     const played=matches.filter(m=>{const r=results[m.id];return r&&r.home!=""&&r.away!="";}).length;
@@ -1318,7 +1318,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
     );
   }
 
-  function RoundMatches({round}) {
+  function renderRoundMatches(round) {
     const rMatches = sortByDeadline(getMatchesForRound(round), deadlines);
     const groups = [...new Set(rMatches.map(m=>m.group))].sort();
     return(
@@ -1376,9 +1376,9 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
               <button key={k} className={"tab"+(groupSubTab===k?" active":"")} onClick={()=>setGroupSubTab(k)}>{l}</button>
             ))}
           </div>
-          {groupSubTab==="omgang1"&&<RoundMatches round={1}/>}
-          {groupSubTab==="omgang2"&&<RoundMatches round={2}/>}
-          {groupSubTab==="omgang3"&&<RoundMatches round={3}/>}
+          {groupSubTab==="omgang1"&&{renderRoundMatches(1)}}
+          {groupSubTab==="omgang2"&&{renderRoundMatches(2)}}
+          {groupSubTab==="omgang3"&&{renderRoundMatches(3)}}
           {groupSubTab==="pergrupp"&&(
             <div>
               <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:20}}>
@@ -1386,7 +1386,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
                   <button key={g} className={"gbtn"+(selGroup===g?" active":"")} onClick={()=>setSelGroup(g)}>Grupp {g}</button>
                 ))}
               </div>
-              <GroupTable group={selGroup}/>
+              {renderGroupTable(selGroup)}
               <p className="ss" style={{fontSize:11,color:"#504840",marginTop:-8}}>&gt; = vidare | * = bästa trea (vidare)</p>
             </div>
           )}
@@ -1590,7 +1590,7 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
   const koPhases = ["Sextondelsfinal","Attondelsfinaler","Kvartsfinal","Semifinal","Bronsmatch","Final"];
   const koMatches = sortByDeadline(KNOCKOUT_ALL.filter(m=>m.phase===phase), deadlines);
 
-  function RoundView({round}) {
+  function renderRound(round) {
     const ms = sortByDeadline(getMatchesForRound(round), deadlines);
     const groups = [...new Set(ms.map(m=>m.group))].sort();
     return(
@@ -1630,9 +1630,9 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
         </div>
       </div>
 
-      {phase==="omgang1"&&<RoundView round={1}/>}
-      {phase==="omgang2"&&<RoundView round={2}/>}
-      {phase==="omgang3"&&<RoundView round={3}/>}
+      {phase==="omgang1"&&renderRound(1)}
+      {phase==="omgang2"&&renderRound(2)}
+      {phase==="omgang3"&&renderRound(3)}
 
       {phase==="pergrupp"&&(
         <div>
@@ -2008,7 +2008,7 @@ function AdminParticipants({participants, deleteParticipant, resetPassword, appr
 
 // SLUTSPELSTRAD
 function BracketView({placements, results, getTeams, bestThirds}) {
-  function TR({mid, side}) {
+  function renderTR(mid, side) {
     const match=KNOCKOUT_ALL.find(m=>m.id===mid)||{homeKey:"",awayKey:""};
     const {home,away}=getTeams(mid);
     const team=side==="home"?home:away;
@@ -2041,9 +2041,9 @@ function BracketView({placements, results, getTeams, bestThirds}) {
       </div>
     );
   }
-  function MB({mid}){return<div style={{display:"flex",flexDirection:"column",gap:2}}><TR mid={mid} side="home"/><TR mid={mid} side="away"/></div>;}
-  function Col({children,pt=0}){return<div style={{display:"flex",flexDirection:"column",gap:6,paddingTop:pt}}>{children}</div>;}
-  function H({t,gold=false}){return<div style={{fontSize:8,fontFamily:"'Source Sans 3',sans-serif",color:gold?"#f5c842":"#60504a",textTransform:"uppercase",letterSpacing:.8,marginBottom:3,fontWeight:700}}>{t}</div>;}
+  function renderMB(mid){return<div style={{display:"flex",flexDirection:"column",gap:2}}>{renderTR(mid,"home")}{renderTR(mid,"away")}</div>;}
+  function renderCol(children,pt=0){return<div style={{display:"flex",flexDirection:"column",gap:6,paddingTop:pt}}>{children}</div>;}
+  function renderH(t,gold=false){return<div style={{fontSize:8,fontFamily:"'Source Sans 3',sans-serif",color:gold?"#f5c842":"#60504a",textTransform:"uppercase",letterSpacing:.8,marginBottom:3,fontWeight:700}}>{t}</div>;}
 
   return(
     <div>
@@ -2053,68 +2053,82 @@ function BracketView({placements, results, getTeams, bestThirds}) {
         * Trea (T) = en av de 8 basta treorna - admin placerar ut dem nar FIFA lastlar bracketen 27 juni
       </p>
       <div style={{overflowX:"auto",paddingBottom:16}}>
-        <div style={{display:"flex",gap:10,alignItems:"flex-start",minWidth:1300}}>
+        <div style={{display:"flex",gap:8,alignItems:"flex-start",minWidth:1400}}>
 
-          {/* VANSTER (Spain-halvan): R32_1+R32_9, R32_2+R32_10, R32_3+R32_11, R32_4+R32_12 -> R16_1..4 -> QF_1,2 -> SF_1 */}
-          <Col>
-            <H t="Sextondelsfinal"/>
+          {/* VANSTER sextondelsfinal - 4 par */}
+          <div style={{display:"flex",flexDirection:"column"}}>
+            {renderH("Sextondelsfinal")}
             {[["R32_1","R32_9"],["R32_2","R32_10"],["R32_3","R32_11"],["R32_4","R32_12"]].map(([a,b],i)=>(
-              <div key={a} style={{marginBottom:i<3?8:0}}>
-                <div style={{marginBottom:2}}><MB mid={a}/></div>
-                <div style={{marginBottom:0}}><MB mid={b}/></div>
+              <div key={a} style={{marginBottom:i<3?16:0}}>
+                <div style={{marginBottom:3}}>{renderMB(a)}</div>
+                <div>{renderMB(b)}</div>
               </div>
             ))}
-          </Col>
-          <Col pt={20}>
-            <H t="Attondelsfinaler"/>
-            {["R16_1","R16_2","R16_3","R16_4"].map(id=>(
-              <div key={id} style={{marginBottom:10}}><MB mid={id}/></div>
+          </div>
+
+          {/* VANSTER attondel - 4 matcher, var och en centrerad mellan sitt par */}
+          <div style={{display:"flex",flexDirection:"column",paddingTop:38}}>
+            {renderH("Attondel")}
+            {["R16_1","R16_2","R16_3","R16_4"].map((id,i)=>(
+              <div key={id} style={{marginBottom:i<3?50:0}}>{renderMB(id)}</div>
             ))}
-          </Col>
-          <Col pt={56}>
-            <H t="Kvartsfinal"/>
-            {["QF_1","QF_2"].map(id=>(
-              <div key={id} style={{marginBottom:28}}><MB mid={id}/></div>
+          </div>
+
+          {/* VANSTER kvartsfinal */}
+          <div style={{display:"flex",flexDirection:"column",paddingTop:100}}>
+            {renderH("Kvartsfinal")}
+            {["QF_1","QF_2"].map((id,i)=>(
+              <div key={id} style={{marginBottom:i<1?148:0}}>{renderMB(id)}</div>
             ))}
-          </Col>
-          <Col pt={108}>
-            <H t="Semifinal (14 jul)"/>
-            <MB mid="SF_1"/>
-          </Col>
+          </div>
+
+          {/* VANSTER semifinal */}
+          <div style={{display:"flex",flexDirection:"column",paddingTop:222}}>
+            {renderH("Semifinal")}
+            <div style={{fontSize:9,fontFamily:"'Source Sans 3',sans-serif",color:"#60504a",marginBottom:4}}>14 juli</div>
+            {renderMB("SF_1")}
+          </div>
 
           {/* MITTEN: Final + Bronsmatch */}
-          <Col pt={140}>
-            <H t="Final" gold={true}/>
-            <MB mid="FINAL"/>
-            <div style={{marginTop:24}}><H t="Bronsmatch (18 jul)"/><MB mid="BRONS"/></div>
-          </Col>
+          <div style={{display:"flex",flexDirection:"column",paddingTop:290}}>
+            {renderH("Final",true)}
+            {renderMB("FINAL")}
+            <div style={{marginTop:24}}>{renderH("Bronsmatch")}<div style={{fontSize:9,fontFamily:"'Source Sans 3',sans-serif",color:"#60504a",marginBottom:4}}>18 juli</div>{renderMB("BRONS")}</div>
+          </div>
 
-          {/* HOGER (Argentina-halvan): R32_5+R32_13, R32_6+R32_14, R32_7+R32_15, R32_8+R32_16 */}
-          <Col pt={108}>
-            <H t="Semifinal (15 jul)"/>
-            <MB mid="SF_2"/>
-          </Col>
-          <Col pt={56}>
-            <H t="Kvartsfinal"/>
-            {["QF_3","QF_4"].map(id=>(
-              <div key={id} style={{marginBottom:28}}><MB mid={id}/></div>
+          {/* HOGER semifinal */}
+          <div style={{display:"flex",flexDirection:"column",paddingTop:222}}>
+            {renderH("Semifinal")}
+            <div style={{fontSize:9,fontFamily:"'Source Sans 3',sans-serif",color:"#60504a",marginBottom:4}}>15 juli</div>
+            {renderMB("SF_2")}
+          </div>
+
+          {/* HOGER kvartsfinal */}
+          <div style={{display:"flex",flexDirection:"column",paddingTop:100}}>
+            {renderH("Kvartsfinal")}
+            {["QF_3","QF_4"].map((id,i)=>(
+              <div key={id} style={{marginBottom:i<1?148:0}}>{renderMB(id)}</div>
             ))}
-          </Col>
-          <Col pt={20}>
-            <H t="Attondelsfinaler"/>
-            {["R16_5","R16_6","R16_7","R16_8"].map(id=>(
-              <div key={id} style={{marginBottom:10}}><MB mid={id}/></div>
+          </div>
+
+          {/* HOGER attondel */}
+          <div style={{display:"flex",flexDirection:"column",paddingTop:38}}>
+            {renderH("Attondel")}
+            {["R16_5","R16_6","R16_7","R16_8"].map((id,i)=>(
+              <div key={id} style={{marginBottom:i<3?50:0}}>{renderMB(id)}</div>
             ))}
-          </Col>
-          <Col>
-            <H t="Sextondelsfinal"/>
+          </div>
+
+          {/* HOGER sextondelsfinal - 4 par */}
+          <div style={{display:"flex",flexDirection:"column"}}>
+            {renderH("Sextondelsfinal")}
             {[["R32_5","R32_13"],["R32_6","R32_14"],["R32_7","R32_15"],["R32_8","R32_16"]].map(([a,b],i)=>(
-              <div key={a} style={{marginBottom:i<3?8:0}}>
-                <div style={{marginBottom:2}}><MB mid={a}/></div>
-                <div style={{marginBottom:0}}><MB mid={b}/></div>
+              <div key={a} style={{marginBottom:i<3?16:0}}>
+                <div style={{marginBottom:3}}>{renderMB(a)}</div>
+                <div>{renderMB(b)}</div>
               </div>
             ))}
-          </Col>
+          </div>
 
         </div>
       </div>
