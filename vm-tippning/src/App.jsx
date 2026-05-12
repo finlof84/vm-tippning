@@ -218,7 +218,7 @@ function koLabel(m, placements={}, getTeams=()=>({home:null,away:null})) {
     const wt=getTeams(key);
     return wt&&wt.home?dn(wt.home):"Vinnare "+key;
   }
-  return keyLabel(m.homeKey)+" vs "+keyLabel(m.awayKey);
+  return keyLabel(m.homeKey)+" - "+keyLabel(m.awayKey);
 }
 
 const DEFAULT_DEADLINES = {
@@ -722,8 +722,16 @@ export default function App() {
                   )}
                   <input type="password" placeholder="Lösenord" value={pwInput}
                     onChange={e=>{setPwInput(e.target.value);setLoginError("");}}
-                    onKeyDown={e=>e.key==="Enter"&&handleJoin()}
                     style={{width:"100%"}}/>
+                  {nameInput&&!participants[nameInput.trim()]&&(
+                    <input type="password" placeholder="Bekräfta lösenord" value={newPwInput}
+                      onChange={e=>{setNewPwInput(e.target.value);setLoginError("");}}
+                      onKeyDown={e=>e.key==="Enter"&&handleJoin()}
+                      style={{width:"100%"}}/>
+                  )}
+                  {nameInput&&participants[nameInput.trim()]&&(
+                    <input type="password" placeholder="" value={newPwInput} onChange={()=>{}} style={{display:"none"}}/>
+                  )}
                   {loginError&&<p className="err">{loginError}</p>}
                   <button className="btn" onClick={handleJoin} style={{width:"100%"}}>
                     {nameInput&&participants[nameInput]?"Loggå in":"Registrera och tippa!"}
@@ -1477,7 +1485,7 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
       <div style={{background:done?"rgba(80,200,120,0.06)":"rgba(255,255,255,0.04)",
         border:"1px solid "+(done?"rgba(80,200,120,0.25)":"rgba(255,255,255,0.07)"),
         borderRadius:9,padding:"10px 14px",marginBottom:6}}>
-        {showLabel&&<p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:6,textAlign:"center"}}>{koMatchLabel(m)}</p>}
+        {showLabel&&<p className="ss" style={{fontSize:10,color:"#60504a",marginBottom:6,textAlign:"center"}} dangerouslySetInnerHTML={{__html:koMatchLabel(m)}}/>}
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           {ht&&<span className="fc">{gc(ht)}</span>}
           <span className="tn" style={{textAlign:"right"}}>{disp.home}</span>
@@ -1924,7 +1932,7 @@ function BracketView({placements, results, getTeams, bestThirds}) {
 
   return(
     <div>
-      <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:6}}>Slutspelstrad</h2>
+      <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:6}}>Slutspelsträd</h2>
       <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:20}}>VM 2026: 32 lag - 5 omgangar till final</p>
       <p className="ss" style={{fontSize:11,color:"#80a8f0",marginBottom:16}}>
         * Trea (T) = en av de 8 basta treorna - admin placerar ut dem nar FIFA lastlar bracketen 27 juni
@@ -1932,58 +1940,58 @@ function BracketView({placements, results, getTeams, bestThirds}) {
       <div style={{overflowX:"auto",paddingBottom:16}}>
         <div style={{display:"flex",gap:10,alignItems:"flex-start",minWidth:1300}}>
 
-          {/* VANSTER HALVA: R32_1,3,5,7,9,11,13,15 -> R16_1..4 -> QF_1,2 -> SF_1 */}
+          {/* VANSTER: R32_1+2, R32_3+4, R32_5+6, R32_7+8 -> R16_1..4 -> QF_1,2 -> SF_1 */}
           <Col>
             <H t="Sextondelsfinal"/>
-            {["R32_1","R32_3","R32_5","R32_7","R32_9","R32_11","R32_13","R32_15"].map(id=>(
-              <div key={id} style={{marginBottom:3}}><MB mid={id}/></div>
+            {["R32_1","R32_2","R32_3","R32_4","R32_5","R32_6","R32_7","R32_8"].map(id=>(
+              <div key={id} style={{marginBottom:id==="R32_2"||id==="R32_4"||id==="R32_6"?10:3}}><MB mid={id}/></div>
             ))}
           </Col>
-          <Col pt={20}>
-            <H t="Attondel"/>
+          <Col pt={22}>
+            <H t="Åttondel"/>
             {["R16_1","R16_2","R16_3","R16_4"].map(id=>(
-              <div key={id} style={{marginBottom:10}}><MB mid={id}/></div>
+              <div key={id} style={{marginBottom:12}}><MB mid={id}/></div>
             ))}
           </Col>
-          <Col pt={56}>
+          <Col pt={64}>
             <H t="Kvartsfinal"/>
             {["QF_1","QF_2"].map(id=>(
-              <div key={id} style={{marginBottom:28}}><MB mid={id}/></div>
+              <div key={id} style={{marginBottom:32}}><MB mid={id}/></div>
             ))}
           </Col>
-          <Col pt={100}>
+          <Col pt={116}>
             <H t="Semifinal"/>
             <MB mid="SF_1"/>
           </Col>
 
           {/* MITTEN: Final + Bronsmatch */}
-          <Col pt={130}>
+          <Col pt={148}>
             <H t="Final" gold={true}/>
             <MB mid="FINAL"/>
-            <div style={{marginTop:24}}><H t="Bronsmatch"/><MB mid="BRONS"/></div>
+            <div style={{marginTop:28}}><H t="Bronsmatch"/><MB mid="BRONS"/></div>
           </Col>
 
-          {/* HOGER HALVA: SF_2 -> QF_3,4 -> R16_5..8 -> R32_2,4,6,8,10,12,14,16 */}
-          <Col pt={100}>
+          {/* HOGER: SF_2 -> QF_3,4 -> R16_5..8 -> R32_9+10..R32_15+16 */}
+          <Col pt={116}>
             <H t="Semifinal"/>
             <MB mid="SF_2"/>
           </Col>
-          <Col pt={56}>
+          <Col pt={64}>
             <H t="Kvartsfinal"/>
             {["QF_3","QF_4"].map(id=>(
-              <div key={id} style={{marginBottom:28}}><MB mid={id}/></div>
+              <div key={id} style={{marginBottom:32}}><MB mid={id}/></div>
             ))}
           </Col>
-          <Col pt={20}>
-            <H t="Attondel"/>
+          <Col pt={22}>
+            <H t="Åttondel"/>
             {["R16_5","R16_6","R16_7","R16_8"].map(id=>(
-              <div key={id} style={{marginBottom:10}}><MB mid={id}/></div>
+              <div key={id} style={{marginBottom:12}}><MB mid={id}/></div>
             ))}
           </Col>
           <Col>
             <H t="Sextondelsfinal"/>
-            {["R32_2","R32_4","R32_6","R32_8","R32_10","R32_12","R32_14","R32_16"].map(id=>(
-              <div key={id} style={{marginBottom:3}}><MB mid={id}/></div>
+            {["R32_9","R32_10","R32_11","R32_12","R32_13","R32_14","R32_15","R32_16"].map(id=>(
+              <div key={id} style={{marginBottom:id==="R32_10"||id==="R32_12"||id==="R32_14"?10:3}}><MB mid={id}/></div>
             ))}
           </Col>
 
