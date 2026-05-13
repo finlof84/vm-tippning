@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { db } from "./firebase";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 
@@ -337,7 +337,28 @@ async function fbSet(id, data) {
   await setDoc(doc(db,"vm2026",id), data, {merge:true});
 }
 
+
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = {error: null}; }
+  static getDerivedStateFromError(error) { return {error: error.message}; }
+  render() {
+    if (this.state.error) {
+      return <div style={{background:"#1a0000",color:"#ff6060",padding:24,fontFamily:"monospace",fontSize:13,borderRadius:8,margin:20}}>
+        <strong>Runtime error (visa för Martin):</strong><br/>{this.state.error}
+      </div>;
+    }
+    return this.props.children;
+  }
+}
+
 // =============================================================================
+// Small reusable display components - must be top-level (not inside App)
+function FC({team}){return <span className="fc">{gc(team)}</span>;}
+function TL({team,label}){
+  if(!team) return <span style={{color:"#50403a"}}>{label||"--"}</span>;
+  return <><FC team={team}/><span>{dn(team)}</span></>;
+}
+
 export default function App() {
   const [view,           setView]           = useState("start");
   const [participants,   setParticipants]   = useState({});
@@ -356,7 +377,7 @@ export default function App() {
   const [pwInput,        setPwInput]        = useState("");
   const [newPwInput,     setNewPwInput]     = useState("");
   const [loginError,     setLoginError]     = useState("");
-  const [tipPhase,       setTipPhase]       = useState("Omgång1");
+  const [tipPhase,       setTipPhase]       = useState("omgang1");
   const [tipGroup,       setTipGroup]       = useState("A");
   const [adminCode,      setAdminCode]      = useState("");
   const [isAdmin,        setIsAdmin]        = useState(false);
@@ -538,9 +559,9 @@ export default function App() {
   }
   const filteredMatches=sortByDeadlineLocal(
     tipPhase==="Grupp"?GROUP_MATCHES.filter(m=>m.group===tipGroup)
-    :tipPhase==="Omgång1"?getMatchesForRound(1)
-    :tipPhase==="Omgång2"?getMatchesForRound(2)
-    :tipPhase==="Omgång3"?getMatchesForRound(3)
+    :tipPhase==="omgang1"?getMatchesForRound(1)
+    :tipPhase==="omgang2"?getMatchesForRound(2)
+    :tipPhase==="omgang3"?getMatchesForRound(3)
     :KNOCKOUT_ALL.filter(m=>m.phase===tipPhase)
   );
 
@@ -603,11 +624,7 @@ export default function App() {
     .err{color:#e07070;font-size:12px;font-family:'Source Sans 3',sans-serif;margin-top:8px;}
   `;
 
-  const FC = ({team})=><span className="fc">{gc(team)}</span>;
-  const TL = ({team,label})=>{
-    if(!team) return <span style={{color:"#50403a"}}>{label||"--"}</span>;
-    return <><FC team={team}/>{dn(team)}</>;
-  }
+  // FC and TL are top-level components (below)
 
   return(
     <div style={{minHeight:"100vh",background:"#0a1628",fontFamily:"Georgia,serif",color:"#f0e6d3"}}>
@@ -794,9 +811,9 @@ export default function App() {
 
             <div className="scroll-x" style={{marginBottom:12}}>
               <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.07)",minWidth:"max-content"}}>
-                <button className={"tab"+(tipPhase==="Omgång1"?" active":"")} onClick={()=>setTipPhase("Omgång1")}>Omgång 1</button>
-                <button className={"tab"+(tipPhase==="Omgång2"?" active":"")} onClick={()=>setTipPhase("Omgång2")}>Omgång 2</button>
-                <button className={"tab"+(tipPhase==="Omgång3"?" active":"")} onClick={()=>setTipPhase("Omgång3")}>Omgång 3</button>
+                <button className={"tab"+(tipPhase==="omgang1"?" active":"")} onClick={()=>setTipPhase("omgang1")}>Omgång 1</button>
+                <button className={"tab"+(tipPhase==="omgang2"?" active":"")} onClick={()=>setTipPhase("omgang2")}>Omgång 2</button>
+                <button className={"tab"+(tipPhase==="omgang3"?" active":"")} onClick={()=>setTipPhase("omgang3")}>Omgång 3</button>
                 <button className={"tab"+(tipPhase==="Grupp"?" active":"")} onClick={()=>setTipPhase("Grupp")}>Per grupp</button>
                 {PHASES.filter(p=>p!=="Grupp").map(p=><button key={p} className={"tab"+(tipPhase===p?" active":"")} onClick={()=>setTipPhase(p)}>{p}</button>)}
               </div>
@@ -808,11 +825,11 @@ export default function App() {
                 ))}
               </div>
             )}
-            {(tipPhase==="Omgång1"||tipPhase==="Omgång2"||tipPhase==="Omgång3")&&(
+            {(tipPhase==="omgang1"||tipPhase==="omgang2"||tipPhase==="omgang3")&&(
               <div style={{background:"rgba(245,200,66,0.05)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:8,padding:"8px 14px",marginBottom:14}}>
                 <span className="ss" style={{fontSize:11,color:"#a09070"}}>
-                  {tipPhase==="Omgång1"?"Omgång 1: 11-17 juni - varje grupps första 2 matcher":
-                   tipPhase==="Omgång2"?"Omgång 2: 18-24 juni - varje grupps matcher 3 och 4":
+                  {tipPhase==="omgang1"?"Omgång 1: 11-17 juni - varje grupps första 2 matcher":
+                   tipPhase==="omgang2"?"Omgång 2: 18-24 juni - varje grupps matcher 3 och 4":
                    "Omgång 3: 25-27 juni - avgörande omgång, båda matcherna i varje grupp spelas samtidigt"}
                 </span>
               </div>
@@ -920,6 +937,7 @@ export default function App() {
 
         {/* ADMIN */}
         {view==="admin"&&isAdmin&&(
+          <ErrorBoundary>
           <AdminView
             results={results} deadlines={deadlines} thirdOverrides={thirdOverrides}
             tipPhase={tipPhase} setTipPhase={setTipPhase} tipGroup={tipGroup} setTipGroup={setTipGroup}
@@ -937,6 +955,7 @@ export default function App() {
             siteInfo={siteInfo} saveSiteInfo={saveSiteInfo}
             matchOverrides={matchOverrides} saveMatchOverride={saveMatchOverride}
           />
+          </ErrorBoundary>
         )}
 
         {view==="tips"&&!currentUser&&(
@@ -1067,7 +1086,7 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
 // DELTAGARE-VY
 function ParticipantsView({participants, results, deadlines, now, loginAs, onLoggedIn}) {
   const [selName, setSelName] = useState(null);
-  const [selPhase, setSelPhase] = useState("Omgång1");
+  const [selPhase, setSelPhase] = useState("omgang1");
   const [selGroup, setSelGroup] = useState("A");
   const [loginModal, setLoginModal] = useState(null); // name to login as
   const [modalPw, setModalPw] = useState("");
@@ -1080,9 +1099,9 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
   }
 
   function getVisibleMatches() {
-    if(selPhase==="Omgång1") return getMatchesForRound(1);
-    if(selPhase==="Omgång2") return getMatchesForRound(2);
-    if(selPhase==="Omgång3") return getMatchesForRound(3);
+    if(selPhase==="omgang1") return getMatchesForRound(1);
+    if(selPhase==="omgang2") return getMatchesForRound(2);
+    if(selPhase==="omgang3") return getMatchesForRound(3);
     if(selPhase==="Grupp") return GROUP_MATCHES.filter(m=>m.group===selGroup);
     return KNOCKOUT_ALL.filter(m=>m.phase===selPhase);
   }
@@ -1149,9 +1168,9 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
           <h3 className="pf" style={{fontSize:20,color:"#f5c842",fontWeight:700,marginBottom:14}}>{selName}s tips</h3>
           <div className="scroll-x" style={{marginBottom:12}}>
             <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.07)",minWidth:"max-content"}}>
-              <button className={"tab"+(selPhase==="Omgång1"?" active":"")} onClick={()=>setSelPhase("Omgång1")}>Omgång 1</button>
-              <button className={"tab"+(selPhase==="Omgång2"?" active":"")} onClick={()=>setSelPhase("Omgång2")}>Omgång 2</button>
-              <button className={"tab"+(selPhase==="Omgång3"?" active":"")} onClick={()=>setSelPhase("Omgång3")}>Omgång 3</button>
+              <button className={"tab"+(selPhase==="omgang1"?" active":"")} onClick={()=>setSelPhase("omgang1")}>Omgång 1</button>
+              <button className={"tab"+(selPhase==="omgang2"?" active":"")} onClick={()=>setSelPhase("omgang2")}>Omgång 2</button>
+              <button className={"tab"+(selPhase==="omgang3"?" active":"")} onClick={()=>setSelPhase("omgang3")}>Omgång 3</button>
               <button className={"tab"+(selPhase==="Grupp"?" active":"")} onClick={()=>setSelPhase("Grupp")}>Per grupp</button>
               {PHASES.filter(p=>p!=="Grupp").map(p=>(
                 <button key={p} className={"tab"+(selPhase===p?" active":"")} onClick={()=>setSelPhase(p)}>{p}</button>
@@ -1602,16 +1621,7 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
               <div style={{flex:1,height:1,background:"rgba(255,255,255,0.06)"}}/>
             </div>
             {ms.filter(m=>m.group===g).map(m=>(
-              <AdminMatchRow key={m.id} m={m} {...rowProps}
-                results={results}
-                getDisplay={getDisplay}
-                getTeams={getTeams}
-                matchOverrides={matchOverrides}
-                saveMatchOverride={saveMatchOverride}
-                openOverrides={openOverrides}
-                toggleOverride={toggleOverride}
-                allTeams={allTeams}
-                placements={placements}/>
+              <AdminMatchRow key={m.id} m={m} {...rowProps}/>
             ))}
           </div>
         ))}
@@ -1669,7 +1679,8 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
   placements,bestThirds,handleThirdOverride,participants,deleteParticipant,resetPassword,
   approved,toggleApproved,
   podiumDeadline,podiumResults,podiumLocked,savePodiumDeadline,savePodiumResults,podiumTips,
-  siteInfo,saveSiteInfo}) {
+  siteInfo,saveSiteInfo,
+  matchOverrides,saveMatchOverride}) {
 
   const [pdlInput, setPdlInput] = useState(podiumDeadline?new Date(podiumDeadline).toISOString().slice(0,16):"");
   useEffect(()=>{ if(podiumDeadline) setPdlInput(new Date(podiumDeadline).toISOString().slice(0,16)); },[podiumDeadline]);
@@ -1891,9 +1902,9 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
 function SiteInfoAdmin({siteInfo, saveSiteInfo}) {
   const [msg, setMsg] = useState(siteInfo.message||"");
   const [pot, setPot] = useState(siteInfo.prizePot||"");
+  const [saved, setSaved] = useState("");
   // Sync with Firebase data when it loads
   useEffect(()=>{ setMsg(siteInfo.message||""); setPot(siteInfo.prizePot||""); },[siteInfo.message,siteInfo.prizePot]);
-  const [saved, setSaved] = useState("");
 
   async function handleSave() {
     await saveSiteInfo({message: msg, prizePot: pot});
