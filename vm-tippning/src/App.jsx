@@ -2064,78 +2064,82 @@ function BracketView({placements, results, getTeams, bestThirds}) {
         * Trea (T) = en av de 8 basta treorna - admin placerar ut dem nar FIFA lastlar bracketen 27 juni
       </p>
       <div style={{overflowX:"auto",paddingBottom:16}}>
-        <div style={{display:"flex",gap:8,alignItems:"flex-start",minWidth:1400}}>
+        <div style={{display:"flex",gap:6,alignItems:"flex-start",minWidth:1500}}>
 
-          {/* VANSTER sextondelsfinal - 4 par */}
-          <div style={{display:"flex",flexDirection:"column"}}>
+          {/* LEFT R32 - Spain half */}
+          <div style={{display:"flex",flexDirection:"column",gap:0}}>
             {renderH("Sextondelsfinal")}
             {[["R32_1","R32_9"],["R32_2","R32_10"],["R32_3","R32_11"],["R32_4","R32_12"]].map(([a,b],i)=>(
-              <div key={a} style={{marginBottom:i<3?16:0}}>
-                <div style={{marginBottom:3}}>{renderMB(a)}</div>
+              <div key={a} style={{height:220,display:"flex",flexDirection:"column",justifyContent:"space-around"}}>
+                <div>{renderMB(a)}</div>
                 <div>{renderMB(b)}</div>
               </div>
             ))}
           </div>
 
-          {/* VANSTER attondel - 4 matcher, var och en centrerad mellan sitt par */}
-          <div style={{display:"flex",flexDirection:"column",paddingTop:38}}>
+          {/* LEFT R16 */}
+          <div style={{display:"flex",flexDirection:"column",gap:0,paddingTop:16}}>
             {renderH("Attondel")}
             {["R16_1","R16_2","R16_3","R16_4"].map((id,i)=>(
-              <div key={id} style={{marginBottom:i<3?50:0}}>{renderMB(id)}</div>
+              <div key={id} style={{height:220,display:"flex",alignItems:"center"}}>{renderMB(id)}</div>
             ))}
           </div>
 
-          {/* VANSTER kvartsfinal */}
-          <div style={{display:"flex",flexDirection:"column",paddingTop:100}}>
+          {/* LEFT QF */}
+          <div style={{display:"flex",flexDirection:"column",gap:0,paddingTop:16}}>
             {renderH("Kvartsfinal")}
             {["QF_1","QF_2"].map((id,i)=>(
-              <div key={id} style={{marginBottom:i<1?148:0}}>{renderMB(id)}</div>
+              <div key={id} style={{height:440,display:"flex",alignItems:"center"}}>{renderMB(id)}</div>
             ))}
           </div>
 
-          {/* VANSTER semifinal */}
-          <div style={{display:"flex",flexDirection:"column",paddingTop:222}}>
+          {/* LEFT SF */}
+          <div style={{display:"flex",flexDirection:"column",paddingTop:16}}>
             {renderH("Semifinal")}
-            <div style={{fontSize:9,fontFamily:"'Source Sans 3',sans-serif",color:"#60504a",marginBottom:4}}>14 juli</div>
-            {renderMB("SF_1")}
+            <div style={{fontSize:9,fontFamily:"'Source Sans 3',sans-serif",color:"#60504a",marginBottom:4}}>14 jul</div>
+            <div style={{height:880,display:"flex",alignItems:"center"}}>{renderMB("SF_1")}</div>
           </div>
 
-          {/* MITTEN: Final + Bronsmatch */}
-          <div style={{display:"flex",flexDirection:"column",paddingTop:290}}>
+          {/* MIDDLE: Final + Bronze */}
+          <div style={{display:"flex",flexDirection:"column",paddingTop:16}}>
             {renderH("Final",true)}
-            {renderMB("FINAL")}
-            <div style={{marginTop:24}}>{renderH("Bronsmatch")}<div style={{fontSize:9,fontFamily:"'Source Sans 3',sans-serif",color:"#60504a",marginBottom:4}}>18 juli</div>{renderMB("BRONS")}</div>
+            <div style={{height:880,display:"flex",alignItems:"center"}}>{renderMB("FINAL")}</div>
+            <div style={{marginTop:8}}>
+              {renderH("Bronsmatch")}
+              <div style={{fontSize:9,fontFamily:"'Source Sans 3',sans-serif",color:"#60504a",marginBottom:4}}>18 jul</div>
+              {renderMB("BRONS")}
+            </div>
           </div>
 
-          {/* HOGER semifinal */}
-          <div style={{display:"flex",flexDirection:"column",paddingTop:222}}>
+          {/* RIGHT SF */}
+          <div style={{display:"flex",flexDirection:"column",paddingTop:16}}>
             {renderH("Semifinal")}
-            <div style={{fontSize:9,fontFamily:"'Source Sans 3',sans-serif",color:"#60504a",marginBottom:4}}>15 juli</div>
-            {renderMB("SF_2")}
+            <div style={{fontSize:9,fontFamily:"'Source Sans 3',sans-serif",color:"#60504a",marginBottom:4}}>15 jul</div>
+            <div style={{height:880,display:"flex",alignItems:"center"}}>{renderMB("SF_2")}</div>
           </div>
 
-          {/* HOGER kvartsfinal */}
-          <div style={{display:"flex",flexDirection:"column",paddingTop:100}}>
+          {/* RIGHT QF */}
+          <div style={{display:"flex",flexDirection:"column",gap:0,paddingTop:16}}>
             {renderH("Kvartsfinal")}
             {["QF_3","QF_4"].map((id,i)=>(
-              <div key={id} style={{marginBottom:i<1?148:0}}>{renderMB(id)}</div>
+              <div key={id} style={{height:440,display:"flex",alignItems:"center"}}>{renderMB(id)}</div>
             ))}
           </div>
 
-          {/* HOGER attondel */}
-          <div style={{display:"flex",flexDirection:"column",paddingTop:38}}>
+          {/* RIGHT R16 */}
+          <div style={{display:"flex",flexDirection:"column",gap:0,paddingTop:16}}>
             {renderH("Attondel")}
             {["R16_5","R16_6","R16_7","R16_8"].map((id,i)=>(
-              <div key={id} style={{marginBottom:i<3?50:0}}>{renderMB(id)}</div>
+              <div key={id} style={{height:220,display:"flex",alignItems:"center"}}>{renderMB(id)}</div>
             ))}
           </div>
 
-          {/* HOGER sextondelsfinal - 4 par */}
-          <div style={{display:"flex",flexDirection:"column"}}>
+          {/* RIGHT R32 - Argentina half */}
+          <div style={{display:"flex",flexDirection:"column",gap:0}}>
             {renderH("Sextondelsfinal")}
             {[["R32_5","R32_13"],["R32_6","R32_14"],["R32_7","R32_15"],["R32_8","R32_16"]].map(([a,b],i)=>(
-              <div key={a} style={{marginBottom:i<3?16:0}}>
-                <div style={{marginBottom:3}}>{renderMB(a)}</div>
+              <div key={a} style={{height:220,display:"flex",flexDirection:"column",justifyContent:"space-around"}}>
+                <div>{renderMB(a)}</div>
                 <div>{renderMB(b)}</div>
               </div>
             ))}
