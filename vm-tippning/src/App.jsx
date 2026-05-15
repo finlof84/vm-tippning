@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db } from "./firebase";
-import { doc, onSnapshot, setDoc } from "firebase/firestore";
+import { doc, onSnapshot, setDoc, increment, updateDoc, getDoc } from "firebase/firestore";
 
 // Ratta grupper enligt FIFA VM 2026 (efter alla kval klara april 2026)
 const GROUPS = {
@@ -367,6 +367,7 @@ export default function App() {
   const [deadlines,      setDeadlines]      = useState({});
   const [thirdOverrides, setThirdOverrides] = useState({});
   const [matchOverrides, setMatchOverrides] = useState({}); // { "R32_1_home": "Brasilien", ... }
+  const [visitorStats, setVisitorStats] = useState({totalVisits:0,uniqueCount:0,lastVisit:null});
   const [approved,       setApproved]       = useState({}); // { name: true/false }
   const [siteInfo,       setSiteInfo]       = useState({}); // { message, prizePot }
   const [podiumTips,     setPodiumTips]     = useState({}); // { name: {winner,second,third} }
@@ -389,6 +390,33 @@ export default function App() {
   const [now,            setNow]            = useState(Date.now());
 
   useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),30000);return()=>clearInterval(t);},[]);
+
+  // Track visit on mount
+  useEffect(()=>{
+    async function trackVisit() {
+      try {
+        // Generate or retrieve visitor ID from localStorage
+        let vid = localStorage.getItem("vmtipp_vid");
+        if(!vid) {
+          vid = Math.random().toString(36).slice(2)+Date.now().toString(36);
+          localStorage.setItem("vmtipp_vid", vid);
+        }
+        const statsRef = doc(db,"vm2026","visitorStats");
+        const snap = await getDoc(statsRef);
+        const data = snap.exists() ? snap.data() : {};
+        const uniqueVisitors = data.uniqueVisitors || {};
+        const isNew = !uniqueVisitors[vid];
+        // Update: always increment totalVisits, only increment uniqueCount if new visitor
+        await setDoc(statsRef, {
+          totalVisits: (data.totalVisits||0) + 1,
+          uniqueCount: (data.uniqueCount||0) + (isNew?1:0),
+          uniqueVisitors: {...uniqueVisitors, [vid]: (uniqueVisitors[vid]||0)+1},
+          lastVisit: new Date().toISOString()
+        }, {merge:true});
+      } catch(e) { /* silent fail */ }
+    }
+    trackVisit();
+  },[]);
 
   useEffect(()=>{
     const unsubs=[
@@ -963,6 +991,7 @@ export default function App() {
             podiumTips={podiumTips}
             siteInfo={siteInfo} saveSiteInfo={saveSiteInfo}
             matchOverrides={matchOverrides} saveMatchOverride={saveMatchOverride}
+            visitorStats={visitorStats}
           />
           </ErrorBoundary>
         )}
@@ -1689,7 +1718,8 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
   approved,toggleApproved,
   podiumDeadline,podiumResults,podiumLocked,savePodiumDeadline,savePodiumResults,podiumTips,
   siteInfo,saveSiteInfo,
-  matchOverrides,saveMatchOverride}) {
+  matchOverrides,saveMatchOverride,
+  visitorStats={}}) {
 
   const [pdlInput, setPdlInput] = useState(podiumDeadline?new Date(podiumDeadline).toISOString().slice(0,16):"");
   useEffect(()=>{ if(podiumDeadline) setPdlInput(new Date(podiumDeadline).toISOString().slice(0,16)); },[podiumDeadline]);
@@ -1697,7 +1727,26 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
 
   return(
     <div>
-      <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:22}}>Admin - P14 HIKs VM-tipp 2026</h2>
+      <h2 className="pf" style={{fontSize:24,color:"#f5c842",fontWeight:700,marginBottom:16}}>Admin - P14 HIKs VM-tipp 2026</h2>
+
+      {/* Visitor stats bar */}
+      <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:20}}>
+        {[
+          {label:"Totalt antal besok",value:visitorStats.totalVisits||0,icon:"&#128100;"},
+          {label:"Unika besokare",value:visitorStats.uniqueCount||0,icon:"&#127775;"},
+          {label:"Senaste besok",value:visitorStats.lastVisit?new Date(visitorStats.lastVisit).toLocaleString("sv-SE",{dateStyle:"short",timeStyle:"short"}):"--",icon:"&#128336;"},
+        ].map(({label,value,icon})=>(
+          <div key={label} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
+            borderRadius:10,padding:"10px 18px",display:"flex",alignItems:"center",gap:10}}>
+            <span dangerouslySetInnerHTML={{__html:icon}} style={{fontSize:18}}/>
+            <div>
+              <div className="pf" style={{fontSize:18,color:"#f5c842",fontWeight:700,lineHeight:1}}>{value}</div>
+              <div className="ss" style={{fontSize:10,color:"#60504a",marginTop:2}}>{label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.08)",marginBottom:22,flexWrap:"wrap"}}>
         {[["results","Resultat"],["thirds","Treornas matcher"],["deadlines","Deadlines"],["podium","Prispall"],["participants","Deltagare"],["siteinfo","Startsida"]].map(([k,l])=>(
           <button key={k} className={"tab"+(adminTab===k?" active":"")} onClick={()=>setAdminTab(k)}>{l}</button>
