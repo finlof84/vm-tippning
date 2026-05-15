@@ -743,7 +743,7 @@ export default function App() {
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>&#127941;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Poäng per match</strong> - 3p for exakt rätt resultat &bull; 1p for rätt utfall (vinst/oavgjort/förlust) &bull; 0p om fel.
+                    <strong style={{color:"#f0e6d3"}}>Poäng per match</strong> - 3p för exakt rätt resultat &bull; 1p för rätt utfall (vinst/oavgjort/förlust) &bull; 0p om fel.
                   </p>
                 </div>
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
