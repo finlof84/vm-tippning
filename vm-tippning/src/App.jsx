@@ -684,7 +684,7 @@ export default function App() {
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>&#128100;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Registrera dig och betala</strong> - Skapa din användare och swisha 60 kr till 0700-000000 (gratis för HIK P14). Hälften går till vinstpotten och hälften till P14s lagkassa. Du syns på topplistan när admin godkänt din betalning.
+                    <strong style={{color:"#f0e6d3"}}>Registrera dig och betala</strong> - Skapa din användare och swisha 60 kr till 0706-426251 (gratis för HIK P14). Hälften går till vinstpotten och hälften till P14s lagkassa. Du syns på topplistan när admin godkänt din betalning.
                   </p>
                 </div>
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
@@ -712,7 +712,7 @@ export default function App() {
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>&#127942;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Prispall-tips</strong> - Innan turneringen börjar tippar du vem som vinner VM-guldet (20p), vem som är tvåa i finalen (15p) och vem som vinner bronsmatchen (10p). Måste lämnas innan 11 juni kl 21:00.
+                    <strong style={{color:"#f0e6d3"}}>Tippa prispall</strong> - Innan turneringen börjar tippar du vilka som vinner VM-guldet (20p), kommer tvåa (15p) och trea (10p). Måste lämnas innan 11 juni kl 21:00.
                   </p>
                 </div>
               </div>
@@ -1039,7 +1039,7 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
       borderRadius:12,padding:"18px 16px",marginBottom:22}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:8}}>
         <div>
-          <h3 className="pf" style={{fontSize:17,color:"#f5c842",fontWeight:700}}>Prispall-tips</h3>
+          <h3 className="pf" style={{fontSize:17,color:"#f5c842",fontWeight:700}}>Tippa prispall</h3>
           <p className="ss" style={{fontSize:11,color:"#a09070",marginTop:2}}>Tippa vem som vinner VM, kommer två och trea. 20/15/10 poäng.</p>
         </div>
         {podiumLocked
@@ -1815,12 +1815,12 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
         <div>
           <h3 className="pf" style={{fontSize:18,color:"#f5c842",fontWeight:700,marginBottom:6}}>Prispall-administration</h3>
           <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:20,lineHeight:1.7}}>
-            Sätt deadline for prispall-tips och registrera officiellt utfall när VM ar klart.
+            Sätt deadline for Tippa prispall och registrera officiellt utfall när VM ar klart.
           </p>
 
           {/* Deadline */}
           <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:10,padding:"16px",marginBottom:20}}>
-            <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:10}}>Deadline for prispall-tips</p>
+            <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:10}}>Deadline for Tippa prispall</p>
             <p className="ss" style={{fontSize:11,color:"#a09070",marginBottom:12}}>Sätt samma deadline som Omgång 1 (fore första matchen).</p>
             <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
               <input type="datetime-local" value={pdlInput}
