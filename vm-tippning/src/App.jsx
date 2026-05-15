@@ -694,6 +694,15 @@ export default function App() {
                   </p>
                 </div>
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <span style={{fontSize:16,flexShrink:0}}>&#128241;</span>
+                  <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
+                    <strong style={{color:"#f0e6d3"}}>Ga med i WhatsApp-gruppen</strong> (frivilligt) &ndash;{" "}
+                    <a href="https://chat.whatsapp.com/G4XIM2xifAiAvRyTP8hT9S?mode=gi_t"
+                      target="_blank" rel="noopener noreferrer"
+                      style={{color:"#f5c842",textDecoration:"underline"}}>VM Tippning HIK p14</a>
+                  </p>
+                </div>
+                <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>&#128274;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
                     <strong style={{color:"#f0e6d3"}}>Deadlines</strong><br/>
@@ -712,7 +721,7 @@ export default function App() {
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>&#127942;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Tippa prispall</strong> - Innan turneringen börjar tippar du vilka som vinner VM-guldet (20p), kommer tvåa (15p) och trea (10p). Måste lämnas innan 11 juni kl 21:00.
+                    <strong style={{color:"#f0e6d3"}}>Tippa prispall</strong> - Tippa vilka som vinner VM-guldet (20p), kommer tvåa (15p) och trea (10p). Deadline 11 juni kl 21:00.
                   </p>
                 </div>
               </div>
