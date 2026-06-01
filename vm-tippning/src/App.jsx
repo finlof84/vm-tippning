@@ -189,17 +189,19 @@ function labelFromKey(key) {
   return "Vinnare "+key;
 }
 
-function calcPoints(tip, result) {
+function calcPoints(tip, result, isKO=false) {
   if(!tip||!result) return 0;
   const th=parseInt(tip.home),ta=parseInt(tip.away);
   const rh=parseInt(result.home),ra=parseInt(result.away);
   if(isNaN(th)||isNaN(ta)||isNaN(rh)||isNaN(ra)) return 0;
-  if(th===rh&&ta===ra) return 3;
-  if(Math.sign(th-ta)===Math.sign(rh-ra)) return 1;
+  if(th===rh&&ta===ra) return isKO?5:3;
+  if(Math.sign(th-ta)===Math.sign(rh-ra)) return isKO?3:1;
   return 0;
 }
 function calcTotal(tips, results) {
-  return [...GROUP_MATCHES,...KNOCKOUT_ALL].reduce((s,m)=>s+calcPoints(tips[m.id],results[m.id]),0);
+  const groupPts = GROUP_MATCHES.reduce((s,m)=>s+calcPoints(tips[m.id],results[m.id],false),0);
+  const koPts = KNOCKOUT_ALL.reduce((s,m)=>s+calcPoints(tips[m.id],results[m.id],true),0);
+  return groupPts+koPts;
 }
 
 const ADMIN_CODE = "vm2026admin";
@@ -743,7 +745,7 @@ export default function App() {
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>&#127941;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Poäng per match</strong> - 3p för exakt rätt resultat &bull; 1p för rätt utfall (vinst/oavgjort/förlust) &bull; 0p om fel.
+                    <strong style={{color:"#f0e6d3"}}>Poäng per match</strong> - Gruppspel: 3p exakt, 1p rätt 1X2 &bull; Slutspel: 5p exakt, 3p rätt 1X2 &bull; 0p om fel.
                   </p>
                 </div>
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
