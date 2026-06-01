@@ -370,6 +370,7 @@ export default function App() {
   const [thirdOverrides, setThirdOverrides] = useState({});
   const [matchOverrides, setMatchOverrides] = useState({}); // { "R32_1_home": "Brasilien", ... }
   const [visitorStats, setVisitorStats] = useState({totalVisits:0,uniqueCount:0,lastVisit:null});
+  const [userGroups, setUserGroups] = useState({}); // {groupName:[member,...]}
   const [approved,       setApproved]       = useState({}); // { name: true/false }
   const [siteInfo,       setSiteInfo]       = useState({}); // { message, prizePot }
   const [podiumTips,     setPodiumTips]     = useState({}); // { name: {winner,second,third} }
@@ -506,6 +507,10 @@ export default function App() {
     const upd={...deadlines};
     getMatchesForRound(round).forEach(m=>{upd[m.id]=iso;});
     await fbSet("deadlines",upd);
+  }
+  async function saveUserGroups(groups) {
+    await setDoc(doc(db,"vm2026","userGroups"), groups);
+    setUserGroups(groups);
   }
   async function saveMatchOverride(matchId, side, team) {
     const key = matchId+"_"+side;
@@ -837,6 +842,34 @@ export default function App() {
             <div style={{background:"rgba(255,255,255,0.05)",borderRadius:4,height:5,marginBottom:22,overflow:"hidden"}}>
               <div style={{background:"#f5c842",height:"100%",width:(countTipped()/totalMatches*100)+"%",transition:"width .3s",borderRadius:4}}/>
             </div>
+            {/* GRUPPER */}
+            {Object.keys(userGroups).length>0&&(
+              <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",
+                borderRadius:10,padding:"12px 16px",marginBottom:18}}>
+                <p className="pf" style={{fontSize:13,color:"#f5c842",fontWeight:700,marginBottom:10}}>Mina grupper</p>
+                <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                  {Object.keys(userGroups).sort().map(g=>{
+                    const isMember=(userGroups[g]||[]).includes(currentUser);
+                    return(
+                      <button key={g} onClick={()=>{
+                        const members=userGroups[g]||[];
+                        const upd=isMember?members.filter(m=>m!==currentUser):[...members,currentUser];
+                        saveUserGroups({...userGroups,[g]:upd});
+                      }}
+                        style={{background:isMember?"rgba(245,200,66,0.15)":"rgba(255,255,255,0.04)",
+                          border:"1px solid "+(isMember?"rgba(245,200,66,0.35)":"rgba(255,255,255,0.08)"),
+                          borderRadius:16,padding:"5px 14px",cursor:"pointer",
+                          color:isMember?"#f5c842":"#a09070",
+                          fontFamily:"'Source Sans 3',sans-serif",fontSize:12,fontWeight:isMember?700:400}}>
+                        {isMember?"OK ":""}{g}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="ss" style={{fontSize:10,color:"#50403a",marginTop:8}}>Klicka for att ga med i eller lamna en grupp.</p>
+              </div>
+            )}
+
             {/* PRISPALL-TIPS */}
             <PodiumTipBox
               currentUser={currentUser}
@@ -910,31 +943,7 @@ export default function App() {
 
         {/* TOPPLISTA */}
         {view==="leaderboard"&&(
-          <div>
-            <h2 className="pf" style={{fontSize:28,color:"#f5c842",fontWeight:700,marginBottom:5}}>Topplista</h2>
-            <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:26}}>Uppdateras när resultat registreras</p>
-            {leaderboard.length===0?(
-              <p className="ss" style={{color:"#60504a",textAlign:"center",padding:"60px 0"}}>Inga tippare ännu!</p>
-            ):(
-              <div style={{display:"flex",flexDirection:"column",gap:7}}>
-                {leaderboard.map((e,i)=>(
-                  <div key={e.name} style={{background:i===0?"rgba(245,200,66,0.08)":"rgba(255,255,255,0.04)",
-                    border:"1px solid "+(i===0?"rgba(245,200,66,0.3)":"rgba(255,255,255,0.07)"),
-                    borderRadius:11,padding:"13px 20px",display:"flex",alignItems:"center",gap:14}}>
-                    <span className="ss" style={{fontSize:i<3?18:13,minWidth:30,textAlign:"center",fontWeight:700,color:"#f5c842"}}>#{i+1}</span>
-                    <div style={{flex:1}}>
-                      <div className="pf" style={{fontSize:16,fontWeight:700,color:i===0?"#f5c842":"#f0e6d3"}}>{e.name}</div>
-                      <div className="ss" style={{fontSize:11,color:"#60504a",marginTop:2}}>{e.tipped} matcher tippade</div>
-                    </div>
-                    <div style={{textAlign:"right"}}>
-                      <div className="pf" style={{fontSize:24,fontWeight:900,color:i===0?"#f5c842":"#f0e6d3"}}>{e.points}</div>
-                      <div className="ss" style={{fontSize:10,color:"#60504a"}}>poäng</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <LeaderboardView leaderboard={leaderboard} userGroups={userGroups}/>
         )}
 
         {/* DELTAGARE */}
@@ -994,6 +1003,7 @@ export default function App() {
             siteInfo={siteInfo} saveSiteInfo={saveSiteInfo}
             matchOverrides={matchOverrides} saveMatchOverride={saveMatchOverride}
             visitorStats={visitorStats}
+            userGroups={userGroups} saveUserGroups={saveUserGroups}
           />
           </ErrorBoundary>
         )}
@@ -1275,6 +1285,76 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
   );
 }
 
+// TOPPLISTA
+function LeaderboardView({leaderboard, userGroups}) {
+  const [activeGroup, setActiveGroup] = useState("Alla");
+
+  const groupNames = ["Alla", ...Object.keys(userGroups).sort()];
+
+  const filtered = activeGroup==="Alla"
+    ? leaderboard
+    : leaderboard.filter(e=>(userGroups[activeGroup]||[]).includes(e.name));
+
+  // Re-rank within filtered group
+  const ranked = filtered.map((e,i)=>({...e, rank:i+1}));
+
+  return(
+    <div>
+      <h2 className="pf" style={{fontSize:28,color:"#f5c842",fontWeight:700,marginBottom:5}}>Topplista</h2>
+      <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:16}}>Uppdateras nar resultat registreras</p>
+
+      {/* Group filter tabs */}
+      {groupNames.length>1&&(
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:20}}>
+          {groupNames.map(g=>(
+            <button key={g} onClick={()=>setActiveGroup(g)}
+              style={{background:activeGroup===g?"rgba(245,200,66,0.15)":"rgba(255,255,255,0.04)",
+                border:"1px solid "+(activeGroup===g?"rgba(245,200,66,0.4)":"rgba(255,255,255,0.08)"),
+                borderRadius:20,padding:"5px 14px",cursor:"pointer",
+                color:activeGroup===g?"#f5c842":"#a09070",
+                fontFamily:"'Source Sans 3',sans-serif",fontWeight:700,fontSize:12}}>
+              {g}{g!=="Alla"&&<span style={{marginLeft:4,opacity:.6}}>({(userGroups[g]||[]).filter(n=>leaderboard.some(e=>e.name===n)).length})</span>}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {ranked.length===0?(
+        <p className="ss" style={{color:"#60504a",textAlign:"center",padding:"60px 0"}}>
+          {activeGroup==="Alla"?"Inga tippare annu!":"Inga tippare i den har gruppen annu."}
+        </p>
+      ):(
+        <div style={{display:"flex",flexDirection:"column",gap:7}}>
+          {ranked.map((e,i)=>{
+            const medal = i===0?"#f5c842":i===1?"#c0c0c0":i===2?"#cd7f32":null;
+            return(
+              <div key={e.name} style={{background:i===0?"rgba(245,200,66,0.08)":"rgba(255,255,255,0.04)",
+                border:"1px solid "+(i===0?"rgba(245,200,66,0.3)":"rgba(255,255,255,0.07)"),
+                borderRadius:11,padding:"13px 20px",display:"flex",alignItems:"center",gap:14}}>
+                <span className="pf" style={{fontSize:i<3?20:14,minWidth:32,textAlign:"center",
+                  fontWeight:700,color:medal||"#60504a"}}>
+                  {i===0?"1.":i===1?"2.":i===2?"3.":`#${e.rank}`}
+                </span>
+                <div style={{flex:1}}>
+                  <div className="pf" style={{fontSize:16,fontWeight:700,color:i===0?"#f5c842":"#f0e6d3"}}>{e.name}</div>
+                  <div className="ss" style={{fontSize:11,color:"#60504a",marginTop:2}}>
+                    {e.tipped} matcher tippade
+                    {e.podiumPoints>0&&<span style={{color:"#80a8f0",marginLeft:6}}>+{e.podiumPoints}p prispall</span>}
+                  </div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div className="pf" style={{fontSize:24,fontWeight:900,color:medal||"#f0e6d3"}}>{e.points}</div>
+                  <div className="ss" style={{fontSize:10,color:"#60504a"}}>poang</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // RESULTAT-VY
 function ResultsView({results, getTeams, getDisplay, placements, bestThirds, deadlines={}}) {
   const [tab, setTab] = useState("groups");
@@ -1543,6 +1623,84 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
 }
 
 
+// ADMIN GRUPPER
+function AdminGroupsView({userGroups, saveUserGroups, participants}) {
+  const [newGroupName, setNewGroupName] = useState("");
+  const [err, setErr] = useState("");
+  const allNames = Object.keys(participants).sort();
+
+  function addGroup() {
+    const name = newGroupName.trim();
+    if(!name){setErr("Ange ett gruppnamn.");return;}
+    if(userGroups[name]){setErr("Gruppen finns redan.");return;}
+    saveUserGroups({...userGroups,[name]:[]});
+    setNewGroupName("");setErr("");
+  }
+  function deleteGroup(g) {
+    const upd={...userGroups};delete upd[g];
+    saveUserGroups(upd);
+  }
+  function toggleMember(group, name) {
+    const members = userGroups[group]||[];
+    const upd = members.includes(name)?members.filter(m=>m!==name):[...members,name];
+    saveUserGroups({...userGroups,[group]:upd});
+  }
+
+  return(
+    <div>
+      <h3 className="pf" style={{fontSize:18,color:"#f5c842",marginBottom:16}}>Hantera grupper</h3>
+      <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:18}}>
+        Skapa grupper och tilldela deltagare. Deltagare kan ocksa ga med sjalva i tippningsvyn.
+      </p>
+
+      {/* Create group */}
+      <div style={{display:"flex",gap:8,marginBottom:24,flexWrap:"wrap"}}>
+        <input value={newGroupName} onChange={e=>{setNewGroupName(e.target.value);setErr("");}}
+          placeholder="Nytt gruppnamn..." onKeyDown={e=>e.key==="Enter"&&addGroup()}
+          style={{flex:1,minWidth:160}}/>
+        <button className="btn" onClick={addGroup} style={{whiteSpace:"nowrap"}}>Skapa grupp</button>
+      </div>
+      {err&&<p className="ss" style={{color:"#e07070",fontSize:12,marginTop:-16,marginBottom:12}}>{err}</p>}
+
+      {Object.keys(userGroups).length===0&&(
+        <p className="ss" style={{color:"#60504a"}}>Inga grupper skapade annu.</p>
+      )}
+
+      {/* Group cards */}
+      {Object.keys(userGroups).sort().map(g=>(
+        <div key={g} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
+          borderRadius:10,padding:"14px 16px",marginBottom:14}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+            <span className="pf" style={{fontSize:15,color:"#f5c842",fontWeight:700}}>{g}</span>
+            <div style={{display:"flex",gap:8,alignItems:"center"}}>
+              <span className="ss" style={{fontSize:11,color:"#60504a"}}>{(userGroups[g]||[]).length} medlemmar</span>
+              <button onClick={()=>deleteGroup(g)}
+                style={{background:"rgba(180,50,50,0.2)",border:"1px solid rgba(180,50,50,0.3)",
+                  borderRadius:5,padding:"3px 10px",cursor:"pointer",fontSize:11,color:"#e07070",
+                  fontFamily:"'Source Sans 3',sans-serif"}}>Ta bort grupp</button>
+            </div>
+          </div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+            {allNames.map(name=>{
+              const isMember=(userGroups[g]||[]).includes(name);
+              return(
+                <button key={name} onClick={()=>toggleMember(g,name)}
+                  style={{background:isMember?"rgba(245,200,66,0.15)":"rgba(255,255,255,0.04)",
+                    border:"1px solid "+(isMember?"rgba(245,200,66,0.4)":"rgba(255,255,255,0.08)"),
+                    borderRadius:16,padding:"4px 12px",cursor:"pointer",
+                    color:isMember?"#f5c842":"#a09070",
+                    fontFamily:"'Source Sans 3',sans-serif",fontSize:12,fontWeight:isMember?700:400}}>
+                  {isMember?"OK ":""}{name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ADMIN RESULTAT - helper components (top-level to avoid hooks-in-nested-components error)
 function AdminMatchRow({m, results, handleResult, getDisplay, getTeams, matchOverrides, saveMatchOverride,
   openOverrides, toggleOverride, allTeams, placements}) {
@@ -1721,7 +1879,8 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
   podiumDeadline,podiumResults,podiumLocked,savePodiumDeadline,savePodiumResults,podiumTips,
   siteInfo,saveSiteInfo,
   matchOverrides,saveMatchOverride,
-  visitorStats={}}) {
+  visitorStats={},
+  userGroups={}, saveUserGroups}) {
 
   const [pdlInput, setPdlInput] = useState(podiumDeadline?new Date(podiumDeadline).toISOString().slice(0,16):"");
   useEffect(()=>{ if(podiumDeadline) setPdlInput(new Date(podiumDeadline).toISOString().slice(0,16)); },[podiumDeadline]);
@@ -1750,7 +1909,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
       </div>
 
       <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.08)",marginBottom:22,flexWrap:"wrap"}}>
-        {[["results","Resultat"],["thirds","Treornas matcher"],["deadlines","Deadlines"],["podium","Prispall"],["participants","Deltagare"],["siteinfo","Startsida"]].map(([k,l])=>(
+        {[["results","Resultat"],["thirds","Treornas matcher"],["deadlines","Deadlines"],["podium","Prispall"],["participants","Deltagare"],["groups","Grupper"],["siteinfo","Startsida"]].map(([k,l])=>(
           <button key={k} className={"tab"+(adminTab===k?" active":"")} onClick={()=>setAdminTab(k)}>{l}</button>
         ))}
       </div>
