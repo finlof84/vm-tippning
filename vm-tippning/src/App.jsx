@@ -2113,6 +2113,10 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
       {adminTab==="siteinfo"&&(
         <SiteInfoAdmin siteInfo={siteInfo} saveSiteInfo={saveSiteInfo}/>
       )}
+
+      {adminTab==="groups"&&(
+        <AdminGroupsView userGroups={userGroups} saveUserGroups={saveUserGroups} participants={participants}/>
+      )}
     </div>
   );
 }
