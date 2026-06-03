@@ -440,6 +440,8 @@ export default function App() {
       onSnapshot(doc(db,"vm2026","podiumResults"), s=>{if(s.exists())setPodiumResults(s.data());}),
       onSnapshot(doc(db,"vm2026","approved"),      s=>{if(s.exists())setApproved(s.data());}),
       onSnapshot(doc(db,"vm2026","siteInfo"),      s=>{setSiteInfo(s.exists()?s.data():{});}),
+      onSnapshot(doc(db,"vm2026","userGroups"),    s=>{setUserGroups(s.exists()?s.data():{});}),
+      onSnapshot(doc(db,"vm2026","visitorStats"),  s=>{if(s.exists())setVisitorStats(s.data());}),
     ];
     return()=>unsubs.forEach(u=>u());
   },[]);
