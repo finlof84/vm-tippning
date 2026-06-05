@@ -808,7 +808,7 @@ export default function App() {
                 <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:16}}>
                   {nameInput&&participants[nameInput]
                     ?"Ange ditt lösenord for att logga in och redigera dina tips."
-                    :"Ange ditt namn och välj ett lösenord."}
+                    :"Ange ditt namn och välj ett lösenord. Sidan är inte speciellt säker så ta inte ditt bästa lösenord :)"}
                 </p>
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>
                   <input type="text" placeholder="Ditt namn" value={nameInput}
