@@ -408,6 +408,12 @@ export default function App() {
 
   useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),30000);return()=>clearInterval(t);},[]);
 
+  // Safety: always stop loading after 5 seconds regardless of Firebase
+  useEffect(()=>{
+    const t = setTimeout(()=>setLoading(false), 5000);
+    return ()=>clearTimeout(t);
+  },[]);
+
   // Track visit on mount
   useEffect(()=>{
     async function trackVisit() {
@@ -437,7 +443,7 @@ export default function App() {
 
   useEffect(()=>{
     const unsubs=[
-      onSnapshot(doc(db,"vm2026","participants"),s=>{if(s.exists())setParticipants(s.data());setLoading(false);},()=>setLoading(false)),
+      onSnapshot(doc(db,"vm2026","participants"),s=>{if(s.exists())setParticipants(s.data()||{}); else setParticipants({}); setLoading(false);},()=>setLoading(false)),
       onSnapshot(doc(db,"vm2026","passwords"),   s=>{if(s.exists())setPasswords(s.data());}),
       onSnapshot(doc(db,"vm2026","results"),     s=>{if(s.exists())setResults(s.data());}),
       onSnapshot(doc(db,"vm2026","deadlines"),   s=>{
@@ -619,7 +625,7 @@ export default function App() {
   const bestThirds=getBestThirds(results);
 
   if(loading) return(
-    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16,
       background:"#0a1628",color:"#f5c842",fontFamily:"Georgia,serif",fontSize:20}}>
       Laddar P14 HIKs VM-tipp 2026...
     </div>
