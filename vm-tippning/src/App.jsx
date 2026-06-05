@@ -403,7 +403,7 @@ export default function App() {
   const [loading,        setLoading]        = useState(true);
   const [adminTab,       setAdminTab]       = useState("results");
   const [dlInput,        setDlInput]        = useState({});
-  const [rdlInput,       setRdlInput]       = useState({r1:"",r2:"",r3:""});
+  const [rdlInput,       setRdlInput]       = useState({r1:"2026-06-11T21:00",r2:"2026-06-18T19:00",r3:"2026-06-25T01:00"});
   const [now,            setNow]            = useState(Date.now());
 
   useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),30000);return()=>clearInterval(t);},[]);
@@ -473,7 +473,7 @@ export default function App() {
     const {home,away}=getTeams(m.id);
     return {home:home?dn(home):labelFromKey(m.homeKey),away:away?dn(away):labelFromKey(m.awayKey)};
   }
-  function getEffectiveDl(mid) { return deadlines[mid]||DEFAULT_DEADLINES[mid]||null; }
+  function getEffectiveDl(mid) { const m=[...GROUP_MATCHES,...KNOCKOUT_ALL].find(x=>x.id===mid); return deadlines[mid]||DEFAULT_DEADLINES[mid]||(m&&m.officialDeadline)||null; }
   function isLocked(mid) { const dl=getEffectiveDl(mid); return dl&&now>=new Date(dl).getTime(); }
   function fmtDl(mid) {
     const dl=getEffectiveDl(mid); if(!dl) return null;
@@ -2000,7 +2000,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
           {/* Bulk per omgång */}
           <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:10,padding:"16px",marginBottom:20}}>
             <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:4}}>Sätt deadline for hel omgång</p>
-            <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:12}}>Forinstallda tider = första matchen i varje omgång. Ändras vid behov.</p>
+            <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:12}}>Omg 1: 11 jun 21:00 &bull; Omg 2: 18 jun 19:00 &bull; Omg 3: 25 jun 01:00. Andras vid behov.</p>
             {[1,2,3].map(r=>(
               <div key={r} style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap",marginBottom:10}}>
                 <span className="ss" style={{fontSize:13,fontWeight:700,color:"#f0e6d3",minWidth:80}}>Omgång {r}:</span>
