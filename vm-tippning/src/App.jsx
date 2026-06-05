@@ -1139,9 +1139,9 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
                 </span>
               ):(
                 <select value={podiumTip[s.key]||""} onChange={e=>savePodiumTip(s.key,e.target.value)}
-                  style={{flex:1,minWidth:160}}>
-                  <option value="">-- Välj lag --</option>
-                  {allTeams.map(t=><option key={t} value={t}>{dn(t)}</option>)}
+                  style={{flex:1,minWidth:160,color:"#111",background:"#fff"}}>
+                  <option value="" style={{color:"#111"}}>-- Välj lag --</option>
+                  {allTeams.map(t=><option key={t} value={t} style={{color:"#111"}}>{dn(t)}</option>)}
                 </select>
               )}
               {podiumResults[s.key]&&(
@@ -2082,7 +2082,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
             ].map(s=>(
               <div key={s.key} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10,flexWrap:"wrap"}}>
                 <span className="ss" style={{fontSize:13,fontWeight:600,color:"#f0e6d3",minWidth:200}}>{s.label} ({s.pts}p):</span>
-                <select value={podiumResults[s.key]||""} onChange={e=>savePodiumResults(s.key,e.target.value)} style={{flex:1,minWidth:160}}>
+                <select value={podiumResults[s.key]||""} onChange={e=>savePodiumResults(s.key,e.target.value)} style={{flex:1,minWidth:160,color:"#111",background:"#fff"}}>
                   <option value="">-- Välj lag --</option>
                   {allTeams.map(t=><option key={t} value={t}>{dn(t)}</option>)}
                 </select>
