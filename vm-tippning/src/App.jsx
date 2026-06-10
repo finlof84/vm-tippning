@@ -1197,7 +1197,8 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
           <div style={{background:"#0f1e35",border:"1px solid rgba(245,200,66,0.3)",borderRadius:14,
             padding:"28px 24px",maxWidth:360,width:"90%"}}>
             <h3 className="pf" style={{fontSize:20,color:"#f5c842",fontWeight:700,marginBottom:6}}>Redigera {loginModal}s tips</h3>
-            <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:16}}>Ange lösenord for {loginModal} for att redigera deras tips.</p>
+            <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:8}}>Ange lösenord for {loginModal} for att redigera deras tips.</p>
+            <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:16}}>Glömt ditt lösenord? Skriv i WhatsApp-gruppen eller kontakta admin: 0706-426251.</p>
             <input type="password" placeholder="Lösenord" value={modalPw}
               onChange={e=>{setModalPw(e.target.value);setModalErr("");}}
               onKeyDown={e=>e.key==="Enter"&&handleModalLogin()}
