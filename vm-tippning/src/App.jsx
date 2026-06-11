@@ -1244,7 +1244,7 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
                 </span>}
               </div>
             ):(
-              <select value={topScorerTip||""} onChange={e=>saveTopScorerTip(e.target.value)}
+              <select value={topScorerTip||""} onChange={e=>saveTopScorerTip(currentUser,e.target.value)}
                 style={{width:"100%",fontSize:13,padding:"6px 10px",color:"#111",background:"#fff",borderRadius:6}}>
                 <option value="" style={{color:"#111"}}>-- Välj spelare --</option>
                 {TOP_SCORERS.map(p=><option key={p} value={p} style={{color:"#111"}}>{p}</option>)}
@@ -2200,9 +2200,15 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
           <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:10,padding:"16px",marginBottom:20}}>
             <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:10}}>Skyttekung</p>
             <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",marginBottom:12}}>
-              <input type="datetime-local" value={topScorerDeadline?new Date(topScorerDeadline).toISOString().slice(0,16):""}
-                onChange={e=>saveTopScorerDeadline(e.target.value?new Date(e.target.value).toISOString():"")}/>
-              <span className="ss" style={{fontSize:11,color:"#60504a"}}>Deadline for skyttekungstips</span>
+              <input type="datetime-local" id="scorer-dl-input"
+                defaultValue={topScorerDeadline?new Date(topScorerDeadline).toISOString().slice(0,16):""}/>
+              <button className="btn btn-sm" onClick={()=>{
+                const v=document.getElementById("scorer-dl-input").value;
+                if(v) saveTopScorerDeadline(new Date(v).toISOString());
+              }}>Spara deadline</button>
+              {topScorerDeadline&&<span className="open-badge">
+                {new Date(topScorerDeadline).toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
+              </span>}
             </div>
             {[{key:"first",label:"Skyttekung (15p)"},
                {key:"second",label:"Tvåa i skytteligan (10p)"},
