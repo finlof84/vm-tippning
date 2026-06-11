@@ -217,6 +217,38 @@ function calcTotal(tips, results) {
 }
 
 const ADMIN_CODE = "vm2026admin";
+const TOP_SCORERS = [
+  // Topp-favoriter (lägst odds)
+  "Kylian Mbappe","Harry Kane","Erling Haaland","Lionel Messi","Lamine Yamal",
+  "Mikel Oyarzabal","Cristiano Ronaldo","Jude Bellingham","Vinicius Junior","Bukayo Saka",
+  // 11-20
+  "Julian Alvarez","Pedri","Raphinha","Antoine Griezmann","Phil Foden",
+  "Rodri","Bernardo Silva","Lautaro Martinez","Ferran Torres","Nico Williams",
+  // 21-30
+  "Memphis Depay","Cody Gakpo","Matheus Cunha","Gabriel Martinelli","Richarlison",
+  "Romelu Lukaku","Donyell Malen","Wout Weghorst","Leroy Sane","Florian Wirtz",
+  // 31-40
+  "Kai Havertz","Timo Werner","Marcus Rashford","Ollie Watkins","Ivan Toney",
+  "Darwin Nunez","Luis Suarez","James Rodriguez","Dusan Vlahovic","Aleksandar Mitrovic",
+  // 41-50
+  "Artem Dovbyk","Viktor Gyokeres","Gonçalo Ramos","Rafael Leao","Pedro Neto",
+  "Alvaro Morata","Borja Iglesias","Takumi Minamino","Daichi Kamada","Yuya Osako",
+  // 51-60
+  "Carlos Vela","Hirving Lozano","Santiago Gimenez","Roberto Alvarado","Henry Martin",
+  "Youssef En-Nesyri","Ayoub El Kaabi","Sofiane Boufal","Achraf Hakimi","Hakim Ziyech",
+  // 61-70
+  "Sadio Mane","Ismaila Sarr","Boulaye Dia","Nicolas Jackson","Diedie Diedhiou",
+  "Odion Ighalo","Victor Osimhen","Moses Simon","Samuel Chukwueze","Cyrille Ngalande",
+  // 71-80
+  "Andre Ayew","Jordan Ayew","Iñaki Williams","Inaki Williams","Franck Kessie",
+  "Sardar Azmoun","Alireza Jahanbakhsh","Mehdi Taremi","Saman Ghoddos","Karim Ansarifard",
+  // 81-90
+  "Ali Mabkhout","Ismail Matar","Ahmad Nur","Neymar","Rodrygo",
+  "Endrick","Bruno Fernandes","Diogo Jota","Joao Felix","Ruben Neves",
+  // 91-100
+  "Heung-Min Son","Hwang Hee-chan","Oh Hyeon-gyu","Cho Gue-sung","Patrick Kluivert",
+  "Xavi Simons","Tijjani Reijnders","Wout Faes","Romelu Lukaku","Ivan Perisic",
+];
 
 // Global sort helper - uses DEFAULT_DEADLINES which is defined globally
 function sortByDeadline(matches, deadlines={}) {
@@ -385,6 +417,9 @@ export default function App() {
   const [matchOverrides, setMatchOverrides] = useState({}); // { "R32_1_home": "Brasilien", ... }
   const [visitorStats, setVisitorStats] = useState({totalVisits:0,uniqueCount:0,lastVisit:null});
   const [userGroups, setUserGroups] = useState({}); // {groupName:[member,...]}
+  const [topScorerTips, setTopScorerTips] = useState({}); // {userName: "Mbappe"}
+  const [topScorerResult, setTopScorerResult] = useState({}); // {first, second, third}
+  const [topScorerDeadline, setTopScorerDeadline] = useState(null);
   const [approved,       setApproved]       = useState({}); // { name: true/false }
   const [siteInfo,       setSiteInfo]       = useState({}); // { message, prizePot }
   const [podiumTips,     setPodiumTips]     = useState({}); // { name: {winner,second,third} }
@@ -535,6 +570,17 @@ export default function App() {
     const upd={...deadlines};
     getMatchesForRound(round).forEach(m=>{upd[m.id]=iso;});
     await fbSet("deadlines",upd);
+  }
+  async function saveTopScorerTip(name, player) {
+    await setDoc(doc(db,"vm2026","topScorerTips"), {...topScorerTips,[name]:player}, {merge:true});
+  }
+  async function saveTopScorerResult(key, player) {
+    const upd = {...topScorerResult, [key]: player};
+    await setDoc(doc(db,"vm2026","topScorerResult"), upd);
+    setTopScorerResult(upd);
+  }
+  async function saveTopScorerDeadline(dl) {
+    await setDoc(doc(db,"vm2026","topScorerDeadline"), {dl});
   }
   async function saveUserGroups(groups) {
     await setDoc(doc(db,"vm2026","userGroups"), groups);
@@ -1034,6 +1080,9 @@ export default function App() {
             siteInfo={siteInfo} saveSiteInfo={saveSiteInfo}
             matchOverrides={matchOverrides} saveMatchOverride={saveMatchOverride}
             visitorStats={visitorStats}
+            topScorerTips={topScorerTips} topScorerResult={topScorerResult}
+            topScorerDeadline={topScorerDeadline}
+            saveTopScorerResult={saveTopScorerResult} saveTopScorerDeadline={saveTopScorerDeadline}
             userGroups={userGroups} saveUserGroups={saveUserGroups}
           />
           </ErrorBoundary>
@@ -1100,7 +1149,7 @@ function ChangePwView({currentUser, passwords, onSaved, onCancel}) {
 }
 
 // PRISPALL-TIPS KOMPONENT
-function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, podiumResults, savePodiumTip, fmtDl}) {
+function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, podiumResults, savePodiumTip, fmtDl, topScorerTip, topScorerResult, topScorerDeadline, saveTopScorerTip}) {
   const allTeams = Object.values(GROUPS).flat().sort((a,b)=>a.localeCompare(b));
   const dl = fmtDl();
 
@@ -1912,7 +1961,9 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
   siteInfo,saveSiteInfo,
   matchOverrides,saveMatchOverride,
   visitorStats={},
-  userGroups={}, saveUserGroups}) {
+  userGroups={}, saveUserGroups,
+  topScorerTips={}, topScorerResult="", topScorerDeadline=null,
+  saveTopScorerResult, saveTopScorerDeadline}) {
 
   const [pdlInput, setPdlInput] = useState(podiumDeadline?new Date(podiumDeadline).toISOString().slice(0,16):"");
   useEffect(()=>{ if(podiumDeadline) setPdlInput(new Date(podiumDeadline).toISOString().slice(0,16)); },[podiumDeadline]);
@@ -2099,6 +2150,51 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
                 {podiumResults[s.key]&&<span className="ss" style={{fontSize:12,color:"#50c878",fontWeight:700}}>{dn(podiumResults[s.key])}</span>}
               </div>
             ))}
+          </div>
+
+          {/* Skyttekung admin */}
+          <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:10,padding:"16px",marginBottom:20}}>
+            <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:10}}>Skyttekung</p>
+            <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",marginBottom:12}}>
+              <input type="datetime-local" value={topScorerDeadline?new Date(topScorerDeadline).toISOString().slice(0,16):""}
+                onChange={e=>saveTopScorerDeadline(e.target.value?new Date(e.target.value).toISOString():"")}/>
+              <span className="ss" style={{fontSize:11,color:"#60504a"}}>Deadline for skyttekungstips</span>
+            </div>
+            {[{key:"first",label:"Skyttekung (15p)"},
+               {key:"second",label:"Tvåa i skytteligan (10p)"},
+               {key:"third",label:"Trea i skytteligan (5p)"}].map(({key,label})=>(
+              <div key={key} style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",marginBottom:8}}>
+                <span className="ss" style={{fontSize:12,color:"#a09070",minWidth:180}}>{label}:</span>
+                <select value={(topScorerResult&&topScorerResult[key])||""}
+                  onChange={e=>saveTopScorerResult(key,e.target.value)}
+                  style={{flex:1,minWidth:180,color:"#111",background:"#fff"}}>
+                  <option value="" style={{color:"#111"}}>-- Välj spelare --</option>
+                  {TOP_SCORERS.map(p=><option key={p} value={p} style={{color:"#111"}}>{p}</option>)}
+                </select>
+                {topScorerResult&&topScorerResult[key]&&
+                  <span className="ss" style={{fontSize:12,color:"#50c878",fontWeight:700}}>{topScorerResult[key]}</span>}
+              </div>
+            ))}
+            {Object.keys(topScorerTips).length>0&&(
+              <div style={{marginTop:14}}>
+                <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:8}}>Deltagarnas tips:</p>
+                <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                  {Object.entries(topScorerTips).sort(([a],[b])=>a.localeCompare(b)).map(([name,player])=>(
+                    <div key={name} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",
+                      borderRadius:6,padding:"4px 10px",fontSize:11,fontFamily:"'Source Sans 3',sans-serif"}}>
+                      <span style={{color:"#f0e6d3",fontWeight:700}}>{name}:</span>{" "}
+                      <span style={{color:
+                        topScorerResult.first&&player===topScorerResult.first?"#50c878":
+                        topScorerResult.second&&player===topScorerResult.second?"#80d0ff":
+                        topScorerResult.third&&player===topScorerResult.third?"#f5c842":"#a09070"}}>{player||"-"}</span>
+                      {topScorerResult.first&&player===topScorerResult.first&&<span style={{color:"#50c878",marginLeft:4}}>+15p</span>}
+                      {topScorerResult.second&&player===topScorerResult.second&&<span style={{color:"#80d0ff",marginLeft:4}}>+10p</span>}
+                      {topScorerResult.third&&player===topScorerResult.third&&<span style={{color:"#f5c842",marginLeft:4}}>+5p</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Oversikt over deltagarnas tips */}
