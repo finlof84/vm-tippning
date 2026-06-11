@@ -953,6 +953,10 @@ export default function App() {
               podiumResults={podiumResults}
               savePodiumTip={savePodiumTip}
               fmtDl={()=>podiumDeadline?new Date(podiumDeadline).toLocaleString("sv-SE",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):null}
+              topScorerTip={topScorerTips[currentUser]||""}
+              topScorerResult={topScorerResult}
+              topScorerDeadline={topScorerDeadline}
+              saveTopScorerTip={(p)=>saveTopScorerTip(currentUser,p)}
             />
 
             <div className="scroll-x" style={{marginBottom:12}}>
