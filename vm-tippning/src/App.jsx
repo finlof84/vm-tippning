@@ -1209,6 +1209,46 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
           );
         })}
       </div>
+
+      {/* SKYTTEKUNG */}
+      {(()=>{
+        const scorerLocked = topScorerDeadline && Date.now() >= new Date(topScorerDeadline).getTime();
+        const fmtScorer = topScorerDeadline ? new Date(topScorerDeadline).toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : null;
+        const pts = topScorerTip&&topScorerResult ? (
+          topScorerTip===topScorerResult.first ? 15 :
+          topScorerTip===topScorerResult.second ? 10 :
+          topScorerTip===topScorerResult.third ? 5 : 0
+        ) : null;
+        const hasResult = topScorerResult&&(topScorerResult.first||topScorerResult.second||topScorerResult.third);
+        return(
+          <div style={{marginTop:16,paddingTop:14,borderTop:"1px solid rgba(255,255,255,0.07)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+              <span className="pf" style={{fontSize:14,color:"#f5c842",fontWeight:700}}>Skyttekung (15/10/5p)</span>
+              {fmtScorer&&<span className={scorerLocked?"lock-badge":"open-badge"}>{scorerLocked?"Last":"Stanger "+fmtScorer}</span>}
+            </div>
+            {scorerLocked||hasResult ? (
+              <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                <span className="ss" style={{fontSize:14,fontWeight:600,
+                  color:pts===15?"#50c878":pts===10?"#80d0ff":pts===5?"#f5c842":"#f0e6d3"}}>
+                  {topScorerTip||<span style={{color:"#50403a"}}>Ej tippat</span>}
+                </span>
+                {pts!==null&&<span className="ss" style={{fontSize:11,color:pts>0?"#50c878":"#60504a"}}>
+                  {pts>0?"+"+pts+"p":"0p"}{pts===15?" (etta)":pts===10?" (tvaa)":pts===5?" (trea)":""}
+                </span>}
+                {hasResult&&!topScorerTip&&<span className="ss" style={{fontSize:11,color:"#60504a"}}>
+                  Facit: {[topScorerResult.first,topScorerResult.second,topScorerResult.third].filter(Boolean).join(", ")}
+                </span>}
+              </div>
+            ):(
+              <select value={topScorerTip||""} onChange={e=>saveTopScorerTip(e.target.value)}
+                style={{width:"100%",fontSize:13,padding:"6px 10px",color:"#111",background:"#fff",borderRadius:6}}>
+                <option value="" style={{color:"#111"}}>-- Välj spelare --</option>
+                {TOP_SCORERS.map(p=><option key={p} value={p} style={{color:"#111"}}>{p}</option>)}
+              </select>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
