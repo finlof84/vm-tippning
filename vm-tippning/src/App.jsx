@@ -479,6 +479,12 @@ export default function App() {
     const dl=getEffectiveDl(mid); if(!dl) return null;
     return new Date(dl).toLocaleString("sv-SE",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
   }
+  function fmtKickoff(m) {
+    const dl = m.officialDeadline||DEFAULT_DEADLINES[m.id];
+    if(!dl) return null;
+    const d = new Date(dl);
+    return d.toLocaleString("sv-SE",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+  }
 
   // Login/register
   async function handleJoin() {
@@ -940,7 +946,9 @@ export default function App() {
                 const ht=m.phase==="Grupp"?m.home:getTeams(m.id).home;
                 const at=m.phase==="Grupp"?m.away:getTeams(m.id).away;
                 return(
-                  <div key={m.id} className={"mc"+(locked?" locked-card":tipped?" tipped":"")}>
+                  <div key={m.id} style={{marginBottom:2}}>
+                    {fmtKickoff(m)&&<div className="ss" style={{fontSize:10,color:"#50403a",textAlign:"center",marginBottom:3}}>{fmtKickoff(m)}</div>}
+                    <div className={"mc"+(locked?" locked-card":tipped?" tipped":"")}>
                     <span className="tn" style={{textAlign:"right"}}><TL team={ht} label={disp.home}/></span>
                     <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
                       <div style={{display:"flex",alignItems:"center",gap:5}}>
@@ -956,6 +964,7 @@ export default function App() {
                     <span className="tn"><TL team={at} label={disp.away}/></span>
                     {hasResult&&<span className="ss" style={{fontSize:12,fontWeight:700,minWidth:26,textAlign:"center",
                       color:pts===3?"#50c878":pts===1?"#f5c842":"#a05050"}}>{pts}p</span>}
+                    </div>
                   </div>
                 );
               })}
