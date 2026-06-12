@@ -639,7 +639,9 @@ export default function App() {
     await fbSet("deadlines",upd);
   }
   async function saveTopScorerTip(name, player) {
-    await setDoc(doc(db,"vm2026","topScorerTips"), {...topScorerTips,[name]:player}, {merge:true});
+    const upd = {...topScorerTips, [name]: player};
+    setTopScorerTips(upd);
+    await setDoc(doc(db,"vm2026","topScorerTips"), upd, {merge:true});
   }
   async function saveTopScorerResult(key, player) {
     const upd = {...topScorerResult, [key]: player};
