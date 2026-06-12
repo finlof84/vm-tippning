@@ -650,6 +650,7 @@ export default function App() {
   }
   async function saveTopScorerDeadline(dl) {
     await setDoc(doc(db,"vm2026","topScorerDeadline"), {dl});
+    setTopScorerDeadline(dl);
   }
   async function saveUserGroups(groups) {
     await setDoc(doc(db,"vm2026","userGroups"), groups);
