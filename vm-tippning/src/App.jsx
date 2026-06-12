@@ -1301,6 +1301,7 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
               <span className="ss" style={{fontSize:10,color:"#60504a",display:"block",marginTop:1}}>Rätt spelare: 15p &bull; Tvåa i skytteligan: 10p &bull; Trea: 5p</span>
             </div>
               {fmtScorer&&<span className={scorerLocked?"lock-badge":"open-badge"}>{scorerLocked?"Last":"Stanger "+fmtScorer}</span>}
+              {!topScorerDeadline&&<span className="ss" style={{fontSize:10,color:"#50403a"}}>Deadline ej satt</span>}
             </div>
             {scorerLocked||hasResult ? (
               <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
