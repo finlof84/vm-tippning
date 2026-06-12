@@ -218,36 +218,103 @@ function calcTotal(tips, results) {
 
 const ADMIN_CODE = "vm2026admin";
 const TOP_SCORERS = [
-  // Topp-favoriter (lägst odds)
-  "Kylian Mbappe","Harry Kane","Erling Haaland","Lionel Messi","Lamine Yamal",
-  "Mikel Oyarzabal","Cristiano Ronaldo","Jude Bellingham","Vinicius Junior","Bukayo Saka",
-  // 11-20
-  "Julian Alvarez","Pedri","Raphinha","Antoine Griezmann","Phil Foden",
-  "Rodri","Bernardo Silva","Lautaro Martinez","Ferran Torres","Nico Williams",
-  // 21-30
-  "Memphis Depay","Cody Gakpo","Matheus Cunha","Gabriel Martinelli","Richarlison",
-  "Romelu Lukaku","Donyell Malen","Wout Weghorst","Leroy Sane","Florian Wirtz",
-  // 31-40
-  "Kai Havertz","Timo Werner","Marcus Rashford","Ollie Watkins","Ivan Toney",
-  "Darwin Nunez","Luis Suarez","James Rodriguez","Dusan Vlahovic","Aleksandar Mitrovic",
-  // 41-50
-  "Artem Dovbyk","Viktor Gyokeres","Gonçalo Ramos","Rafael Leao","Pedro Neto",
-  "Alvaro Morata","Borja Iglesias","Takumi Minamino","Daichi Kamada","Yuya Osako",
-  // 51-60
-  "Carlos Vela","Hirving Lozano","Santiago Gimenez","Roberto Alvarado","Henry Martin",
-  "Youssef En-Nesyri","Ayoub El Kaabi","Sofiane Boufal","Achraf Hakimi","Hakim Ziyech",
-  // 61-70
-  "Sadio Mane","Ismaila Sarr","Boulaye Dia","Nicolas Jackson","Diedie Diedhiou",
-  "Odion Ighalo","Victor Osimhen","Moses Simon","Samuel Chukwueze","Cyrille Ngalande",
-  // 71-80
-  "Andre Ayew","Jordan Ayew","Iñaki Williams","Inaki Williams","Franck Kessie",
-  "Sardar Azmoun","Alireza Jahanbakhsh","Mehdi Taremi","Saman Ghoddos","Karim Ansarifard",
-  // 81-90
-  "Ali Mabkhout","Ismail Matar","Ahmad Nur","Neymar","Rodrygo",
-  "Endrick","Bruno Fernandes","Diogo Jota","Joao Felix","Ruben Neves",
-  // 91-100
-  "Heung-Min Son","Hwang Hee-chan","Oh Hyeon-gyu","Cho Gue-sung","Patrick Kluivert",
-  "Xavi Simons","Tijjani Reijnders","Wout Faes","Romelu Lukaku","Ivan Perisic",
+  "Achraf Hakimi",
+  "Ahmad Nur",
+  "Aleksandar Mitrovic",
+  "Ali Mabkhout",
+  "Alireza Jahanbakhsh",
+  "Alvaro Morata",
+  "Andre Ayew",
+  "Antoine Griezmann",
+  "Artem Dovbyk",
+  "Ayoub El Kaabi",
+  "Bernardo Silva",
+  "Borja Iglesias",
+  "Boulaye Dia",
+  "Bruno Fernandes",
+  "Bukayo Saka",
+  "Carlos Vela",
+  "Cho Gue-sung",
+  "Cody Gakpo",
+  "Cristiano Ronaldo",
+  "Cyrille Ngalande",
+  "Daichi Kamada",
+  "Darwin Nunez",
+  "Diedie Diedhiou",
+  "Diogo Jota",
+  "Donyell Malen",
+  "Dusan Vlahovic",
+  "Endrick",
+  "Erling Haaland",
+  "Ferran Torres",
+  "Florian Wirtz",
+  "Gabriel Martinelli",
+  "Gonçalo Ramos",
+  "Hakim Ziyech",
+  "Harry Kane",
+  "Henry Martin",
+  "Heung-Min Son",
+  "Hirving Lozano",
+  "Hwang Hee-chan",
+  "Inaki Williams",
+  "Ismail Matar",
+  "Ismaila Sarr",
+  "Ivan Perisic",
+  "Ivan Toney",
+  "James Rodriguez",
+  "Joao Felix",
+  "Jordan Ayew",
+  "Jude Bellingham",
+  "Julian Alvarez",
+  "Kai Havertz",
+  "Karim Ansarifard",
+  "Kylian Mbappe",
+  "Lamine Yamal",
+  "Lautaro Martinez",
+  "Leroy Sane",
+  "Lionel Messi",
+  "Luis Suarez",
+  "Marcus Rashford",
+  "Matheus Cunha",
+  "Mehdi Taremi",
+  "Memphis Depay",
+  "Mikel Oyarzabal",
+  "Moses Simon",
+  "Neymar",
+  "Nico Williams",
+  "Nicolas Jackson",
+  "Odion Ighalo",
+  "Oh Hyeon-gyu",
+  "Ollie Watkins",
+  "Patrick Kluivert",
+  "Pedri",
+  "Pedro Neto",
+  "Phil Foden",
+  "Rafael Leao",
+  "Raphinha",
+  "Richarlison",
+  "Roberto Alvarado",
+  "Rodri",
+  "Rodrygo",
+  "Romelu Lukaku",
+  "Ruben Neves",
+  "Sadio Mane",
+  "Saman Ghoddos",
+  "Samuel Chukwueze",
+  "Santiago Gimenez",
+  "Sardar Azmoun",
+  "Sofiane Boufal",
+  "Takumi Minamino",
+  "Tijjani Reijnders",
+  "Timo Werner",
+  "Victor Osimhen",
+  "Viktor Gyokeres",
+  "Vinicius Junior",
+  "Wout Weghorst",
+  "Xavi Simons",
+  "Youssef En-Nesyri",
+  "Yuya Osako",
+  "Annan spelare",
 ];
 
 // Global sort helper - uses DEFAULT_DEADLINES which is defined globally
@@ -830,7 +897,7 @@ export default function App() {
                 <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>&#127942;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
-                    <strong style={{color:"#f0e6d3"}}>Tippa prispall</strong> - Tippa vilka som vinner VM-guldet (20p), kommer tvåa (15p) och trea (10p). Deadline {podiumDeadline?new Date(podiumDeadline).toLocaleString("sv-SE",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):"11 juni kl 21:00"}.
+                    <strong style={{color:"#f0e6d3"}}>Tippa prispall &amp; skyttekung</strong> - Tippa vinnare (20p), tvåa (15p) och trea (10p) i VM. Tippa även skyttekungen: rätt spelare ger 15p, tvåan i skytteligan 10p, trean 5p. Deadline {podiumDeadline?new Date(podiumDeadline).toLocaleString("sv-SE",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):"11 juni kl 21:00"}.
                   </p>
                 </div>
               </div>
@@ -1227,7 +1294,10 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
         return(
           <div style={{marginTop:16,paddingTop:14,borderTop:"1px solid rgba(255,255,255,0.07)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-              <span className="pf" style={{fontSize:14,color:"#f5c842",fontWeight:700}}>Skyttekung (15/10/5p)</span>
+              <div>
+              <span className="pf" style={{fontSize:14,color:"#f5c842",fontWeight:700}}>Skyttekung</span>
+              <span className="ss" style={{fontSize:10,color:"#60504a",display:"block",marginTop:1}}>Rätt spelare: 15p &bull; Tvåa i skytteligan: 10p &bull; Trea: 5p</span>
+            </div>
               {fmtScorer&&<span className={scorerLocked?"lock-badge":"open-badge"}>{scorerLocked?"Last":"Stanger "+fmtScorer}</span>}
             </div>
             {scorerLocked||hasResult ? (
@@ -1244,7 +1314,7 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
                 </span>}
               </div>
             ):(
-              <select value={topScorerTip||""} onChange={e=>saveTopScorerTip(currentUser,e.target.value)}
+              <select value={topScorerTip||""} onChange={e=>saveTopScorerTip(e.target.value)}
                 style={{width:"100%",fontSize:13,padding:"6px 10px",color:"#111",background:"#fff",borderRadius:6}}>
                 <option value="" style={{color:"#111"}}>-- Välj spelare --</option>
                 {TOP_SCORERS.map(p=><option key={p} value={p} style={{color:"#111"}}>{p}</option>)}
@@ -2010,7 +2080,9 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
   saveTopScorerResult, saveTopScorerDeadline}) {
 
   const [pdlInput, setPdlInput] = useState(podiumDeadline?new Date(podiumDeadline).toISOString().slice(0,16):"");
+  const [scorerDlInput, setScorerDlInput] = useState(topScorerDeadline?new Date(topScorerDeadline).toISOString().slice(0,16):"");
   useEffect(()=>{ if(podiumDeadline) setPdlInput(new Date(podiumDeadline).toISOString().slice(0,16)); },[podiumDeadline]);
+  useEffect(()=>{ if(topScorerDeadline) setScorerDlInput(new Date(topScorerDeadline).toISOString().slice(0,16)); },[topScorerDeadline]);
   const allTeams = Object.values(GROUPS).flat().sort((a,b)=>a.localeCompare(b));
 
   return(
@@ -2200,11 +2272,10 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
           <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:10,padding:"16px",marginBottom:20}}>
             <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:10}}>Skyttekung</p>
             <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",marginBottom:12}}>
-              <input type="datetime-local" id="scorer-dl-input"
-                defaultValue={topScorerDeadline?new Date(topScorerDeadline).toISOString().slice(0,16):""}/>
+              <input type="datetime-local" value={scorerDlInput}
+                onChange={e=>setScorerDlInput(e.target.value)}/>
               <button className="btn btn-sm" onClick={()=>{
-                const v=document.getElementById("scorer-dl-input").value;
-                if(v) saveTopScorerDeadline(new Date(v).toISOString());
+                if(scorerDlInput) saveTopScorerDeadline(new Date(scorerDlInput).toISOString());
               }}>Spara deadline</button>
               {topScorerDeadline&&<span className="open-badge">
                 {new Date(topScorerDeadline).toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
