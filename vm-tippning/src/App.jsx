@@ -572,6 +572,9 @@ export default function App() {
       onSnapshot(doc(db,"vm2026","siteInfo"),      s=>{setSiteInfo(s.exists()?s.data():{});}),
       onSnapshot(doc(db,"vm2026","userGroups"),    s=>{setUserGroups(s.exists()?s.data():{});}),
       onSnapshot(doc(db,"vm2026","visitorStats"),  s=>{if(s.exists())setVisitorStats(s.data());}),
+      onSnapshot(doc(db,"vm2026","topScorerTips"), s=>{if(s.exists())setTopScorerTips(s.data());}),
+      onSnapshot(doc(db,"vm2026","topScorerResult"),s=>{if(s.exists())setTopScorerResult(s.data()||{});}),
+      onSnapshot(doc(db,"vm2026","topScorerDeadline"),s=>{if(s.exists()&&s.data().dl)setTopScorerDeadline(s.data().dl);}),
     ];
     return()=>unsubs.forEach(u=>u());
   },[]);
@@ -2092,9 +2095,9 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
   saveTopScorerResult, saveTopScorerDeadline}) {
 
   const [pdlInput, setPdlInput] = useState(podiumDeadline?new Date(podiumDeadline).toISOString().slice(0,16):"");
-  const [scorerDlInput, setScorerDlInput] = useState(topScorerDeadline?new Date(topScorerDeadline).toISOString().slice(0,16):"");
+  const [scorerDlInput, setScorerDlInput] = useState(topScorerDeadline?topScorerDeadline.slice(0,16):"");
   useEffect(()=>{ if(podiumDeadline) setPdlInput(new Date(podiumDeadline).toISOString().slice(0,16)); },[podiumDeadline]);
-  useEffect(()=>{ if(topScorerDeadline) setScorerDlInput(new Date(topScorerDeadline).toISOString().slice(0,16)); },[topScorerDeadline]);
+  useEffect(()=>{ if(topScorerDeadline) setScorerDlInput(topScorerDeadline.slice?topScorerDeadline.slice(0,16):new Date(topScorerDeadline).toISOString().slice(0,16)); },[topScorerDeadline]);
   const allTeams = Object.values(GROUPS).flat().sort((a,b)=>a.localeCompare(b));
 
   return(
@@ -2287,7 +2290,7 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
               <input type="datetime-local" value={scorerDlInput}
                 onChange={e=>setScorerDlInput(e.target.value)}/>
               <button className="btn btn-sm" onClick={()=>{
-                if(scorerDlInput) saveTopScorerDeadline(new Date(scorerDlInput).toISOString());
+                if(scorerDlInput) saveTopScorerDeadline(scorerDlInput);
               }}>Spara deadline</button>
               {topScorerDeadline&&<span className="open-badge">
                 {new Date(topScorerDeadline).toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
