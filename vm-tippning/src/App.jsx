@@ -740,8 +740,13 @@ export default function App() {
       points:calcTotal(tips,results)+calcPodiumPoints(name),
       matchPoints:calcTotal(tips,results),
       podiumPoints:calcPodiumPoints(name),
+      exact:[...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{
+        const t=tips[m.id]; const r=results[m.id];
+        return t&&r&&t.home!=""&&t.away!=""&&r.home!=""&&r.away!=""&&
+          parseInt(t.home)===parseInt(r.home)&&parseInt(t.away)===parseInt(r.away);
+      }).length,
       tipped:[...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{const t=tips[m.id];return t&&t.home!=""&&t.away!="";}).length}))
-    .sort((a,b)=>b.points-a.points);
+    .sort((a,b)=>b.points-a.points||b.exact-a.exact);
 
   const userTips=participants[currentUser]||{};
   const totalMatches=GROUP_MATCHES.length+KNOCKOUT_ALL.length;
@@ -1565,7 +1570,8 @@ function LeaderboardView({leaderboard, userGroups}) {
                 <div style={{flex:1}}>
                   <div className="pf" style={{fontSize:16,fontWeight:700,color:i===0?"#f5c842":"#f0e6d3"}}>{e.name}</div>
                   <div className="ss" style={{fontSize:11,color:"#60504a",marginTop:2}}>
-                    {e.tipped} matcher tippade
+                    {e.tipped} tippade
+                    {e.exact>0&&<span style={{color:"#50c878",marginLeft:6}}>{e.exact} exakta</span>}
                     {e.podiumPoints>0&&<span style={{color:"#80a8f0",marginLeft:6}}>+{e.podiumPoints}p prispall</span>}
                   </div>
                 </div>
