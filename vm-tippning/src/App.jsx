@@ -1118,6 +1118,7 @@ export default function App() {
                     {hasResult&&<span className="ss" style={{fontSize:12,fontWeight:700,minWidth:26,textAlign:"center",
                       color:pts===3?"#50c878":pts===1?"#f5c842":"#a05050"}}>{pts}p</span>}
                     </div>
+                    <TipsPanel matchId={m.id} participants={participants} results={results} isKO={m.phase!=="Grupp"} deadlines={deadlines} now={now}/>
                   </div>
                 );
               })}
@@ -1816,18 +1817,20 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
           {matches.map(m=>{
             const r=results[m.id]; const played=r&&r.home!=""&&r.away!="";
             return(
-              <div key={m.id} style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0"}}>
-                <span className="fc">{gc(m.home)}</span>
-                <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc",textAlign:"right"}}>{dn(m.home)}</span>
-                <div style={{minWidth:60,textAlign:"center",background:played?"rgba(255,255,255,0.07)":"rgba(255,255,255,0.03)",
-                  border:"1px solid "+(played?"rgba(255,255,255,0.12)":"rgba(255,255,255,0.05)"),borderRadius:6,padding:"3px 8px"}}>
-                  {played?<span className="pf" style={{fontSize:13,fontWeight:700,color:"#f0e6d3"}}>{r.home} - {r.away}</span>
-                    :<span className="ss" style={{fontSize:11,color:"#50403a"}}>-</span>}
+              <div key={m.id} style={{marginBottom:4}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0"}}>
+                  <span className="fc">{gc(m.home)}</span>
+                  <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc",textAlign:"right"}}>{dn(m.home)}</span>
+                  <div style={{minWidth:60,textAlign:"center",background:played?"rgba(255,255,255,0.07)":"rgba(255,255,255,0.03)",
+                    border:"1px solid "+(played?"rgba(255,255,255,0.12)":"rgba(255,255,255,0.05)"),borderRadius:6,padding:"3px 8px"}}>
+                    {played?<span className="pf" style={{fontSize:13,fontWeight:700,color:"#f0e6d3"}}>{r.home} - {r.away}</span>
+                      :<span className="ss" style={{fontSize:11,color:"#50403a"}}>-</span>}
+                  </div>
+                  <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc"}}>{dn(m.away)}</span>
+                  <span className="fc">{gc(m.away)}</span>
                 </div>
-                <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc"}}>{dn(m.away)}</span>
-                <span className="fc">{gc(m.away)}</span>
+                <TipsPanel matchId={m.id} participants={participants} results={results} deadlines={deadlines} now={now}/>
               </div>
-              <TipsPanel matchId={m.id} participants={participants} results={results} deadlines={deadlines} now={now}/>
             );
           })}
         </div>
@@ -1851,18 +1854,20 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
               {gMatches.map(m=>{
                 const r=results[m.id]; const played=r&&r.home!=""&&r.away!="";
                 return(
-                  <div key={m.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 2px",marginBottom:4}}>
-                    <span className="fc">{gc(m.home)}</span>
-                    <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc",textAlign:"right"}}>{dn(m.home)}</span>
-                    <div style={{minWidth:64,textAlign:"center",background:played?"rgba(255,255,255,0.09)":"rgba(255,255,255,0.03)",
-                      border:"1px solid "+(played?"rgba(255,255,255,0.15)":"rgba(255,255,255,0.05)"),borderRadius:8,padding:"4px 10px"}}>
-                      {played?<span className="pf" style={{fontSize:15,fontWeight:700,color:"#f0e6d3"}}>{r.home} - {r.away}</span>
-                        :<span className="ss" style={{fontSize:11,color:"#50403a"}}>vs</span>}
+                  <div key={m.id} style={{marginBottom:6}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8,padding:"6px 2px"}}>
+                      <span className="fc">{gc(m.home)}</span>
+                      <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc",textAlign:"right"}}>{dn(m.home)}</span>
+                      <div style={{minWidth:64,textAlign:"center",background:played?"rgba(255,255,255,0.09)":"rgba(255,255,255,0.03)",
+                        border:"1px solid "+(played?"rgba(255,255,255,0.15)":"rgba(255,255,255,0.05)"),borderRadius:8,padding:"4px 10px"}}>
+                        {played?<span className="pf" style={{fontSize:15,fontWeight:700,color:"#f0e6d3"}}>{r.home} - {r.away}</span>
+                          :<span className="ss" style={{fontSize:11,color:"#50403a"}}>vs</span>}
+                      </div>
+                      <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc"}}>{dn(m.away)}</span>
+                      <span className="fc">{gc(m.away)}</span>
                     </div>
-                    <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc"}}>{dn(m.away)}</span>
-                    <span className="fc">{gc(m.away)}</span>
+                    <TipsPanel matchId={m.id} participants={participants} results={results} deadlines={deadlines} now={now}/>
                   </div>
-                  <TipsPanel matchId={m.id} participants={participants} results={results} deadlines={deadlines} now={now}/>
                 );
               })}
             </div>
@@ -1933,8 +1938,8 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
               return(
                 <div key={m.id} style={{background:played?"rgba(255,255,255,0.05)":"rgba(255,255,255,0.03)",
                   border:"1px solid "+(played?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.05)"),
-                  borderRadius:11,padding:"12px 18px"}}>
-                  {!played&&<p className="ss" style={{fontSize:10,color:"#50403a",marginBottom:6,textAlign:"center"}}>{matchLabel}</p>}
+                  borderRadius:11,padding:"12px 18px",marginBottom:10}}>
+                  <p className="ss" style={{fontSize:10,color:"#50403a",marginBottom:6,textAlign:"center"}}>{matchLabel}</p>
                   <div style={{display:"flex",alignItems:"center",gap:10}}>
                     {ht&&<span className="fc">{gc(ht)}</span>}
                     <span className="ss" style={{fontSize:13,fontWeight:700,flex:1,textAlign:"right",
@@ -1948,6 +1953,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
                       color:awayWon?"#f5c842":played?"#a09070":"#d0c8bc"}}>{disp.away}</span>
                     {at&&<span className="fc">{gc(at)}</span>}
                   </div>
+                  <TipsPanel matchId={m.id} participants={participants} results={results} isKO={true} deadlines={deadlines} now={now}/>
                 </div>
               );
             })}
