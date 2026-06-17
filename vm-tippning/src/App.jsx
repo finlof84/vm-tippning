@@ -924,9 +924,9 @@ export default function App() {
                   <span style={{fontSize:16,flexShrink:0}}>&#128274;</span>
                   <p className="ss" style={{fontSize:13,color:"#c8b89a",lineHeight:1.6}}>
                     <strong style={{color:"#f0e6d3"}}>Deadlines</strong><br/>
-                    &nbsp;&nbsp;&#x1F4C5; Gruppspel omgång 1 &mdash; 11 juni kl 21:00<br/>
-                    &nbsp;&nbsp;&#x1F4C5; Gruppspel omgång 2 &mdash; 18 juni kl 19:00<br/>
-                    &nbsp;&nbsp;&#x1F4C5; Gruppspel omgång 3 &mdash; 24 juni kl 21:00<br/>
+                    &nbsp;&nbsp;&#x1F4C5; Gruppspel omgång 1 &mdash; fr.o.m. 11 juni (låses per match vid matchstart)<br/>
+                    &nbsp;&nbsp;&#x1F4C5; Gruppspel omgång 2 &mdash; fr.o.m. 18 juni (låses per match vid matchstart)<br/>
+                    &nbsp;&nbsp;&#x1F4C5; Gruppspel omgång 3 &mdash; fr.o.m. 24 juni (låses per match vid matchstart)<br/>
                     &nbsp;&nbsp;&#x1F3C6; Slutspel &mdash; låses individuellt vid matchstart
                   </p>
                 </div>
@@ -1087,9 +1087,9 @@ export default function App() {
             {(tipPhase==="omgang1"||tipPhase==="omgang2"||tipPhase==="omgang3")&&(
               <div style={{background:"rgba(245,200,66,0.05)",border:"1px solid rgba(245,200,66,0.12)",borderRadius:8,padding:"8px 14px",marginBottom:14}}>
                 <span className="ss" style={{fontSize:11,color:"#a09070"}}>
-                  {tipPhase==="omgang1"?"Omgång 1: 11-17 juni - varje grupps första 2 matcher":
-                   tipPhase==="omgang2"?"Omgång 2: 18-24 juni - varje grupps matcher 3 och 4":
-                   "Omgång 3: 25-27 juni - avgörande omgång, båda matcherna i varje grupp spelas samtidigt"}
+                  {tipPhase==="omgang1"?"Omgång 1: 11-17 juni - varje grupps första 2 matcher. Varje match låses vid matchstart.":
+                   tipPhase==="omgang2"?"Omgång 2: 18-24 juni - varje grupps matcher 3 och 4. Varje match låses vid matchstart.":
+                   "Omgång 3: 24-27 juni - avgörande omgång, båda matcherna i varje grupp spelas samtidigt. Låses vid matchstart."}
                 </span>
               </div>
             )}
