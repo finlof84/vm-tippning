@@ -651,6 +651,11 @@ export default function App() {
     await fbSet("results",{...results,[mid]:{...(results[mid]||{}),[side]:val}});
   }
   async function setDeadline(mid,iso) { await fbSet("deadlines",{...deadlines,[mid]:iso}); }
+  async function resetAllDeadlines() {
+    // Delete the deadlines doc so app falls back to DEFAULT_DEADLINES (match kickoff times)
+    await setDoc(doc(db,"vm2026","deadlines"), {});
+    setDeadlines(DEFAULT_DEADLINES);
+  }
   async function rmDeadline(mid) {
     const upd={...deadlines}; delete upd[mid];
     await setDoc(doc(db,"vm2026","deadlines"),upd);
@@ -697,7 +702,7 @@ export default function App() {
     await fbSet("thirdOverrides",{...thirdOverrides,[key]:team});
   }
   async function deleteParticipant(name) {
-    if(!window.confirm("Ta bort "+name+"?")) return;
+    if(!window.confirm("Är du säker på att du vill ta bort "+name+"? Alla deras tips raderas permanent.")) return;
     const upd={...participants}; delete upd[name];
     await setDoc(doc(db,"vm2026","participants"),upd);
     const pwUpd={...passwords}; delete pwUpd[name];
@@ -1196,6 +1201,7 @@ export default function App() {
             filteredMatches={filteredMatches} getDisplay={getDisplay} getTeams={getTeams}
             handleResult={handleResult} setDeadline={setDeadline} rmDeadline={rmDeadline}
             bulkDeadline={bulkDeadline} bulkRoundDeadline={bulkRoundDeadline} isLocked={isLocked} fmtDl={fmtDl}
+            resetAllDeadlines={resetAllDeadlines}
             placements={placements} bestThirds={bestThirds} handleThirdOverride={handleThirdOverride}
             participants={participants} deleteParticipant={deleteParticipant} resetPassword={resetPassword}
             approved={approved} toggleApproved={toggleApproved}
@@ -2275,7 +2281,7 @@ function AdminResults({results, handleResult, getTeams, getDisplay, placements, 
 function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGroup,setTipGroup,
   adminTab,setAdminTab,dlInput,setDlInput,rdlInput,setRdlInput,
   filteredMatches,getDisplay,getTeams,handleResult,setDeadline,rmDeadline,
-  bulkDeadline,bulkRoundDeadline,isLocked,fmtDl,
+  bulkDeadline,bulkRoundDeadline,isLocked,fmtDl,resetAllDeadlines,
   placements,bestThirds,handleThirdOverride,participants,deleteParticipant,resetPassword,
   approved,toggleApproved,
   podiumDeadline,podiumResults,podiumLocked,savePodiumDeadline,savePodiumResults,podiumTips,
@@ -2378,9 +2384,21 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
 
       {adminTab==="deadlines"&&(
         <div>
-          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:18,lineHeight:1.7}}>
+          <p className="ss" style={{fontSize:12,color:"#a09070",marginBottom:14,lineHeight:1.7}}>
             Sätt deadline per match eller per omgång. När deadline passerar låses tipsen automatiskt.
           </p>
+          <div style={{background:"rgba(180,50,50,0.08)",border:"1px solid rgba(180,50,50,0.25)",borderRadius:10,padding:"14px 16px",marginBottom:20,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
+            <div>
+              <p className="ss" style={{fontSize:13,fontWeight:700,color:"#e07070",marginBottom:2}}>Aterstall alla deadlines till matchstart</p>
+              <p className="ss" style={{fontSize:11,color:"#60504a"}}>Tar bort alla manuellt satta deadlines. Varje match las automatiskt vid sin officielle matchstart.</p>
+            </div>
+            <button onClick={()=>{if(window.confirm("Aterstall alla deadlines till matchstart?")) resetAllDeadlines();}}
+              style={{background:"rgba(180,50,50,0.2)",border:"1px solid rgba(180,50,50,0.4)",borderRadius:8,
+                padding:"8px 16px",cursor:"pointer",color:"#e07070",fontFamily:"'Source Sans 3',sans-serif",
+                fontWeight:700,fontSize:13,whiteSpace:"nowrap"}}>
+              Aterstall till matchstart
+            </button>
+          </div>
           {/* Bulk per omgång */}
           <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(245,200,66,0.14)",borderRadius:10,padding:"16px",marginBottom:20}}>
             <p className="ss" style={{fontSize:13,fontWeight:700,color:"#f5c842",marginBottom:4}}>Sätt deadline for hel omgång</p>
@@ -2668,7 +2686,11 @@ function AdminParticipants({participants, deleteParticipant, resetPassword, appr
                     <div className="ss" style={{fontSize:11,color:"#60504a",marginTop:2}}>{tipped} matcher tippade</div>
                   </div>
                   <button className="btn btn-sm" style={{background:"rgba(245,200,66,0.15)",color:"#f5c842",border:"1px solid rgba(245,200,66,0.3)"}}
-                    onClick={()=>{setResetName(isResetting?null:name);setNewPw("");setNewPw2("");setPwErr("");setPwOk("");}}>
+                    onClick={()=>{
+                      if(isResetting){setResetName(null);setNewPw("");setNewPw2("");setPwErr("");setPwOk("");return;}
+                      if(!window.confirm("Återställ lösenord for "+name+"?")) return;
+                      setResetName(name);setNewPw("");setNewPw2("");setPwErr("");setPwOk("");
+                    }}>
                     {isResetting?"Avbryt":"Återställ lösenord"}
                   </button>
                   <button className="btn btn-sm btn-danger" onClick={()=>deleteParticipant(name)}>Ta bort</button>
