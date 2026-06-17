@@ -1093,7 +1093,7 @@ export default function App() {
                         <span className="ss" style={{fontSize:11,color:"#a09070"}}>Resultat:</span>
                         <span className="pf" style={{fontSize:13,fontWeight:700,
                           color:pts===3?"#50c878":pts===1?"#f5c842":"#f0e6d3"}}>
-                          {results[m.id].home}–{results[m.id].away}
+                          {results[m.id].home}{results[m.id].away}
                         </span>
                         {tipped&&<span className="ss" style={{fontSize:10,
                           color:pts===3?"#50c878":pts===1?"#f5c842":"#e07070"}}>
@@ -1137,7 +1137,10 @@ export default function App() {
 
         {/* RESULTAT */}
         {view==="results"&&(
-          <ResultsView results={results} getTeams={getTeams} getDisplay={getDisplay} placements={placements} bestThirds={bestThirds} deadlines={deadlines}/>
+          <ResultsView results={results} getTeams={getTeams} getDisplay={getDisplay} placements={placements} bestThirds={bestThirds} deadlines={deadlines}
+            participants={participants} podiumTips={podiumTips} podiumResults={podiumResults}
+            topScorerTips={topScorerTips} topScorerResult={topScorerResult}
+            podiumDeadline={podiumDeadline} topScorerDeadline={topScorerDeadline} now={now}/>
         )}
 
         {/* SLUTSPEL */}
@@ -1588,8 +1591,149 @@ function LeaderboardView({leaderboard, userGroups}) {
   );
 }
 
+// TIPS-PANEL - kollapsbar lista med allas tips pa en match
+function TipsPanel({matchId, participants, results, isKO=false, deadlines={}, now}) {
+  const [open, setOpen] = React.useState(false);
+  const r = results[matchId];
+  const played = r&&r.home!==""&&r.away!=="";
+
+  // Sorted list: exact first, then correct 1x2, then wrong, then untipped
+  const rows = Object.entries(participants)
+    .map(([name, tips]) => {
+      const t = tips[matchId];
+      const tipped = t&&t.home!==""&&t.away!=="";
+      const pts = tipped&&played ? calcPoints(t, r, isKO) : null;
+      return {name, t, tipped, pts};
+    })
+    .sort((a,b)=>{
+      if(a.pts===null&&b.pts!==null) return 1;
+      if(a.pts!==null&&b.pts===null) return -1;
+      if(a.pts!==b.pts) return (b.pts||0)-(a.pts||0);
+      return a.name.localeCompare(b.name);
+    });
+
+  return(
+    <div style={{marginTop:4}}>
+      <button onClick={()=>setOpen(!open)}
+        style={{background:"none",border:"none",cursor:"pointer",padding:"3px 0",
+          display:"flex",alignItems:"center",gap:4,width:"100%",justifyContent:"center"}}>
+        <span className="ss" style={{fontSize:10,color:"#60504a"}}>
+          {open?"Dölj tips ^":"Visa allas tips v"}
+        </span>
+      </button>
+      {open&&(
+        <div style={{maxHeight:220,overflowY:"auto",marginTop:4,
+          background:"rgba(0,0,0,0.2)",borderRadius:8,padding:"6px 10px",
+          border:"1px solid rgba(255,255,255,0.06)"}}>
+          {rows.map(({name,t,tipped,pts})=>(
+            <div key={name} style={{display:"flex",alignItems:"center",gap:6,
+              padding:"3px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+              <span className="ss" style={{fontSize:11,color:"#a09070",minWidth:80,
+                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{name}</span>
+              {tipped?(
+                <>
+                  <span className="pf" style={{fontSize:12,fontWeight:700,minWidth:36,textAlign:"center",
+                    color:pts===null?"#f0e6d3":pts===3||pts===5?"#50c878":pts===1||pts===3?"#f5c842":"#e07070"}}>
+                    {t.home}{t.away}
+                  </span>
+                  {pts!==null&&<span className="ss" style={{fontSize:10,
+                    color:pts>=3?"#50c878":pts>=1?"#f5c842":"#e07070"}}>
+                    {pts===5?"5p OKOK":pts===3?"3p OK":pts===1?"1p ->":"0p "}
+                  </span>}
+                </>
+              ):(
+                <span className="ss" style={{fontSize:10,color:"#50403a",fontStyle:"italic"}}>ej tippat</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// PRISPALL-PANEL - allas prispall och skyttekungstips
+function PodiumPanel({participants, podiumTips, podiumResults, topScorerTips, topScorerResult,
+  podiumDeadline, topScorerDeadline, now}) {
+  const [openPodium, setOpenPodium] = React.useState(false);
+  const [openScorer, setOpenScorer] = React.useState(false);
+  const podiumLocked = podiumDeadline&&now>=new Date(podiumDeadline).getTime();
+  const scorerLocked = topScorerDeadline&&now>=new Date(topScorerDeadline).getTime();
+
+  if(!podiumLocked&&!scorerLocked) return null;
+
+  return(
+    <div style={{marginBottom:20}}>
+      {podiumLocked&&(
+        <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",
+          borderRadius:10,marginBottom:10,overflow:"hidden"}}>
+          <button onClick={()=>setOpenPodium(!openPodium)}
+            style={{width:"100%",background:"none",border:"none",cursor:"pointer",
+              padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <span className="pf" style={{fontSize:14,color:"#f5c842",fontWeight:700}}>Prispall-tips</span>
+            <span className="ss" style={{fontSize:10,color:"#60504a"}}>{openPodium?"Dolj ^":"Visa alla v"}</span>
+          </button>
+          {openPodium&&(
+            <div style={{maxHeight:300,overflowY:"auto",padding:"0 12px 10px"}}>
+              {Object.keys(participants).sort().map(name=>{
+                const t=podiumTips[name]||{};
+                const w=t.winner; const s=t.second; const th=t.third;
+                const pts=(podiumResults.winner&&w===podiumResults.winner?20:0)+
+                  (podiumResults.second&&s===podiumResults.second?15:0)+
+                  (podiumResults.third&&th===podiumResults.third?10:0);
+                return(
+                  <div key={name} style={{padding:"5px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+                    <span className="ss" style={{fontSize:11,fontWeight:700,color:"#a09070",marginRight:8}}>{name}:</span>
+                    <span className="ss" style={{fontSize:11,color:"#f0e6d3"}}>
+                      1a {w?dn(w):""}
+                      <span style={{margin:"0 6px",color:"#50403a"}}>·</span>
+                      2a {s?dn(s):""}
+                      <span style={{margin:"0 6px",color:"#50403a"}}>·</span>
+                      3a {th?dn(th):""}
+                    </span>
+                    {pts>0&&<span className="ss" style={{fontSize:10,color:"#50c878",marginLeft:8}}>+{pts}p</span>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+      {scorerLocked&&(
+        <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",
+          borderRadius:10,overflow:"hidden"}}>
+          <button onClick={()=>setOpenScorer(!openScorer)}
+            style={{width:"100%",background:"none",border:"none",cursor:"pointer",
+              padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <span className="pf" style={{fontSize:14,color:"#f5c842",fontWeight:700}}>Skyttekung-tips</span>
+            <span className="ss" style={{fontSize:10,color:"#60504a"}}>{openScorer?"Dolj ^":"Visa alla v"}</span>
+          </button>
+          {openScorer&&(
+            <div style={{maxHeight:300,overflowY:"auto",padding:"0 12px 10px"}}>
+              {Object.keys(participants).sort().map(name=>{
+                const player=topScorerTips[name]||"";
+                const pts=player?(player===topScorerResult.first?15:player===topScorerResult.second?10:player===topScorerResult.third?5:0):0;
+                return(
+                  <div key={name} style={{padding:"4px 0",borderBottom:"1px solid rgba(255,255,255,0.04)",
+                    display:"flex",alignItems:"center",gap:8}}>
+                    <span className="ss" style={{fontSize:11,fontWeight:700,color:"#a09070",minWidth:80}}>{name}:</span>
+                    <span className="ss" style={{fontSize:11,color:player?"#f0e6d3":"#50403a",fontStyle:player?"normal":"italic"}}>
+                      {player||"ej tippat"}
+                    </span>
+                    {pts>0&&<span className="ss" style={{fontSize:10,color:"#50c878"}}>+{pts}p</span>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // RESULTAT-VY
-function ResultsView({results, getTeams, getDisplay, placements, bestThirds, deadlines={}}) {
+function ResultsView({results, getTeams, getDisplay, placements, bestThirds, deadlines={}, participants={}, podiumTips={}, podiumResults={}, topScorerTips={}, topScorerResult={}, podiumDeadline, topScorerDeadline, now}) {
   const [tab, setTab] = useState("groups");
   const [groupSubTab, setGroupSubTab] = useState("omgang1");
   const [selGroup, setSelGroup] = useState("A");
@@ -1683,6 +1827,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
                 <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc"}}>{dn(m.away)}</span>
                 <span className="fc">{gc(m.away)}</span>
               </div>
+              <TipsPanel matchId={m.id} participants={participants} results={results} deadlines={deadlines} now={now}/>
             );
           })}
         </div>
@@ -1717,6 +1862,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
                     <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc"}}>{dn(m.away)}</span>
                     <span className="fc">{gc(m.away)}</span>
                   </div>
+                  <TipsPanel matchId={m.id} participants={participants} results={results} deadlines={deadlines} now={now}/>
                 );
               })}
             </div>
@@ -1732,7 +1878,10 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
   return(
     <div>
       <h2 className="pf" style={{fontSize:28,color:"#f5c842",fontWeight:700,marginBottom:6}}>Resultat</h2>
-      <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:22}}>Officiella matchresultat och gruppställningar</p>
+      <p className="ss" style={{fontSize:12,color:"#60504a",marginBottom:16}}>Officiella matchresultat och gruppställningar</p>
+      <PodiumPanel participants={participants} podiumTips={podiumTips} podiumResults={podiumResults}
+        topScorerTips={topScorerTips} topScorerResult={topScorerResult}
+        podiumDeadline={podiumDeadline} topScorerDeadline={topScorerDeadline} now={now}/>
       <div style={{display:"flex",borderBottom:"1px solid rgba(255,255,255,0.08)",marginBottom:22}}>
         {[["groups","Gruppspel"],["knockout","Slutspel"],["thirds","Bästa treor"]].map(([k,l])=>(
           <button key={k} className={"tab"+(tab===k?" active":"")} onClick={()=>setTab(k)}>{l}</button>
