@@ -1593,7 +1593,7 @@ function LeaderboardView({leaderboard, userGroups}) {
 
 // TIPS-PANEL - kollapsbar lista med allas tips pa en match
 function TipsPanel({matchId, participants, results, isKO=false, deadlines={}, now}) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const r = results[matchId];
   const played = r&&r.home!==""&&r.away!=="";
 
@@ -1634,7 +1634,7 @@ function TipsPanel({matchId, participants, results, isKO=false, deadlines={}, no
                 <>
                   <span className="pf" style={{fontSize:12,fontWeight:700,minWidth:36,textAlign:"center",
                     color:pts===null?"#f0e6d3":pts===3||pts===5?"#50c878":pts===1||pts===3?"#f5c842":"#e07070"}}>
-                    {t.home}{t.away}
+                    {t.home}-{t.away}
                   </span>
                   {pts!==null&&<span className="ss" style={{fontSize:10,
                     color:pts>=3?"#50c878":pts>=1?"#f5c842":"#e07070"}}>
@@ -1655,8 +1655,8 @@ function TipsPanel({matchId, participants, results, isKO=false, deadlines={}, no
 // PRISPALL-PANEL - allas prispall och skyttekungstips
 function PodiumPanel({participants, podiumTips, podiumResults, topScorerTips, topScorerResult,
   podiumDeadline, topScorerDeadline, now}) {
-  const [openPodium, setOpenPodium] = React.useState(false);
-  const [openScorer, setOpenScorer] = React.useState(false);
+  const [openPodium, setOpenPodium] = useState(false);
+  const [openScorer, setOpenScorer] = useState(false);
   const podiumLocked = podiumDeadline&&now>=new Date(podiumDeadline).getTime();
   const scorerLocked = topScorerDeadline&&now>=new Date(topScorerDeadline).getTime();
 
