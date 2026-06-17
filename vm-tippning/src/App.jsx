@@ -1618,6 +1618,12 @@ function TipsPanel({matchId, participants, results, isKO=false, deadlines={}, no
   const r = results[matchId];
   const played = r&&r.home!==""&&r.away!=="";
 
+  // Only show after deadline/matchstart has passed
+  const m = [...GROUP_MATCHES,...KNOCKOUT_ALL].find(x=>x.id===matchId);
+  const dl = deadlines[matchId]||DEFAULT_DEADLINES[matchId]||(m&&m.officialDeadline);
+  const locked = dl && now >= new Date(dl).getTime();
+  if(!locked) return null;
+
   // Sorted list: exact first, then correct 1x2, then wrong, then untipped
   const rows = Object.entries(participants)
     .map(([name, tips]) => {
