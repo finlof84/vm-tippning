@@ -677,8 +677,8 @@ export default function App() {
     setTopScorerTips(upd);
     await setDoc(doc(db,"vm2026","topScorerTips"), upd, {merge:true});
   }
-  async function saveTopScorerResult(key, player) {
-    const upd = {...topScorerResult, [key]: player};
+  async function saveTopScorerResult(key, players) {
+    const upd = {...topScorerResult, [key]: players};
     await setDoc(doc(db,"vm2026","topScorerResult"), upd);
     setTopScorerResult(upd);
   }
@@ -1112,7 +1112,7 @@ export default function App() {
                         <span className="ss" style={{fontSize:11,color:"#a09070"}}>Resultat:</span>
                         <span className="pf" style={{fontSize:13,fontWeight:700,
                           color:pts===3?"#50c878":pts===1?"#f5c842":"#f0e6d3"}}>
-                          {results[m.id].home}{results[m.id].away}
+                          {results[m.id].home}-{results[m.id].away}
                         </span>
                         {tipped&&<span className="ss" style={{fontSize:10,
                           color:pts===3?"#50c878":pts===1?"#f5c842":"#e07070"}}>
@@ -1346,9 +1346,9 @@ function PodiumTipBox({currentUser, podiumTip, podiumDeadline, podiumLocked, pod
         const scorerLocked = topScorerDeadline && Date.now() >= new Date(topScorerDeadline).getTime();
         const fmtScorer = topScorerDeadline ? new Date(topScorerDeadline).toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : null;
         const pts = topScorerTip&&topScorerResult ? (
-          topScorerTip===topScorerResult.first ? 15 :
-          topScorerTip===topScorerResult.second ? 10 :
-          topScorerTip===topScorerResult.third ? 5 : 0
+          (Array.isArray(topScorerResult.first)?topScorerResult.first.includes(topScorerTip):topScorerTip===topScorerResult.first) ? 15 :
+          (Array.isArray(topScorerResult.second)?topScorerResult.second.includes(topScorerTip):topScorerTip===topScorerResult.second) ? 10 :
+          (Array.isArray(topScorerResult.third)?topScorerResult.third.includes(topScorerTip):topScorerTip===topScorerResult.third) ? 5 : 0
         ) : null;
         const hasResult = topScorerResult&&(topScorerResult.first||topScorerResult.second||topScorerResult.third);
         return(
@@ -1739,7 +1739,8 @@ function PodiumPanel({participants, podiumTips, podiumResults, topScorerTips, to
             <div style={{maxHeight:300,overflowY:"auto",padding:"0 12px 10px"}}>
               {Object.keys(participants).sort().map(name=>{
                 const player=topScorerTips[name]||"";
-                const pts=player?(player===topScorerResult.first?15:player===topScorerResult.second?10:player===topScorerResult.third?5:0):0;
+                const inA=(arr,v)=>Array.isArray(arr)?arr.includes(v):arr===v;
+                const pts=player?(inA(topScorerResult.first,player)?15:inA(topScorerResult.second,player)?10:inA(topScorerResult.third,player)?5:0):0;
                 return(
                   <div key={name} style={{padding:"4px 0",borderBottom:"1px solid rgba(255,255,255,0.04)",
                     display:"flex",alignItems:"center",gap:8}}>
@@ -2514,19 +2515,43 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
             </div>
             {[{key:"first",label:"Skyttekung (15p)"},
                {key:"second",label:"Tvåa i skytteligan (10p)"},
-               {key:"third",label:"Trea i skytteligan (5p)"}].map(({key,label})=>(
-              <div key={key} style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",marginBottom:8}}>
-                <span className="ss" style={{fontSize:12,color:"#a09070",minWidth:180}}>{label}:</span>
-                <select value={(topScorerResult&&topScorerResult[key])||""}
-                  onChange={e=>saveTopScorerResult(key,e.target.value)}
-                  style={{flex:1,minWidth:180,color:"#111",background:"#fff"}}>
-                  <option value="" style={{color:"#111"}}>-- Välj spelare --</option>
-                  {TOP_SCORERS.map(p=><option key={p} value={p} style={{color:"#111"}}>{p}</option>)}
-                </select>
-                {topScorerResult&&topScorerResult[key]&&
-                  <span className="ss" style={{fontSize:12,color:"#50c878",fontWeight:700}}>{topScorerResult[key]}</span>}
-              </div>
-            ))}
+               {key:"third",label:"Trea i skytteligan (5p)"}].map(({key,label})=>{
+              const current = topScorerResult&&topScorerResult[key]
+                ? (Array.isArray(topScorerResult[key])?topScorerResult[key]:[topScorerResult[key]])
+                : [];
+              return(
+                <div key={key} style={{marginBottom:12}}>
+                  <span className="ss" style={{fontSize:12,color:"#a09070",display:"block",marginBottom:6}}>{label}:</span>
+                  <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:6}}>
+                    {current.map(p=>(
+                      <div key={p} style={{display:"flex",alignItems:"center",gap:4,background:"rgba(80,200,120,0.1)",
+                        border:"1px solid rgba(80,200,120,0.3)",borderRadius:16,padding:"3px 10px"}}>
+                        <span className="ss" style={{fontSize:12,color:"#50c878",fontWeight:700}}>{p}</span>
+                        <button onClick={()=>saveTopScorerResult(key,current.filter(x=>x!==p))}
+                          style={{background:"none",border:"none",cursor:"pointer",color:"#e07070",
+                            fontSize:14,lineHeight:1,padding:"0 2px"}}>x</button>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{display:"flex",gap:8}}>
+                    <select id={"scorer-sel-"+key}
+                      style={{flex:1,minWidth:180,color:"#111",background:"#fff"}}>
+                      <option value="" style={{color:"#111"}}>-- Lagg till spelare --</option>
+                      {TOP_SCORERS.filter(p=>!current.includes(p)).map(p=>(
+                        <option key={p} value={p} style={{color:"#111"}}>{p}</option>
+                      ))}
+                    </select>
+                    <button className="btn btn-sm" onClick={()=>{
+                      const sel=document.getElementById("scorer-sel-"+key);
+                      if(sel&&sel.value) {
+                        saveTopScorerResult(key,[...current,sel.value]);
+                        sel.value="";
+                      }
+                    }}>Lagg till</button>
+                  </div>
+                </div>
+              );
+            })}
             {Object.keys(topScorerTips).length>0&&(
               <div style={{marginTop:14}}>
                 <p className="ss" style={{fontSize:11,color:"#60504a",marginBottom:8}}>Deltagarnas tips:</p>
@@ -2535,13 +2560,18 @@ function AdminView({results,deadlines,thirdOverrides,tipPhase,setTipPhase,tipGro
                     <div key={name} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",
                       borderRadius:6,padding:"4px 10px",fontSize:11,fontFamily:"'Source Sans 3',sans-serif"}}>
                       <span style={{color:"#f0e6d3",fontWeight:700}}>{name}:</span>{" "}
-                      <span style={{color:
-                        topScorerResult.first&&player===topScorerResult.first?"#50c878":
-                        topScorerResult.second&&player===topScorerResult.second?"#80d0ff":
-                        topScorerResult.third&&player===topScorerResult.third?"#f5c842":"#a09070"}}>{player||"-"}</span>
-                      {topScorerResult.first&&player===topScorerResult.first&&<span style={{color:"#50c878",marginLeft:4}}>+15p</span>}
-                      {topScorerResult.second&&player===topScorerResult.second&&<span style={{color:"#80d0ff",marginLeft:4}}>+10p</span>}
-                      {topScorerResult.third&&player===topScorerResult.third&&<span style={{color:"#f5c842",marginLeft:4}}>+5p</span>}
+                      {(()=>{
+                        const inA=(arr,v)=>Array.isArray(arr)?arr.includes(v):arr===v;
+                        const p1=topScorerResult.first&&inA(topScorerResult.first,player);
+                        const p2=topScorerResult.second&&inA(topScorerResult.second,player);
+                        const p3=topScorerResult.third&&inA(topScorerResult.third,player);
+                        return <>
+                          <span style={{color:p1?"#50c878":p2?"#80d0ff":p3?"#f5c842":"#a09070"}}>{player||"-"}</span>
+                          {p1&&<span style={{color:"#50c878",marginLeft:4}}>+15p</span>}
+                          {p2&&<span style={{color:"#80d0ff",marginLeft:4}}>+10p</span>}
+                          {p3&&<span style={{color:"#f5c842",marginLeft:4}}>+5p</span>}
+                        </>;
+                      })()}
                     </div>
                   ))}
                 </div>
