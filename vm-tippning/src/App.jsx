@@ -1762,6 +1762,11 @@ function PodiumPanel({participants, podiumTips, podiumResults, topScorerTips, to
 
 // RESULTAT-VY
 function ResultsView({results, getTeams, getDisplay, placements, bestThirds, deadlines={}, participants={}, podiumTips={}, podiumResults={}, topScorerTips={}, topScorerResult={}, podiumDeadline, topScorerDeadline, now}) {
+  function fmtMatchTime(m) {
+    const dl = m.officialDeadline||DEFAULT_DEADLINES[m.id];
+    if(!dl) return null;
+    return new Date(dl).toLocaleString("sv-SE",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+  }
   const [tab, setTab] = useState("groups");
   const [groupSubTab, setGroupSubTab] = useState("omgang1");
   const [selGroup, setSelGroup] = useState("A");
@@ -1845,6 +1850,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
             const r=results[m.id]; const played=r&&r.home!=""&&r.away!="";
             return(
               <div key={m.id} style={{marginBottom:4}}>
+                {fmtMatchTime(m)&&<div className="ss" style={{fontSize:10,color:"#50403a",textAlign:"center",marginBottom:2}}>{fmtMatchTime(m)}</div>}
                 <div style={{display:"flex",alignItems:"center",gap:8,padding:"4px 0"}}>
                   <span className="fc">{gc(m.home)}</span>
                   <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc",textAlign:"right"}}>{dn(m.home)}</span>
@@ -1882,6 +1888,7 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
                 const r=results[m.id]; const played=r&&r.home!=""&&r.away!="";
                 return(
                   <div key={m.id} style={{marginBottom:6}}>
+                    {fmtMatchTime(m)&&<div className="ss" style={{fontSize:10,color:"#50403a",textAlign:"center",marginBottom:2}}>{fmtMatchTime(m)}</div>}
                     <div style={{display:"flex",alignItems:"center",gap:8,padding:"6px 2px"}}>
                       <span className="fc">{gc(m.home)}</span>
                       <span className="ss" style={{fontSize:12,fontWeight:600,flex:1,color:"#d0c8bc",textAlign:"right"}}>{dn(m.home)}</span>
@@ -1966,7 +1973,8 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
                 <div key={m.id} style={{background:played?"rgba(255,255,255,0.05)":"rgba(255,255,255,0.03)",
                   border:"1px solid "+(played?"rgba(255,255,255,0.1)":"rgba(255,255,255,0.05)"),
                   borderRadius:11,padding:"12px 18px",marginBottom:10}}>
-                  <p className="ss" style={{fontSize:10,color:"#50403a",marginBottom:6,textAlign:"center"}}>{matchLabel}</p>
+                  <p className="ss" style={{fontSize:10,color:"#50403a",marginBottom:2,textAlign:"center"}}>{matchLabel}</p>
+                  {(()=>{const t=fmtMatchTime(m);return t&&<p className="ss" style={{fontSize:10,color:"#50403a",marginBottom:6,textAlign:"center"}}>{t}</p>;})()}
                   <div style={{display:"flex",alignItems:"center",gap:10}}>
                     {ht&&<span className="fc">{gc(ht)}</span>}
                     <span className="ss" style={{fontSize:13,fontWeight:700,flex:1,textAlign:"right",
