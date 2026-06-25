@@ -2017,21 +2017,25 @@ function ResultsView({results, getTeams, getDisplay, placements, bestThirds, dea
                 {Object.keys(GROUPS).map(g=>{
                   const st=calcGroupStandings(g,results);
                   const row=st[2]; if(!row) return null;
-                  const rank=bestThirds.findIndex(t=>t.team===row.team);
-                  const advances=rank>=0&&rank<8;
+                  return {...row, group:g};
+                }).filter(Boolean)
+                .sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf)
+                .map((row,i)=>{
+                  const advances=i<8;
                   return(
-                    <tr key={g} style={{borderBottom:"1px solid rgba(255,255,255,0.04)",
+                    <tr key={row.group} style={{borderBottom:"1px solid rgba(255,255,255,0.04)",
                       background:advances?"rgba(80,120,220,0.06)":"transparent"}}>
                       <td style={{padding:"8px 12px",fontFamily:"'Source Sans 3',sans-serif",
-                        color:advances?"#80a8f0":"#60504a",fontWeight:700,fontSize:12}}>{advances?rank+1:"-"}</td>
+                        color:advances?"#80a8f0":"#60504a",fontWeight:700,fontSize:12}}>{advances?i+1:"-"}</td>
                       <td style={{padding:"8px 12px",whiteSpace:"nowrap"}}>
                         <span className="fc">{gc(row.team)}</span>
                         <span className="ss" style={{fontSize:12,fontWeight:600,color:advances?"#f0e6d3":"#a09070"}}>{dn(row.team)}</span>
                       </td>
-                      <td style={{padding:"8px 12px",fontFamily:"'Source Sans 3',sans-serif",color:"#60504a",fontSize:12}}>{g}</td>
+                      <td style={{padding:"8px 12px",fontFamily:"'Source Sans 3',sans-serif",color:"#60504a",fontSize:12}}>{row.group}</td>
                       <td style={{padding:"8px 12px",textAlign:"center",fontFamily:"'Source Sans 3',sans-serif",
                         color:advances?"#80a8f0":"#a09070",fontWeight:advances?700:400,fontSize:12}}>{row.pts}</td>
-                      <td style={{padding:"8px 12px",textAlign:"center",fontFamily:"'Source Sans 3',sans-serif",color:"#a09070",fontSize:12}}>{row.gd>0?"+":""}{row.gd}</td>
+                      <td style={{padding:"8px 12px",textAlign:"center",fontFamily:"'Source Sans 3',sans-serif",
+                        color:row.gd>0?"#50c878":row.gd<0?"#e07070":"#a09070",fontSize:12}}>{row.gd>0?"+":""}{row.gd}</td>
                       <td style={{padding:"8px 12px",textAlign:"center",fontFamily:"'Source Sans 3',sans-serif",color:"#a09070",fontSize:12}}>{row.gf}</td>
                     </tr>
                   );
