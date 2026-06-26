@@ -74,40 +74,40 @@ function dn(team) { return team || "--"; }
 // Baserat pa FIFA VM 2026 officiellt schema (ESPN/Al Jazeera)
 // Trea-platser (THIRD_1..8) fylls i av admin när FIFA bestammer bracketen (27 juni)
 const R32_FIXED = [
-  // Fasta R32-matcher (etta vs tvaa, eller tvaa vs tvaa)
-  {id:"R32_1",  phase:"Sextondelsfinal", homeKey:"C0", awayKey:"F1"},  // M76: Brasilien vs Tvaan F (Japan) Jun 29
-  {id:"R32_2",  phase:"Sextondelsfinal", homeKey:"F0", awayKey:"C1"},  // M75: Nederlanderna vs Tvaan C (Marocko) Jun 29
-  {id:"R32_3",  phase:"Sextondelsfinal", homeKey:"E1", awayKey:"I1"},  // M78: Tvaan E (Elfenbenskusten) vs Tvaan I Jun 30
-  {id:"R32_4",  phase:"Sextondelsfinal", homeKey:"H0", awayKey:"J1"},  // M85: Spanien vs Tvaan J (Osterrike) Jul 2
-  {id:"R32_5",  phase:"Sextondelsfinal", homeKey:"A1", awayKey:"B1"},  // M73: Tvaan A (Sydafrika) vs Tvaan B (Kanada) Jun 28
-  {id:"R32_6",  phase:"Sextondelsfinal", homeKey:"J0", awayKey:"H1"},  // M86: Argentina vs Tvaan H (Uruguay) Jul 3
-  {id:"R32_7",  phase:"Sextondelsfinal", homeKey:"K1", awayKey:"L1"},  // M84: Tvaan K (Portugal) vs Tvaan L (Ghana) Jul 2
-  {id:"R32_8",  phase:"Sextondelsfinal", homeKey:"D1", awayKey:"G1"},  // M88: Tvaan D (Australien) vs Tvaan G (Iran) Jul 3
+  // Bekraftade av Sky Sports, NBC, FOX Sports, ESPN (26 jun 2026)
+  {id:"R32_1",  phase:"Sextondelsfinal", homeKey:"C0", awayKey:"F1"},  // M76: Brasilien vs Japan (Houston)
+  {id:"R32_2",  phase:"Sextondelsfinal", homeKey:"F0", awayKey:"C1"},  // M75: Nederlanderna vs Marocko (Monterrey)
+  {id:"R32_4",  phase:"Sextondelsfinal", homeKey:"H0", awayKey:"J1"},  // M84: Spanien vs Osterrike (Los Angeles)
+  {id:"R32_5",  phase:"Sextondelsfinal", homeKey:"A1", awayKey:"B1"},  // M73: Sydafrika vs Kanada (Los Angeles)
+  {id:"R32_6",  phase:"Sextondelsfinal", homeKey:"J0", awayKey:"H1"},  // M86: Argentina vs Uruguay (Dallas)
+  {id:"R32_7",  phase:"Sextondelsfinal", homeKey:"K1", awayKey:"L1"},  // M83: Portugal vs Kroatien (Vancouver)
+  {id:"R32_8",  phase:"Sextondelsfinal", homeKey:"D1", awayKey:"G1"},  // M88: Australien vs Tvaan G (...)
 ];
 // Etta vs Trea - admin placerar rätt trea när FIFA laser bracketen
 const R32_THIRDS = [
-  // Etta vs basta trea - placeras av admin 27 jun
-  {id:"R32_9",  phase:"Sextondelsfinal", homeKey:"E0",  awayKey:"THIRD_1", thirdInfo:"Trea fran grupp A/B/C/D/F"},  // M74: Tyskland vs trea
-  {id:"R32_10", phase:"Sextondelsfinal", homeKey:"I0",  awayKey:"THIRD_2", thirdInfo:"Trea fran grupp C/D/F/G/H"},  // M77: Etta grupp I vs trea
-  {id:"R32_11", phase:"Sextondelsfinal", homeKey:"G0",  awayKey:"THIRD_3", thirdInfo:"Trea fran grupp A/E/H/I/J"},  // M82: Etta grupp G vs trea
-  {id:"R32_12", phase:"Sextondelsfinal", homeKey:"L0",  awayKey:"THIRD_4", thirdInfo:"Trea fran grupp E/H/I/J/K"},  // M80: Etta grupp L vs trea
-  {id:"R32_13", phase:"Sextondelsfinal", homeKey:"A0",  awayKey:"THIRD_5", thirdInfo:"Trea fran grupp C/E/F/H/I"},  // M79: Mexiko vs trea
-  {id:"R32_14", phase:"Sextondelsfinal", homeKey:"D0",  awayKey:"THIRD_6", thirdInfo:"Trea fran grupp B/E/F/I/J"},  // M81: USA vs trea (Bosnien)
-  {id:"R32_15", phase:"Sextondelsfinal", homeKey:"B0",  awayKey:"THIRD_7", thirdInfo:"Trea fran grupp E/F/G/I/J"},  // M83: Schweiz vs trea
-  {id:"R32_16", phase:"Sextondelsfinal", homeKey:"K0",  awayKey:"THIRD_8", thirdInfo:"Trea fran grupp D/E/I/J/L"},  // M87: Colombia vs trea
+  // Etta/Tvaa vs basta trea - treorna placeras av admin 27 jun
+  {id:"R32_9",  phase:"Sextondelsfinal", homeKey:"E0", awayKey:"THIRD_1", thirdInfo:"Trea fran A/B/C/D/F"},   // M74: Tyskland vs trea (Boston)
+  {id:"R32_3",  phase:"Sextondelsfinal", homeKey:"I1", awayKey:"THIRD_2", thirdInfo:"Trea fran grupp E (Ecuador)"},// M78: Tvaan I vs Ecuador/trea E (Dallas)
+  {id:"R32_10", phase:"Sextondelsfinal", homeKey:"I0", awayKey:"THIRD_3", thirdInfo:"Trea fran C/D/F/G/H"},   // M77: Etta I vs trea (New York)
+  {id:"R32_12", phase:"Sextondelsfinal", homeKey:"L0", awayKey:"THIRD_4", thirdInfo:"Trea fran E/H/I/J/K"},   // M80: Etta L vs trea (Atlanta)
+  {id:"R32_11", phase:"Sextondelsfinal", homeKey:"G0", awayKey:"THIRD_5", thirdInfo:"Trea fran A/E/H/I/J"},   // M82: Etta G vs trea (Seattle)
+  {id:"R32_13", phase:"Sextondelsfinal", homeKey:"A0", awayKey:"THIRD_6", thirdInfo:"Trea fran C/E/F/H/I"},   // M79: Mexiko vs trea (Mexico City)
+  {id:"R32_14", phase:"Sextondelsfinal", homeKey:"D0", awayKey:"THIRD_7", thirdInfo:"Trea fran B/E/F/I/J"},   // M81: USA vs Bosnien (Santa Clara)
+  {id:"R32_15", phase:"Sextondelsfinal", homeKey:"B0", awayKey:"THIRD_8", thirdInfo:"Trea fran E/F/G/I/J"},   // M85: Schweiz vs trea (Vancouver)
+  {id:"R32_16", phase:"Sextondelsfinal", homeKey:"K0", awayKey:"THIRD_9", thirdInfo:"Trea fran D/E/I/J/L"},   // M87: Colombia vs trea
 ];
 const R32 = [...R32_FIXED, ...R32_THIRDS];
 
 const R16 = [
-  // R16 baserat pa officiellt FIFA-schema (NBC Sports, Sky Sports, CBS Sports bekraftad)
+  // Bekraftade av NBC Sports, Sky Sports, CBS Sports (juni 2026)
   {id:"R16_1", phase:"Attondelsfinaler", homeKey:"R32_9",  awayKey:"R32_10"}, // M89: V(M74) vs V(M77) - Philadelphia
-  {id:"R16_2", phase:"Attondelsfinaler", homeKey:"R32_5",  awayKey:"R32_2"},  // M90: V(M73) vs V(M75) - Houston
-  {id:"R16_3", phase:"Attondelsfinaler", homeKey:"R32_1",  awayKey:"R32_3"},  // M91: V(M76) vs V(M78) - New York
-  {id:"R16_4", phase:"Attondelsfinaler", homeKey:"R32_13", awayKey:"R32_12"}, // M92: V(M79) vs V(M80) - Mexico City
-  {id:"R16_5", phase:"Attondelsfinaler", homeKey:"R32_7",  awayKey:"R32_4"},  // M93: V(M83) vs V(M84) - Dallas
-  {id:"R16_6", phase:"Attondelsfinaler", homeKey:"R32_14", awayKey:"R32_11"}, // M94: V(M81) vs V(M82) - Seattle
-  {id:"R16_7", phase:"Attondelsfinaler", homeKey:"R32_6",  awayKey:"R32_8"},  // M95: V(M86) vs V(M88) - Atlanta
-  {id:"R16_8", phase:"Attondelsfinaler", homeKey:"R32_15", awayKey:"R32_16"}, // M96: V(M85) vs V(M87) - Vancouver
+  {id:"R16_2", phase:"Attondelsfinaler", homeKey:"R32_5",  awayKey:"R32_2"},  // M90: V(M73=SA/Kan) vs V(M75=NL/Mar) - Houston
+  {id:"R16_3", phase:"Attondelsfinaler", homeKey:"R32_1",  awayKey:"R32_3"},  // M91: V(M76=Bra/Jap) vs V(M78=I1/trea) - New York
+  {id:"R16_4", phase:"Attondelsfinaler", homeKey:"R32_13", awayKey:"R32_12"}, // M92: V(M79=Mex/trea) vs V(M80=EttaL/trea) - Mexico City
+  {id:"R16_5", phase:"Attondelsfinaler", homeKey:"R32_7",  awayKey:"R32_4"},  // M93: V(M83=Por/Kro) vs V(M84=Spa/Ost) - Dallas
+  {id:"R16_6", phase:"Attondelsfinaler", homeKey:"R32_14", awayKey:"R32_11"}, // M94: V(M81=USA/Bos) vs V(M82=EttaG/trea) - Seattle
+  {id:"R16_7", phase:"Attondelsfinaler", homeKey:"R32_6",  awayKey:"R32_8"},  // M95: V(M86=Arg/Uru) vs V(M88=Aus/IranTvaa) - Atlanta
+  {id:"R16_8", phase:"Attondelsfinaler", homeKey:"R32_15", awayKey:"R32_16"}, // M96: V(M85=Sch/trea) vs V(M87=Col/trea) - Vancouver
 ];
 const QF = [
   {id:"QF_1", phase:"Kvartsfinal", homeKey:"R16_1", awayKey:"R16_2"}, // M97: V(M89) vs V(M90) - Boston
