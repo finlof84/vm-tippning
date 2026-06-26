@@ -74,40 +74,41 @@ function dn(team) { return team || "--"; }
 // Baserat pa FIFA VM 2026 officiellt schema (ESPN/Al Jazeera)
 // Trea-platser (THIRD_1..8) fylls i av admin när FIFA bestammer bracketen (27 juni)
 const R32_FIXED = [
-  // Etta vs Två - fasta matchningår
-  {id:"R32_1",  phase:"Sextondelsfinal", homeKey:"C0", awayKey:"F1"},  // jun 29
-  {id:"R32_2",  phase:"Sextondelsfinal", homeKey:"F0", awayKey:"C1"},  // jun 29
-  {id:"R32_3",  phase:"Sextondelsfinal", homeKey:"E1", awayKey:"I1"},  // jun 30 (två vs två)
-  {id:"R32_4",  phase:"Sextondelsfinal", homeKey:"H0", awayKey:"J1"},  // jul 2
-  {id:"R32_5",  phase:"Sextondelsfinal", homeKey:"B0", awayKey:"G1"},  // jul 2
-  {id:"R32_6",  phase:"Sextondelsfinal", homeKey:"J0", awayKey:"H1"},  // jul 3
-  {id:"R32_7",  phase:"Sextondelsfinal", homeKey:"K0", awayKey:"B1"},  // jul 3
-  {id:"R32_8",  phase:"Sextondelsfinal", homeKey:"A1", awayKey:"D1"},  // jul 3 (två vs två)
+  // Fasta R32-matcher (etta vs tvaa, eller tvaa vs tvaa)
+  {id:"R32_1",  phase:"Sextondelsfinal", homeKey:"C0", awayKey:"F1"},  // M76: Brasilien vs Tvaan F (Japan) Jun 29
+  {id:"R32_2",  phase:"Sextondelsfinal", homeKey:"F0", awayKey:"C1"},  // M75: Nederlanderna vs Tvaan C (Marocko) Jun 29
+  {id:"R32_3",  phase:"Sextondelsfinal", homeKey:"E1", awayKey:"I1"},  // M78: Tvaan E (Elfenbenskusten) vs Tvaan I Jun 30
+  {id:"R32_4",  phase:"Sextondelsfinal", homeKey:"H0", awayKey:"J1"},  // M85: Spanien vs Tvaan J (Osterrike) Jul 2
+  {id:"R32_5",  phase:"Sextondelsfinal", homeKey:"A1", awayKey:"B1"},  // M73: Tvaan A (Sydafrika) vs Tvaan B (Kanada) Jun 28
+  {id:"R32_6",  phase:"Sextondelsfinal", homeKey:"J0", awayKey:"H1"},  // M86: Argentina vs Tvaan H (Uruguay) Jul 3
+  {id:"R32_7",  phase:"Sextondelsfinal", homeKey:"K1", awayKey:"L1"},  // M84: Tvaan K (Portugal) vs Tvaan L (Ghana) Jul 2
+  {id:"R32_8",  phase:"Sextondelsfinal", homeKey:"D1", awayKey:"G1"},  // M88: Tvaan D (Australien) vs Tvaan G (Iran) Jul 3
 ];
 // Etta vs Trea - admin placerar rätt trea när FIFA laser bracketen
 const R32_THIRDS = [
-  {id:"R32_9",  phase:"Sextondelsfinal", homeKey:"E0",  awayKey:"THIRD_1", thirdInfo:"Trea från grupp A/B/C/D/F"},  // jun 29
-  {id:"R32_10", phase:"Sextondelsfinal", homeKey:"I0",  awayKey:"THIRD_2", thirdInfo:"Trea från grupp C/D/F/G/H"},  // jun 30
-  {id:"R32_11", phase:"Sextondelsfinal", homeKey:"A0",  awayKey:"THIRD_3", thirdInfo:"Trea från grupp C/E/F/H/I"},  // jun 30
-  {id:"R32_12", phase:"Sextondelsfinal", homeKey:"L0",  awayKey:"THIRD_4", thirdInfo:"Trea från grupp E/H/I/J/K"},  // jul 1
-  {id:"R32_13", phase:"Sextondelsfinal", homeKey:"G0",  awayKey:"THIRD_5", thirdInfo:"Trea från grupp A/E/H/I/J"},  // jul 1
-  {id:"R32_14", phase:"Sextondelsfinal", homeKey:"D0",  awayKey:"THIRD_6", thirdInfo:"Trea från grupp B/E/F/I/J"},  // jul 1
-  {id:"R32_15", phase:"Sextondelsfinal", homeKey:"K0",  awayKey:"THIRD_7", thirdInfo:"Trea från grupp D/E/I/J/L"},  // jul 2 -- wait K0 already used
-  {id:"R32_16", phase:"Sextondelsfinal", homeKey:"B1",  awayKey:"THIRD_8", thirdInfo:"Trea (okänd matchning)"},
+  // Etta vs basta trea - placeras av admin 27 jun
+  {id:"R32_9",  phase:"Sextondelsfinal", homeKey:"E0",  awayKey:"THIRD_1", thirdInfo:"Trea fran grupp A/B/C/D/F"},  // M74: Tyskland vs trea
+  {id:"R32_10", phase:"Sextondelsfinal", homeKey:"I0",  awayKey:"THIRD_2", thirdInfo:"Trea fran grupp C/D/F/G/H"},  // M77: Etta grupp I vs trea
+  {id:"R32_11", phase:"Sextondelsfinal", homeKey:"G0",  awayKey:"THIRD_3", thirdInfo:"Trea fran grupp A/E/H/I/J"},  // M82: Etta grupp G vs trea
+  {id:"R32_12", phase:"Sextondelsfinal", homeKey:"L0",  awayKey:"THIRD_4", thirdInfo:"Trea fran grupp E/H/I/J/K"},  // M80: Etta grupp L vs trea
+  {id:"R32_13", phase:"Sextondelsfinal", homeKey:"A0",  awayKey:"THIRD_5", thirdInfo:"Trea fran grupp C/E/F/H/I"},  // M79: Mexiko vs trea
+  {id:"R32_14", phase:"Sextondelsfinal", homeKey:"D0",  awayKey:"THIRD_6", thirdInfo:"Trea fran grupp B/E/F/I/J"},  // M81: USA vs trea (Bosnien)
+  {id:"R32_15", phase:"Sextondelsfinal", homeKey:"B0",  awayKey:"THIRD_7", thirdInfo:"Trea fran grupp E/F/G/I/J"},  // M83: Schweiz vs trea
+  {id:"R32_16", phase:"Sextondelsfinal", homeKey:"K0",  awayKey:"THIRD_8", thirdInfo:"Trea fran grupp D/E/I/J/L"},  // M87: Colombia vs trea
 ];
 const R32 = [...R32_FIXED, ...R32_THIRDS];
 
 const R16 = [
-  // Spain-halvan: vinnare fran par av R32
-  {id:"R16_1", phase:"Attondelsfinaler", homeKey:"R32_1",  awayKey:"R32_9"},   // 1F/2C vs 1E/trea
-  {id:"R16_2", phase:"Attondelsfinaler", homeKey:"R32_2",  awayKey:"R32_10"},  // 1C/2F vs 1I/trea
-  {id:"R16_3", phase:"Attondelsfinaler", homeKey:"R32_3",  awayKey:"R32_11"},  // 2E/2I vs 1G/trea
-  {id:"R16_4", phase:"Attondelsfinaler", homeKey:"R32_4",  awayKey:"R32_12"},  // 1H/2J vs 1D/trea
-  // Argentina-halvan
-  {id:"R16_5", phase:"Attondelsfinaler", homeKey:"R32_5",  awayKey:"R32_13"},  // 2A/2B vs 1A/trea
-  {id:"R16_6", phase:"Attondelsfinaler", homeKey:"R32_6",  awayKey:"R32_14"},  // 1J/2H vs 1L/trea
-  {id:"R16_7", phase:"Attondelsfinaler", homeKey:"R32_7",  awayKey:"R32_15"},  // 2K/2L vs 1B/trea
-  {id:"R16_8", phase:"Attondelsfinaler", homeKey:"R32_8",  awayKey:"R32_16"},  // 2D/2G vs 1K/trea
+  // Spain-halvan (-> SF1 Dallas 14 jul)
+  {id:"R16_1", phase:"Attondelsfinaler", homeKey:"R32_1",  awayKey:"R32_9"},   // Brasilien/Japan vs Tyskland/trea
+  {id:"R16_2", phase:"Attondelsfinaler", homeKey:"R32_2",  awayKey:"R32_10"},  // Nederlanderna/Marocko vs Etta I/trea
+  {id:"R16_3", phase:"Attondelsfinaler", homeKey:"R32_3",  awayKey:"R32_11"},  // Elfenbenskusten/Tvaan I vs Etta G/trea
+  {id:"R16_4", phase:"Attondelsfinaler", homeKey:"R32_4",  awayKey:"R32_12"},  // Spanien/Osterrike vs Etta L/trea
+  // Argentina-halvan (-> SF2 Atlanta 15 jul)
+  {id:"R16_5", phase:"Attondelsfinaler", homeKey:"R32_5",  awayKey:"R32_13"},  // Sydafrika/Kanada vs Mexiko/trea
+  {id:"R16_6", phase:"Attondelsfinaler", homeKey:"R32_6",  awayKey:"R32_14"},  // Argentina/Uruguay vs USA/trea
+  {id:"R16_7", phase:"Attondelsfinaler", homeKey:"R32_7",  awayKey:"R32_15"},  // Portugal/Ghana vs Schweiz/trea
+  {id:"R16_8", phase:"Attondelsfinaler", homeKey:"R32_8",  awayKey:"R32_16"},  // Australien/Iran vs Colombia/trea
 ];
 const QF = [
   {id:"QF_1", phase:"Kvartsfinal", homeKey:"R16_1", awayKey:"R16_2"},  // Spain-halvan
