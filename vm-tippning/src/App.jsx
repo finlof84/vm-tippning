@@ -2826,7 +2826,7 @@ function BracketView({placements, results, getTeams, bestThirds}) {
           {/* LEFT R32 - Spain half */}
           <div style={{display:"flex",flexDirection:"column",gap:0}}>
             {renderH("Sextondelsfinal")}
-            {[["R32_1","R32_9"],["R32_2","R32_10"],["R32_3","R32_11"],["R32_4","R32_12"]].map(([a,b],i)=>(
+            {[["R32_9","R32_10"],["R32_5","R32_2"],["R32_1","R32_3"],["R32_13","R32_12"]].map(([a,b],i)=>(
               <div key={a} style={{height:220,display:"flex",flexDirection:"column",justifyContent:"space-around"}}>
                 <div>{renderMB(a)}</div>
                 <div>{renderMB(b)}</div>
@@ -2894,7 +2894,7 @@ function BracketView({placements, results, getTeams, bestThirds}) {
           {/* RIGHT R32 - Argentina half */}
           <div style={{display:"flex",flexDirection:"column",gap:0}}>
             {renderH("Sextondelsfinal")}
-            {[["R32_5","R32_13"],["R32_6","R32_14"],["R32_7","R32_15"],["R32_8","R32_16"]].map(([a,b],i)=>(
+            {[["R32_7","R32_4"],["R32_14","R32_11"],["R32_6","R32_8"],["R32_15","R32_16"]].map(([a,b],i)=>(
               <div key={a} style={{height:220,display:"flex",flexDirection:"column",justifyContent:"space-around"}}>
                 <div>{renderMB(a)}</div>
                 <div>{renderMB(b)}</div>
