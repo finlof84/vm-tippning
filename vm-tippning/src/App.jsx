@@ -2801,7 +2801,15 @@ function BracketView({placements, results, getTeams, bestThirds}) {
       </div>
     );
   }
-  function renderMB(mid){return<div style={{display:"flex",flexDirection:"column",gap:2}}>{renderTR(mid,"home")}{renderTR(mid,"away")}</div>;}
+  function renderMB(mid){
+    const dl=DEFAULT_DEADLINES[mid];
+    const timeStr=dl?new Date(dl).toLocaleString("sv-SE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):null;
+    return<div style={{display:"flex",flexDirection:"column",gap:1}}>
+      {timeStr&&<div style={{fontSize:8,color:"#50403a",fontFamily:"'Source Sans 3',sans-serif",textAlign:"center",marginBottom:1}}>{timeStr}</div>}
+      {renderTR(mid,"home")}
+      {renderTR(mid,"away")}
+    </div>;
+  }
   function renderCol(children,pt=0){return<div style={{display:"flex",flexDirection:"column",gap:6,paddingTop:pt}}>{children}</div>;}
   function renderH(t,gold=false){return<div style={{fontSize:8,fontFamily:"'Source Sans 3',sans-serif",color:gold?"#f5c842":"#60504a",textTransform:"uppercase",letterSpacing:.8,marginBottom:3,fontWeight:700}}>{t}</div>;}
 
