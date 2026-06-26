@@ -99,26 +99,25 @@ const R32_THIRDS = [
 const R32 = [...R32_FIXED, ...R32_THIRDS];
 
 const R16 = [
-  // Spain-halvan (-> SF1 Dallas 14 jul)
-  {id:"R16_1", phase:"Attondelsfinaler", homeKey:"R32_1",  awayKey:"R32_9"},   // Brasilien/Japan vs Tyskland/trea
-  {id:"R16_2", phase:"Attondelsfinaler", homeKey:"R32_2",  awayKey:"R32_10"},  // Nederlanderna/Marocko vs Etta I/trea
-  {id:"R16_3", phase:"Attondelsfinaler", homeKey:"R32_3",  awayKey:"R32_11"},  // Elfenbenskusten/Tvaan I vs Etta G/trea
-  {id:"R16_4", phase:"Attondelsfinaler", homeKey:"R32_4",  awayKey:"R32_12"},  // Spanien/Osterrike vs Etta L/trea
-  // Argentina-halvan (-> SF2 Atlanta 15 jul)
-  {id:"R16_5", phase:"Attondelsfinaler", homeKey:"R32_5",  awayKey:"R32_13"},  // Sydafrika/Kanada vs Mexiko/trea
-  {id:"R16_6", phase:"Attondelsfinaler", homeKey:"R32_6",  awayKey:"R32_14"},  // Argentina/Uruguay vs USA/trea
-  {id:"R16_7", phase:"Attondelsfinaler", homeKey:"R32_7",  awayKey:"R32_15"},  // Portugal/Ghana vs Schweiz/trea
-  {id:"R16_8", phase:"Attondelsfinaler", homeKey:"R32_8",  awayKey:"R32_16"},  // Australien/Iran vs Colombia/trea
+  // R16 baserat pa officiellt FIFA-schema (NBC Sports, Sky Sports, CBS Sports bekraftad)
+  {id:"R16_1", phase:"Attondelsfinaler", homeKey:"R32_9",  awayKey:"R32_10"}, // M89: V(M74) vs V(M77) - Philadelphia
+  {id:"R16_2", phase:"Attondelsfinaler", homeKey:"R32_5",  awayKey:"R32_2"},  // M90: V(M73) vs V(M75) - Houston
+  {id:"R16_3", phase:"Attondelsfinaler", homeKey:"R32_1",  awayKey:"R32_3"},  // M91: V(M76) vs V(M78) - New York
+  {id:"R16_4", phase:"Attondelsfinaler", homeKey:"R32_13", awayKey:"R32_12"}, // M92: V(M79) vs V(M80) - Mexico City
+  {id:"R16_5", phase:"Attondelsfinaler", homeKey:"R32_7",  awayKey:"R32_4"},  // M93: V(M83) vs V(M84) - Dallas
+  {id:"R16_6", phase:"Attondelsfinaler", homeKey:"R32_14", awayKey:"R32_11"}, // M94: V(M81) vs V(M82) - Seattle
+  {id:"R16_7", phase:"Attondelsfinaler", homeKey:"R32_6",  awayKey:"R32_8"},  // M95: V(M86) vs V(M88) - Atlanta
+  {id:"R16_8", phase:"Attondelsfinaler", homeKey:"R32_15", awayKey:"R32_16"}, // M96: V(M85) vs V(M87) - Vancouver
 ];
 const QF = [
-  {id:"QF_1", phase:"Kvartsfinal", homeKey:"R16_1", awayKey:"R16_2"},  // Spain-halvan
-  {id:"QF_2", phase:"Kvartsfinal", homeKey:"R16_3", awayKey:"R16_4"},  // Spain-halvan
-  {id:"QF_3", phase:"Kvartsfinal", homeKey:"R16_5", awayKey:"R16_6"},  // Argentina-halvan
-  {id:"QF_4", phase:"Kvartsfinal", homeKey:"R16_7", awayKey:"R16_8"},  // Argentina-halvan
+  {id:"QF_1", phase:"Kvartsfinal", homeKey:"R16_1", awayKey:"R16_2"}, // M97: V(M89) vs V(M90) - Boston
+  {id:"QF_2", phase:"Kvartsfinal", homeKey:"R16_3", awayKey:"R16_4"}, // M98: V(M91) vs V(M92) - Los Angeles? check
+  {id:"QF_3", phase:"Kvartsfinal", homeKey:"R16_5", awayKey:"R16_6"}, // M99: V(M93) vs V(M94) - Miami
+  {id:"QF_4", phase:"Kvartsfinal", homeKey:"R16_7", awayKey:"R16_8"}, // M100: V(M95) vs V(M96) - Kansas City
 ];
 const SF = [
-  {id:"SF_1", phase:"Semifinal", homeKey:"QF_1", awayKey:"QF_2"},  // Spain-halvan -> Dallas 14 jul
-  {id:"SF_2", phase:"Semifinal", homeKey:"QF_3", awayKey:"QF_4"},  // Argentina-halvan -> Atlanta 15 jul
+  {id:"SF_1", phase:"Semifinal", homeKey:"QF_1", awayKey:"QF_2"}, // M101: V(M97) vs V(M98) - Dallas 14 jul
+  {id:"SF_2", phase:"Semifinal", homeKey:"QF_3", awayKey:"QF_4"}, // M102: V(M99) vs V(M100) - Atlanta 15 jul
 ];
 const LATE = [
   {id:"BRONS", phase:"Bronsmatch", homeKey:"SF_1L", awayKey:"SF_2L"},
