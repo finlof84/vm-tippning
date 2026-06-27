@@ -74,50 +74,50 @@ function dn(team) { return team || "--"; }
 // Baserat pa FIFA VM 2026 officiellt schema (ESPN/Al Jazeera)
 // Trea-platser (THIRD_1..8) fylls i av admin när FIFA bestammer bracketen (27 juni)
 const R32_FIXED = [
-  // Bekraftade av Sky Sports, NBC, FOX Sports, ESPN (26 jun 2026)
-  {id:"R32_1",  phase:"Sextondelsfinal", homeKey:"C0", awayKey:"F1"},  // M76: Brasilien vs Japan (Houston)
-  {id:"R32_2",  phase:"Sextondelsfinal", homeKey:"F0", awayKey:"C1"},  // M75: Nederlanderna vs Marocko (Monterrey)
-  {id:"R32_4",  phase:"Sextondelsfinal", homeKey:"H0", awayKey:"J1"},  // M84: Spanien vs Osterrike (Los Angeles)
-  {id:"R32_5",  phase:"Sextondelsfinal", homeKey:"A1", awayKey:"B1"},  // M73: Sydafrika vs Kanada (Los Angeles)
-  {id:"R32_6",  phase:"Sextondelsfinal", homeKey:"J0", awayKey:"H1"},  // M86: Argentina vs Uruguay (Dallas)
-  {id:"R32_7",  phase:"Sextondelsfinal", homeKey:"K1", awayKey:"L1"},  // M83: Portugal vs Kroatien (Vancouver)
-  {id:"R32_8",  phase:"Sextondelsfinal", homeKey:"D1", awayKey:"G1"},  // M88: Australien vs Tvaan G (...)
+  // 8 fasta matcher (bekraftade fran FIFA.com, Ticombo, SPORTFIVE)
+  {id:"R32_1",  phase:"Sextondelsfinal", homeKey:"C0", awayKey:"F1"},  // M76: 1C Brasilien vs 2F Japan
+  {id:"R32_2",  phase:"Sextondelsfinal", homeKey:"F0", awayKey:"C1"},  // M75: 1F Nederlanderna vs 2C Marocko
+  {id:"R32_3",  phase:"Sextondelsfinal", homeKey:"E1", awayKey:"I1"},  // M78: 2E Elfenbenskusten vs 2I Norge
+  {id:"R32_4",  phase:"Sextondelsfinal", homeKey:"H0", awayKey:"J1"},  // M84: 1H Spanien vs 2J Osterrike
+  {id:"R32_5",  phase:"Sextondelsfinal", homeKey:"A1", awayKey:"B1"},  // M73: 2A Sydafrika vs 2B Kanada
+  {id:"R32_6",  phase:"Sextondelsfinal", homeKey:"J0", awayKey:"H1"},  // M86: 1J Argentina vs 2H Uruguay
+  {id:"R32_7",  phase:"Sextondelsfinal", homeKey:"K1", awayKey:"L1"},  // M83: 2K Portugal vs 2L Kroatien
+  {id:"R32_8",  phase:"Sextondelsfinal", homeKey:"D1", awayKey:"G1"},  // M88: 2D Australien vs 2G Tvaan G
 ];
 // Etta vs Trea - admin placerar rätt trea när FIFA laser bracketen
 const R32_THIRDS = [
-  // Etta/Tvaa vs basta trea - treorna placeras av admin 27 jun
-  {id:"R32_9",  phase:"Sextondelsfinal", homeKey:"E0", awayKey:"THIRD_1", thirdInfo:"Trea fran A/B/C/D/F"},   // M74: Tyskland vs trea (Boston)
-  {id:"R32_3",  phase:"Sextondelsfinal", homeKey:"I1", awayKey:"THIRD_2", thirdInfo:"Trea fran grupp E (Ecuador)"},// M78: Tvaan I vs Ecuador/trea E (Dallas)
-  {id:"R32_10", phase:"Sextondelsfinal", homeKey:"I0", awayKey:"THIRD_3", thirdInfo:"Trea fran C/D/F/G/H"},   // M77: Etta I vs trea (New York)
-  {id:"R32_12", phase:"Sextondelsfinal", homeKey:"L0", awayKey:"THIRD_4", thirdInfo:"Trea fran E/H/I/J/K"},   // M80: Etta L vs trea (Atlanta)
-  {id:"R32_11", phase:"Sextondelsfinal", homeKey:"G0", awayKey:"THIRD_5", thirdInfo:"Trea fran A/E/H/I/J"},   // M82: Etta G vs trea (Seattle)
-  {id:"R32_13", phase:"Sextondelsfinal", homeKey:"A0", awayKey:"THIRD_6", thirdInfo:"Trea fran C/E/F/H/I"},   // M79: Mexiko vs trea (Mexico City)
-  {id:"R32_14", phase:"Sextondelsfinal", homeKey:"D0", awayKey:"THIRD_7", thirdInfo:"Trea fran B/E/F/I/J"},   // M81: USA vs Bosnien (Santa Clara)
-  {id:"R32_15", phase:"Sextondelsfinal", homeKey:"B0", awayKey:"THIRD_8", thirdInfo:"Trea fran E/F/G/I/J"},   // M85: Schweiz vs trea (Vancouver)
-  {id:"R32_16", phase:"Sextondelsfinal", homeKey:"K0", awayKey:"THIRD_9", thirdInfo:"Trea fran D/E/I/J/L"},   // M87: Colombia vs trea
+  // 8 trea-matcher (bekraftade fran FIFA.com)
+  {id:"R32_9",  phase:"Sextondelsfinal", homeKey:"E0", awayKey:"THIRD_1", thirdInfo:"Trea fran A/B/C/D/F"},  // M74: 1E Tyskland
+  {id:"R32_10", phase:"Sextondelsfinal", homeKey:"I0", awayKey:"THIRD_2", thirdInfo:"Trea fran C/D/F/G/H"},  // M77: 1I Frankrike
+  {id:"R32_11", phase:"Sextondelsfinal", homeKey:"G0", awayKey:"THIRD_3", thirdInfo:"Trea fran A/E/H/I/J"},  // M82: 1G Etta G
+  {id:"R32_12", phase:"Sextondelsfinal", homeKey:"L0", awayKey:"THIRD_4", thirdInfo:"Trea fran E/H/I/J/K"},  // M80: 1L Etta L
+  {id:"R32_13", phase:"Sextondelsfinal", homeKey:"A0", awayKey:"THIRD_5", thirdInfo:"Trea fran C/E/F/H/I"},  // M79: 1A Mexiko
+  {id:"R32_14", phase:"Sextondelsfinal", homeKey:"D0", awayKey:"THIRD_6", thirdInfo:"Trea fran B/E/F/I/J"},  // M81: 1D USA
+  {id:"R32_15", phase:"Sextondelsfinal", homeKey:"B0", awayKey:"THIRD_7", thirdInfo:"Trea fran E/F/G/I/J"},  // M85: 1B Schweiz
+  {id:"R32_16", phase:"Sextondelsfinal", homeKey:"K0", awayKey:"THIRD_8", thirdInfo:"Trea fran D/E/I/J/L"},  // M87: 1K Colombia
 ];
 const R32 = [...R32_FIXED, ...R32_THIRDS];
 
 const R16 = [
-  // Bekraftade av NBC Sports, Sky Sports, CBS Sports (juni 2026)
-  {id:"R16_1", phase:"Attondelsfinaler", homeKey:"R32_9",  awayKey:"R32_10"}, // M89: V(M74) vs V(M77) - Philadelphia
-  {id:"R16_2", phase:"Attondelsfinaler", homeKey:"R32_5",  awayKey:"R32_2"},  // M90: V(M73=SA/Kan) vs V(M75=NL/Mar) - Houston
-  {id:"R16_3", phase:"Attondelsfinaler", homeKey:"R32_1",  awayKey:"R32_3"},  // M91: V(M76=Bra/Jap) vs V(M78=I1/trea) - New York
-  {id:"R16_4", phase:"Attondelsfinaler", homeKey:"R32_13", awayKey:"R32_12"}, // M92: V(M79=Mex/trea) vs V(M80=EttaL/trea) - Mexico City
-  {id:"R16_5", phase:"Attondelsfinaler", homeKey:"R32_7",  awayKey:"R32_4"},  // M93: V(M83=Por/Kro) vs V(M84=Spa/Ost) - Dallas
-  {id:"R16_6", phase:"Attondelsfinaler", homeKey:"R32_14", awayKey:"R32_11"}, // M94: V(M81=USA/Bos) vs V(M82=EttaG/trea) - Seattle
-  {id:"R16_7", phase:"Attondelsfinaler", homeKey:"R32_6",  awayKey:"R32_8"},  // M95: V(M86=Arg/Uru) vs V(M88=Aus/IranTvaa) - Atlanta
-  {id:"R16_8", phase:"Attondelsfinaler", homeKey:"R32_15", awayKey:"R32_16"}, // M96: V(M85=Sch/trea) vs V(M87=Col/trea) - Vancouver
+  // Bekraftade fran FIFA.com + defirate.com
+  {id:"R16_1", phase:"Attondelsfinaler", homeKey:"R32_9",  awayKey:"R32_10"}, // M89: W(M74) vs W(M77)
+  {id:"R16_2", phase:"Attondelsfinaler", homeKey:"R32_5",  awayKey:"R32_2"},  // M90: W(M73) vs W(M75) - SA/Kan vs NL/Mar
+  {id:"R16_3", phase:"Attondelsfinaler", homeKey:"R32_1",  awayKey:"R32_3"},  // M91: W(M76) vs W(M78) - Bra/Jap vs CIV/Nor
+  {id:"R16_4", phase:"Attondelsfinaler", homeKey:"R32_13", awayKey:"R32_12"}, // M92: W(M79) vs W(M80)
+  {id:"R16_5", phase:"Attondelsfinaler", homeKey:"R32_7",  awayKey:"R32_4"},  // M93: W(M83) vs W(M84)
+  {id:"R16_6", phase:"Attondelsfinaler", homeKey:"R32_14", awayKey:"R32_11"}, // M94: W(M81) vs W(M82)
+  {id:"R16_7", phase:"Attondelsfinaler", homeKey:"R32_6",  awayKey:"R32_8"},  // M95: W(M86) vs W(M88)
+  {id:"R16_8", phase:"Attondelsfinaler", homeKey:"R32_15", awayKey:"R32_16"}, // M96: W(M85) vs W(M87)
 ];
 const QF = [
-  {id:"QF_1", phase:"Kvartsfinal", homeKey:"R16_1", awayKey:"R16_2"}, // M97: V(M89) vs V(M90) - Boston
-  {id:"QF_2", phase:"Kvartsfinal", homeKey:"R16_3", awayKey:"R16_4"}, // M98: V(M91) vs V(M92) - Los Angeles? check
-  {id:"QF_3", phase:"Kvartsfinal", homeKey:"R16_5", awayKey:"R16_6"}, // M99: V(M93) vs V(M94) - Miami
-  {id:"QF_4", phase:"Kvartsfinal", homeKey:"R16_7", awayKey:"R16_8"}, // M100: V(M95) vs V(M96) - Kansas City
+  {id:"QF_1", phase:"Kvartsfinal", homeKey:"R16_1", awayKey:"R16_2"}, // M97: W(M89) vs W(M90)
+  {id:"QF_2", phase:"Kvartsfinal", homeKey:"R16_5", awayKey:"R16_6"}, // M98: W(M93) vs W(M94)
+  {id:"QF_3", phase:"Kvartsfinal", homeKey:"R16_3", awayKey:"R16_4"}, // M99: W(M91) vs W(M92)
+  {id:"QF_4", phase:"Kvartsfinal", homeKey:"R16_7", awayKey:"R16_8"}, // M100: W(M95) vs W(M96)
 ];
 const SF = [
-  {id:"SF_1", phase:"Semifinal", homeKey:"QF_1", awayKey:"QF_2"}, // M101: V(M97) vs V(M98) - Dallas 14 jul
-  {id:"SF_2", phase:"Semifinal", homeKey:"QF_3", awayKey:"QF_4"}, // M102: V(M99) vs V(M100) - Atlanta 15 jul
+  {id:"SF_1", phase:"Semifinal", homeKey:"QF_1", awayKey:"QF_2"}, // M101: W(M97) vs W(M98) - Dallas 14 jul
+  {id:"SF_2", phase:"Semifinal", homeKey:"QF_3", awayKey:"QF_4"}, // M102: W(M99) vs W(M100) - Atlanta 15 jul
 ];
 const LATE = [
   {id:"BRONS", phase:"Bronsmatch", homeKey:"SF_1L", awayKey:"SF_2L"},
@@ -2826,7 +2826,7 @@ function BracketView({placements, results, getTeams, bestThirds}) {
           {/* LEFT R32 - Spain half */}
           <div style={{display:"flex",flexDirection:"column",gap:0}}>
             {renderH("Sextondelsfinal")}
-            {[["R32_9","R32_10"],["R32_5","R32_2"],["R32_1","R32_3"],["R32_13","R32_12"]].map(([a,b],i)=>(
+            {[["R32_9","R32_10"],["R32_5","R32_2"],["R32_7","R32_4"],["R32_14","R32_11"]].map(([a,b],i)=>(
               <div key={a} style={{height:220,display:"flex",flexDirection:"column",justifyContent:"space-around"}}>
                 <div>{renderMB(a)}</div>
                 <div>{renderMB(b)}</div>
@@ -2837,7 +2837,7 @@ function BracketView({placements, results, getTeams, bestThirds}) {
           {/* LEFT R16 */}
           <div style={{display:"flex",flexDirection:"column",gap:0,paddingTop:16}}>
             {renderH("Attondel")}
-            {["R16_1","R16_2","R16_3","R16_4"].map((id,i)=>(
+            {["R16_1","R16_2","R16_5","R16_6"].map((id,i)=>(
               <div key={id} style={{height:220,display:"flex",alignItems:"center"}}>{renderMB(id)}</div>
             ))}
           </div>
@@ -2886,7 +2886,7 @@ function BracketView({placements, results, getTeams, bestThirds}) {
           {/* RIGHT R16 */}
           <div style={{display:"flex",flexDirection:"column",gap:0,paddingTop:16}}>
             {renderH("Attondel")}
-            {["R16_5","R16_6","R16_7","R16_8"].map((id,i)=>(
+            {["R16_3","R16_4","R16_7","R16_8"].map((id,i)=>(
               <div key={id} style={{height:220,display:"flex",alignItems:"center"}}>{renderMB(id)}</div>
             ))}
           </div>
@@ -2894,7 +2894,7 @@ function BracketView({placements, results, getTeams, bestThirds}) {
           {/* RIGHT R32 - Argentina half */}
           <div style={{display:"flex",flexDirection:"column",gap:0}}>
             {renderH("Sextondelsfinal")}
-            {[["R32_7","R32_4"],["R32_14","R32_11"],["R32_6","R32_8"],["R32_15","R32_16"]].map(([a,b],i)=>(
+            {[["R32_1","R32_3"],["R32_13","R32_12"],["R32_6","R32_8"],["R32_15","R32_16"]].map(([a,b],i)=>(
               <div key={a} style={{height:220,display:"flex",flexDirection:"column",justifyContent:"space-around"}}>
                 <div>{renderMB(a)}</div>
                 <div>{renderMB(b)}</div>
