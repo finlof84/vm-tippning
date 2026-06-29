@@ -1100,7 +1100,7 @@ export default function App() {
                 const locked=isLocked(m.id);
                 const dl=fmtDl(m.id);
                 const hasResult=results[m.id]&&results[m.id].home!=""&&results[m.id].away!="";
-                const pts=calcPoints(tip,results[m.id]);
+                const pts=calcPoints(tip,results[m.id],m.phase!=="Grupp");
                 const disp=getDisplay(m);
                 const ht=m.phase==="Grupp"?m.home:getTeams(m.id).home;
                 const at=m.phase==="Grupp"?m.away:getTeams(m.id).away;
@@ -1111,12 +1111,12 @@ export default function App() {
                       <div style={{textAlign:"center",marginBottom:4,display:"flex",justifyContent:"center",alignItems:"center",gap:6}}>
                         <span className="ss" style={{fontSize:11,color:"#a09070"}}>Resultat:</span>
                         <span className="pf" style={{fontSize:13,fontWeight:700,
-                          color:pts===3?"#50c878":pts===1?"#f5c842":"#f0e6d3"}}>
+                          color:(m.phase!=="Grupp"?(pts===5):(pts===3))?"#50c878":(m.phase!=="Grupp"?(pts===3):(pts===1))?"#f5c842":"#f0e6d3"}}>
                           {results[m.id].home}-{results[m.id].away}
                         </span>
                         {tipped&&<span className="ss" style={{fontSize:10,
-                          color:pts===3?"#50c878":pts===1?"#f5c842":"#e07070"}}>
-                          {pts===3?"(3p - exakt!)":pts===1?"(1p - ratt 1X2)":"(0p)"}
+                          color:(m.phase!=="Grupp"?(pts===5):(pts===3))?"#50c878":(m.phase!=="Grupp"?(pts===3):(pts===1))?"#f5c842":"#e07070"}}>
+                          {m.phase!=="Grupp"?(pts===5?"(5p - exakt!)":pts===3?"(3p - ratt 1X2)":"(0p)"):(pts===3?"(3p - exakt!)":pts===1?"(1p - ratt 1X2)":"(0p)")}
                         </span>}
                       </div>
                     )}
@@ -1135,7 +1135,7 @@ export default function App() {
                     </div>
                     <span className="tn"><TL team={at} label={disp.away}/></span>
                     {hasResult&&<span className="ss" style={{fontSize:12,fontWeight:700,minWidth:26,textAlign:"center",
-                      color:pts===3?"#50c878":pts===1?"#f5c842":"#a05050"}}>{pts}p</span>}
+                      color:(m.phase!=="Grupp"?pts===5:pts===3)?"#50c878":(m.phase!=="Grupp"?pts===3:pts===1)?"#f5c842":"#a05050"}}>{pts}p</span>}
                     </div>
                     <TipsPanel matchId={m.id} participants={participants} results={results} isKO={m.phase!=="Grupp"} deadlines={deadlines} now={now}/>
                   </div>
@@ -1496,7 +1496,7 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
               const tip=tips[m.id];
               const hasTip=tip&&tip.home!=""&&tip.away!="";
               const hasResult=results[m.id]&&results[m.id].home!=""&&results[m.id].away!="";
-              const pts=visible&&hasTip?calcPoints(tip,results[m.id]):null;
+              const pts=visible&&hasTip?calcPoints(tip,results[m.id],m.phase!=="Grupp"):null;
               const hTeam=m.phase==="Grupp"?m.home:null;
               const aTeam=m.phase==="Grupp"?m.away:null;
               return(
@@ -1509,7 +1509,7 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
                   <div style={{minWidth:90,textAlign:"center"}}>
                     {visible&&hasTip?(
                       <span className="pf" style={{fontSize:15,fontWeight:700,
-                        color:pts===3?"#50c878":pts===1?"#f5c842":pts===0&&hasResult?"#e07070":"#f0e6d3"}}>
+                        color:(isKO?pts===5:pts===3)?"#50c878":(isKO?pts===3:pts===1)?"#f5c842":pts===0&&hasResult?"#e07070":"#f0e6d3"}}>
                         {tip.home} - {tip.away}
                         {pts!==null&&<span className="ss" style={{fontSize:11,marginLeft:6,opacity:.8}}>({pts}p)</span>}
                       </span>
