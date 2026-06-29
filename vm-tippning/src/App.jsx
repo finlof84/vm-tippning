@@ -1509,7 +1509,7 @@ function ParticipantsView({participants, results, deadlines, now, loginAs, onLog
                   <div style={{minWidth:90,textAlign:"center"}}>
                     {visible&&hasTip?(
                       <span className="pf" style={{fontSize:15,fontWeight:700,
-                        color:(isKO?pts===5:pts===3)?"#50c878":(isKO?pts===3:pts===1)?"#f5c842":pts===0&&hasResult?"#e07070":"#f0e6d3"}}>
+                        color:(m.phase!=="Grupp"?pts===5:pts===3)?"#50c878":(m.phase!=="Grupp"?pts===3:pts===1)?"#f5c842":pts===0&&hasResult?"#e07070":"#f0e6d3"}}>
                         {tip.home} - {tip.away}
                         {pts!==null&&<span className="ss" style={{fontSize:11,marginLeft:6,opacity:.8}}>({pts}p)</span>}
                       </span>
@@ -1660,12 +1660,12 @@ function TipsPanel({matchId, participants, results, isKO=false, deadlines={}, no
               {tipped?(
                 <>
                   <span className="pf" style={{fontSize:12,fontWeight:700,minWidth:36,textAlign:"center",
-                    color:pts===null?"#f0e6d3":pts===3||pts===5?"#50c878":pts===1||pts===3?"#f5c842":"#e07070"}}>
+                    color:pts===null?"#f0e6d3":(isKO?pts===5:pts===3)?"#50c878":(isKO?pts===3:pts===1)?"#f5c842":"#e07070"}}>
                     {t.home}-{t.away}
                   </span>
                   {pts!==null&&<span className="ss" style={{fontSize:10,
                     color:pts>=3?"#50c878":pts>=1?"#f5c842":"#e07070"}}>
-                    {pts===5?"5p OKOK":pts===3?"3p OK":pts===1?"1p ->":"0p "}
+                    {isKO?(pts===5?"5p OK":pts===3?"3p ->":"0p"):(pts===3?"3p OK":pts===1?"1p ->":"0p")}
                   </span>}
                 </>
               ):(
