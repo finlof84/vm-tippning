@@ -764,7 +764,22 @@ export default function App() {
     .map(([name,tips])=>({name,
       points:calcTotal(tips,results)+calcPodiumPoints(name),
       matchPoints:calcTotal(tips,results),
-      podiumPoints:calcPodiumPoints(name),
+      podiumPoints:(()=>{
+        const tip=podiumTips[name]||{};
+        let pts=0;
+        if(podiumResults.winner&&tip.winner===podiumResults.winner) pts+=20;
+        if(podiumResults.second&&tip.second===podiumResults.second) pts+=15;
+        if(podiumResults.third&&tip.third===podiumResults.third) pts+=10;
+        return pts;
+      })(),
+      scorerPoints:(()=>{
+        const scorerTip=topScorerTips[name]||"";
+        const inArr=(arr,v)=>Array.isArray(arr)?arr.includes(v):arr===v;
+        if(scorerTip&&topScorerResult.first&&inArr(topScorerResult.first,scorerTip)) return 15;
+        if(scorerTip&&topScorerResult.second&&inArr(topScorerResult.second,scorerTip)) return 10;
+        if(scorerTip&&topScorerResult.third&&inArr(topScorerResult.third,scorerTip)) return 5;
+        return 0;
+      })(),
       exact:[...GROUP_MATCHES,...KNOCKOUT_ALL].filter(m=>{
         const t=tips[m.id]; const r=results[m.id];
         return t&&r&&t.home!=""&&t.away!=""&&r.home!=""&&r.away!=""&&
@@ -1603,6 +1618,7 @@ function LeaderboardView({leaderboard, userGroups}) {
                     {e.tipped} tippade
                     {e.exact>0&&<span style={{color:"#50c878",marginLeft:6}}>{e.exact} exakta</span>}
                     {e.podiumPoints>0&&<span style={{color:"#80a8f0",marginLeft:6}}>+{e.podiumPoints}p prispall</span>}
+                    {e.scorerPoints>0&&<span style={{color:"#c080f0",marginLeft:6}}>+{e.scorerPoints}p skyttekung</span>}
                   </div>
                 </div>
                 <div style={{textAlign:"right"}}>
