@@ -750,6 +750,12 @@ export default function App() {
     if(podiumResults.winner&&tip.winner===podiumResults.winner) pts+=20;
     if(podiumResults.second&&tip.second===podiumResults.second) pts+=15;
     if(podiumResults.third&&tip.third===podiumResults.third)    pts+=10;
+    // Skyttekung
+    const scorerTip=topScorerTips[name]||"";
+    const inArr=(arr,v)=>Array.isArray(arr)?arr.includes(v):arr===v;
+    if(scorerTip&&topScorerResult.first&&inArr(topScorerResult.first,scorerTip)) pts+=15;
+    else if(scorerTip&&topScorerResult.second&&inArr(topScorerResult.second,scorerTip)) pts+=10;
+    else if(scorerTip&&topScorerResult.third&&inArr(topScorerResult.third,scorerTip)) pts+=5;
     return pts;
   }
 
